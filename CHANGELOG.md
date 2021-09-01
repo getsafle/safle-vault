@@ -12,3 +12,4 @@
 * Sign transaction
 * Delete account
 * Recover vault
+* Added github actions workflow
