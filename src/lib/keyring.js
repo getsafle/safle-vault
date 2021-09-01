@@ -1,30 +1,91 @@
 const Tx = require('ethereumjs-tx').Transaction;
+const cryptojs = require('crypto-js');
 
-const helper = require('../utils/helper');
-const { DEFAULT_GAS_LIMIT } = require('../config');
-const { INVALID_PUBLIC_ADDRESS, INVALID_RPC_RESPONSE, NONEXISTENT_KEYRING_ACCOUNT } = require('../constants/responses')
+const helper = require('../utils/helper');;
+
+const response = require('../constants/responses')
 
 class Keyring {
 
-    async extractKeyring(vault, password) {
-        const { response: encryptedKeyring } = await helper.decryptVault(vault, password);
+    async exportMnemonic(pin) {
+        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+
+        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+
+        if(mnemonic == '') {
+            return { error: response.INCORRECT_PIN };
+        }
     
-        const { response: keyring } = await helper.decryptKeyring(encryptedKeyring, password, this.keyringInstance);
-    
-        return { response: keyring }
+        return { response: mnemonic }
     }
 
-    async getAccounts() {
-        const accounts = await this.keyringInstance.getAccounts();
+    async getAccounts(vault, encryptionKey) {
+        const bytes = cryptojs.AES.decrypt(vault, JSON.stringify(encryptionKey));
+
+        let decryptedVault;
+
+        try {
+            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+            this.decryptedVault = decryptedVault;
+        } catch(error) {
+            return { error: response.INCORRECT_ENCRYPTION_KEY };
+        }
+
+        const accounts = decryptedVault.eth.public;
     
         return { response: accounts }
     }
 
-    async signMessage(address, data) {
+    async exportPrivateKey(address, pin) {
+        if(this.decryptedVault.eth.public.some(element => element.address === address) == false) {
+            return { error: response.ADDRESS_NOT_PRESENT };
+        }
+
+        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin); 
+
+        if(decrypt == '') {
+            return { error: response.INCORRECT_PIN };
+        }; 
+
+        const privateKey = await this.keyringInstance.exportAccount(address)
+    
+        return { response: privateKey }
+    }
+
+    async addAccount(encryptionKey, pin) {
+        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+        
+        if(decrypt == '') {
+            return { error: response.INCORRECT_PIN };
+        }
+    
         const accounts = await this.keyringInstance.getAccounts();
 
+        const keyring = await this.keyringInstance.getKeyringForAccount(accounts[0]);
+
+        await this.keyringInstance.addNewAccount(keyring);
+
+        const newAccount = await this.keyringInstance.getAccounts();
+
+        this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false })
+        this.decryptedVault.eth.numberOfAccounts++;
+                    
+        const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+    
+        return { response: encryptedVault }
+    }
+
+    async signMessage(address, data, pin) {
+        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+        
+        if(decrypt == '') {
+            return { error: response.INCORRECT_PIN };
+        }
+
+        const accounts = await this.keyringInstance.getAccounts();
+        
         if (accounts.includes(address) === false) {
-            return { error: NONEXISTENT_KEYRING_ACCOUNT };
+            return { error: response.NONEXISTENT_KEYRING_ACCOUNT };
         }
 
         const msg = await helper.stringToArrayBuffer(data);
@@ -36,59 +97,89 @@ class Keyring {
         return { response: signedMsg };
     }
 
-    async signTransaction(rawTx, password) {
-        try {
-            const { error } = await helper.validateTxData(rawTx, this.keyringInstance);
-
-            if (error) {
-                return { error }
-            }
+    async signTransaction(rawTx, pin) {
+        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
         
-            this.keyringInstance.password = password;
-        
-            const defaultGasPrice = await this.web3.eth.getGasPrice();
-
-            const count = await this.web3.eth.getTransactionCount(rawTx.from);
-
-            const defaultNonce = await this.web3.utils.toHex(count);
-
-            const rawTxObj = {
-                to: rawTx.to,
-                from: rawTx.from,
-                value: rawTx.value || '0x00',
-                gasPrice: this.web3.utils.toHex(rawTx.gasPrice) || this.web3.utils.toHex(defaultGasPrice),
-                gas: this.web3.utils.numberToHex(rawTx.gasLimit) || this.web3.utils.numberToHex(DEFAULT_GAS_LIMIT),
-                data: rawTx.data || '0x00',
-                nonce: rawTx.nonce || defaultNonce,
-            };
-        
-            let network;
-
-            await this.web3.eth.net.getNetworkType().then((e) => network = e);
-
-            const privateKey = await this.keyringInstance.exportAccount(rawTx.from);
-
-            const pkey = Buffer.from(privateKey, 'hex');
-
-            let tx;
-
-            if (network === 'main') {
-                tx = new Tx(rawTxObj, { chain: 'mainnet' });
-            } else {
-                tx = new Tx(rawTxObj, { chain: network });
-            }
-
-            tx.sign(pkey);
-            const signedTx = `0x${tx.serialize().toString('hex')}`;
-
-            return { response: signedTx };
-        } catch (error) {
-            if (error.message === 'The field to must have byte length of 20') {
-                return { error: INVALID_PUBLIC_ADDRESS };
-            }
-
-            return { error: INVALID_RPC_RESPONSE };
+        if(decrypt == '') {
+            return { error: response.INCORRECT_PIN };
         }
+
+        let network;
+
+        await this.web3.eth.net.getNetworkType().then((e) => network = e);
+
+        const privateKey = await this.keyringInstance.exportAccount(rawTx.from);
+
+        const pkey = Buffer.from(privateKey, 'hex'); 
+
+        let tx;
+
+        if (network === 'main') {
+            tx = new Tx(rawTx, { chain: 'mainnet' });
+        } else {
+            tx = new Tx(rawTx, { chain: network });
+        };
+
+        tx.sign(pkey);
+
+        const signedTx = `0x${tx.serialize().toString('hex')}`;
+
+        return { response: signedTx };
+    }
+
+    async restoreKeyringState(vault, pin, encryptionKey) {
+        const bytes = cryptojs.AES.decrypt(vault, JSON.stringify(encryptionKey));
+
+        let decryptedVault;
+
+        try {
+            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+            this.decryptedVault = decryptedVault;
+        } catch(error) {
+            return { error: response.INCORRECT_ENCRYPTION_KEY };
+        }
+
+        const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin);
+
+        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+
+        const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
+
+        const numberOfAcc = this.decryptedVault.eth.numberOfAccounts;
+
+        let decryptedkeyring = await this.keyringInstance.getKeyringsByType(restoredVault.keyrings[0].type);
+
+        if(numberOfAcc > 1) {
+            for(let i=0; i < numberOfAcc-1; i++) {
+            await this.keyringInstance.addNewAccount(decryptedkeyring[0]);
+
+            decryptedkeyring[0].opts.numberOfAccounts = numberOfAcc;
+            }
+        } else {
+            decryptedkeyring[0].opts.numberOfAccounts = numberOfAcc;
+        }
+    }
+
+    async deleteAccount(encryptionKey, address, pin) {
+        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+        
+        if(decrypt == '') {
+            return { error: response.INCORRECT_PIN };
+        }
+
+        const accounts = await this.keyringInstance.getAccounts();
+        
+        if (accounts.includes(address) === false) {
+            return { error: response.ADDRESS_NOT_PRESENT };
+        };
+
+        const objIndex = this.decryptedVault.eth.public.findIndex((obj => obj.address === address));
+
+        this.decryptedVault.eth.public[objIndex].isDeleted = true;
+
+        const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+        return { response: vault };
     }
 
 }

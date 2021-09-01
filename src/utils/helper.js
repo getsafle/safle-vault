@@ -1,121 +1,5 @@
-const axios = require('axios');
-const jwtDecode = require('jwt-decode');
-const crypto = require('crypto');
 const cryptojs = require('crypto-js');
-
-const {
-    AUTH_SERVICE_URL_PROD,
-    AUTH_SERVICE_URL_DEV,
-    AUTH_SERVICE_URL_TEST,
-} = require('../config');
-
-const {
-  INVALID_ENVIRONMENT,
-  NONEXISTENT_KEYRING_ACCOUNT,
-  RECEPIENT_ADDRESS_NOT_FOUND,
-  SENDER_ADDRESS_NOT_FOUND,
-} = require('../constants/responses');
-
-async function getBaseUrl(env) {
-  if (env === 'test') {
-    return { auth: AUTH_SERVICE_URL_TEST };
-  } if (env === 'dev') {
-    return { auth: AUTH_SERVICE_URL_DEV };
-  } if (env === 'prod') {
-    return { auth: AUTH_SERVICE_URL_PROD };
-  }
-
-  return { error: INVALID_ENVIRONMENT };
-}
-
-async function generatePDKeyHash(safleId, password) {
-  const passwordDerivedKey = crypto.pbkdf2Sync(safleId, password, 10000, 32, 'sha512');
-
-  const passwordDerivedKeyHash = crypto.createHash('sha512', passwordDerivedKey);
-
-  const passwordDerivedKeyHashHex = passwordDerivedKeyHash.digest('hex');
-
-  return passwordDerivedKeyHashHex;
-}
-
-async function postRequest({ params, url, authToken }) {
-  try {
-    const response = await axios({
-      url,
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-      data: params,
-    });
-
-    return { response: response.data };
-  } catch (error) {
-    return { error: error.response.data };
-  }
-}
-
-async function _retrieveVault({ env, password, authToken }) {
-  const { auth: AUTH_SERVICE_URL, error: BASE_URL_ERROR } = await getBaseUrl(env);
-
-    if (BASE_URL_ERROR) {
-      return { error: BASE_URL_ERROR };
-    }
-
-    const { safleId } = jwtDecode(authToken);
-
-    const PDKeyHash = await generatePDKeyHash(safleId, password);
-
-    const url = `${AUTH_SERVICE_URL}/vault/retrieve`;
-
-    const { error, response } = await postRequest({ params: { PDKeyHash }, url, authToken });
-
-    if (error) {
-      return { error: error.details };
-    }
-
-    return { response: response.data.data.vault };
-}
-
-async function decryptVault(vault, password) {
-
-  const bytes = cryptojs.AES.decrypt(vault, password);
-
-  const decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-
-  return { response: decryptedVault };
-}
-
-async function decryptKeyring(encryptedKeyring, password, keyringInstance) {
-
-  const bytes = cryptojs.AES.decrypt(encryptedKeyring.keyring, password);
-
-  const decryptedKeyring = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-
-  await keyringInstance.restoreKeyring({ type: decryptedKeyring.type, data: { numberOfAccounts: decryptedKeyring.wallets.length, mnemonic: decryptedKeyring.mnemonic } });
-
-  const keyring = await keyringInstance.getKeyringsByType(decryptedKeyring.type);
-
-  return { response: keyring[0] };
-}
-
-async function validateTxData(rawTx, keyringInstance) {
-  if (!rawTx.to) {
-    return { error: RECEPIENT_ADDRESS_NOT_FOUND };
-  }
-
-  if (!rawTx.from) {
-    return { error: SENDER_ADDRESS_NOT_FOUND };
-  }
-    
-  const accounts = await keyringInstance.getAccounts();
-    
-  if (accounts.includes(rawTx.from) === false) {
-    return { error: NONEXISTENT_KEYRING_ACCOUNT };
-  }
-
-  return true;
-}
+const safleAssetController = require('@getsafle/asset-controller');
 
 async function stringToArrayBuffer(str) {
   const buf = new ArrayBuffer(32);
@@ -128,4 +12,67 @@ async function stringToArrayBuffer(str) {
   return buf;
 }
 
-module.exports = { _retrieveVault, decryptVault, decryptKeyring, validateTxData, stringToArrayBuffer }
+async function generatePrivData(mnemonic, pin) {
+  var priv = {};
+
+  const encryptedMnemonic = cryptojs.AES.encrypt(mnemonic, pin).toString();
+
+  priv.encryptedMnemonic = encryptedMnemonic;
+
+  return priv;
+}
+
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, web3, rpcURL) {
+  const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
+
+  let zeroCounter = 0;
+  let accountsArray = [];
+
+  accountsArray.push({ address: indexAddress, isDeleted: false });
+
+  do {
+    zeroCounter = 0;
+    for(let i=0; i < 5; i++) {
+      const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+  
+      const nonce = await getNonce(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], web3);
+
+      const tokens = await getTokens({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], rpcURL });
+
+      const ethBalance = await getEthBalance(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], web3);
+  
+      if (nonce === 0 && tokens.length === 0 && ethBalance === '0') {
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true });
+        zeroCounter++;
+      } else {
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false });
+        zeroCounter = 0;
+      }
+    }
+  }
+  while (zeroCounter < 5 )
+
+  return accountsArray;
+}
+
+async function getTokens({ address, rpcURL }) {
+  const assetController = new safleAssetController.AssetController({ address, rpcURL });
+
+  const tokens = await assetController.detectTokens();
+
+  return tokens
+}
+
+async function getNonce(address, web3) {
+  const nonce = await web3.eth.getTransactionCount(address);
+
+  return nonce
+}
+
+async function getEthBalance(address, web3) {
+  const ethBalance = await web3.eth.getBalance(address);
+
+  return ethBalance
+}
+
+module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts }
