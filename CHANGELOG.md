@@ -13,3 +13,9 @@
 * Delete account
 * Recover vault
 * Added github actions workflow
+
+### 1.0.1 (2021-09-02)
+
+##### Update README
+
+* Updated the package description in the README file
