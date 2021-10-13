@@ -13,3 +13,9 @@
 * Delete account
 * Recover vault
 * Added github actions workflow
+
+### 1.1.0 (2021-10-13)
+
+##### Added support for EIP-1559 Tx Signing
+
+* Implemented method to sign eip1559 transactions
