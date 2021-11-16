@@ -11,9 +11,10 @@ const response = require('../constants/responses')
 
 class Vault extends Keyring {
 
-    constructor(rpcURL) {
+    constructor(rpcURL, vault) {
         super();
         this.rpcURL = rpcURL;
+        this.vault = vault;
         this.web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
         this.initializeKeyringController()
     }
@@ -22,15 +23,15 @@ class Vault extends Keyring {
         const keyringController = new KeyringController({
         encryptor: {
             encrypt(pass, object) {
-            const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(object), pass).toString();
+                const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(object), pass).toString();
 
-            return ciphertext;
+                return ciphertext;
             },
             decrypt(pass, encryptedString) {
-            const bytes = CryptoJS.AES.decrypt(encryptedString, pass);
-            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                const bytes = CryptoJS.AES.decrypt(encryptedString, pass);
+                const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 
-            return decryptedData;
+                return decryptedData;
             },
         },
         });
@@ -64,6 +65,8 @@ class Vault extends Keyring {
         const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false } ], private: privData, numberOfAccounts: 1 } }
                 
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
+
+        this.vault = vault;
     
         return { response: vault };
     }

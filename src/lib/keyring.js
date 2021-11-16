@@ -4,9 +4,9 @@ const Common = require('@ethereumjs/common').default;
 const { Hardfork } = require('@ethereumjs/common');
 const { bufferToHex }=require('ethereumjs-util')
 
-const helper = require('../utils/helper');;
+const helper = require('../utils/helper');
 
-const response = require('../constants/responses')
+const response = require('../constants/responses');
 
 class Keyring {
 
@@ -22,8 +22,8 @@ class Keyring {
         return { response: mnemonic }
     }
 
-    async getAccounts(vault, encryptionKey) {
-        const bytes = cryptojs.AES.decrypt(vault, JSON.stringify(encryptionKey));
+    async getAccounts(encryptionKey) {
+        const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
 
         let decryptedVault;
 

@@ -19,3 +19,9 @@
 ##### Added support for EIP-1559 Tx Signing
 
 * Implemented method to sign eip1559 transactions
+
+### 1.1.1 (2021-11-16)
+
+##### Updated constructor parameter
+
+* Updated the constructor parameter to initialize the SDK using the encrypted vault string
