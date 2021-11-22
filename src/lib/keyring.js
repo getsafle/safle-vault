@@ -1,8 +1,4 @@
 const cryptojs = require('crypto-js');
-const { FeeMarketEIP1559Transaction } = require('@ethereumjs/tx');
-const Common = require('@ethereumjs/common').default;
-const { Hardfork } = require('@ethereumjs/common');
-const { bufferToHex }=require('ethereumjs-util')
 
 const helper = require('../utils/helper');
 
@@ -107,21 +103,7 @@ class Keyring {
             return { error: response.INCORRECT_PIN };
         }
 
-        let chain;
-
-        await this.web3.eth.getChainId().then((e) => chain = e);
-
-        const privateKey = await this.keyringInstance.exportAccount(rawTx.from);
-
-        const pkey = Buffer.from(privateKey, 'hex');
-
-        const common = new Common({ chain, hardfork: Hardfork.London });
-
-        const tx = FeeMarketEIP1559Transaction.fromTxData(rawTx, { common });
-
-        const signedTransaction = tx.sign(pkey);
-
-        const signedTx = bufferToHex(signedTransaction.serialize());
+        const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
 
         return { response: signedTx };
     }
