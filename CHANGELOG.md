@@ -25,3 +25,9 @@
 ##### Updated constructor parameter
 
 * Updated the constructor parameter to initialize the SDK using the encrypted vault string
+
+### 1.1.2 (2021-11-22)
+
+##### Updated transaction signing method
+
+* Implemented the updated vault-eth-controller sdk to sign eip1559 transactions.
