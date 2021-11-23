@@ -18,6 +18,18 @@ class Keyring {
         return { response: mnemonic }
     }
 
+    async validatePin(pin) {
+        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+
+        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+
+        if(mnemonic == '') {
+            return { response: false };
+        }
+
+        return { response: true };
+    }
+
     async getAccounts(encryptionKey) {
         const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
 
@@ -40,9 +52,9 @@ class Keyring {
             return { error: response.ADDRESS_NOT_PRESENT };
         }
 
-        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin); 
+        const { response } = await validatePin(pin)
 
-        if(decrypt == '') {
+        if(response == false) {
             return { error: response.INCORRECT_PIN };
         }; 
 
@@ -52,11 +64,11 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
-        
-        if(decrypt == '') {
+        const { response } = await validatePin(pin)
+
+        if(response == false) {
             return { error: response.INCORRECT_PIN };
-        }
+        }; 
     
         const accounts = await this.keyringInstance.getAccounts();
 
@@ -75,11 +87,11 @@ class Keyring {
     }
 
     async signMessage(address, data, pin) {
-        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
-        
-        if(decrypt == '') {
+        const { response } = await validatePin(pin)
+
+        if(response == false) {
             return { error: response.INCORRECT_PIN };
-        }
+        }; 
 
         const accounts = await this.keyringInstance.getAccounts();
         
@@ -97,11 +109,11 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin) {
-        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
-        
-        if(decrypt == '') {
+        const { response } = await validatePin(pin)
+
+        if(response == false) {
             return { error: response.INCORRECT_PIN };
-        }
+        }; 
 
         const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
 
@@ -142,11 +154,11 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        const decrypt = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
-        
-        if(decrypt == '') {
+        const { response } = await validatePin(pin)
+
+        if(response == false) {
             return { error: response.INCORRECT_PIN };
-        }
+        }; 
 
         const accounts = await this.keyringInstance.getAccounts();
         

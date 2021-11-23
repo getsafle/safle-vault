@@ -31,3 +31,9 @@
 ##### Updated transaction signing method
 
 * Implemented the updated vault-eth-controller sdk to sign eip1559 transactions.
+
+### 1.1.3 (2021-11-28)
+
+##### Added method to validate PIN
+
+* Implemented the method to validate the user's PIN.
