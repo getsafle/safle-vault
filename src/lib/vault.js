@@ -7,7 +7,7 @@ const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 const helper = require('../utils/helper');
 const Keyring = require('./keyring');
 
-const response = require('../constants/responses')
+const errorMessage = require('../constants/responses')
 
 class Vault extends Keyring {
 
@@ -53,7 +53,7 @@ class Vault extends Keyring {
 
     async generateVault(encryptionKey, pin, mnemonic) {
         if(!encryptionKey || !pin) {
-            return { error: response.ENTER_CREDS };
+            return { error: errorMessage.ENTER_CREDS };
         }
 
         await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
@@ -79,7 +79,7 @@ class Vault extends Keyring {
         const safleId = await safle.getSafleId(vaultState.keyrings[0].accounts[0]);
         
         if (safleId === '' || safleId != safleID) {
-            return { error: response.WRONG_MNEMONIC };
+            return { error: errorMessage.WRONG_MNEMONIC };
         }
 
         const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, this.web3, this.rpcURL);
