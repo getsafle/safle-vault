@@ -2,7 +2,7 @@ const cryptojs = require('crypto-js');
 
 const helper = require('../utils/helper');
 
-const response = require('../constants/responses');
+const errorMessage = require('../constants/responses');
 
 class Keyring {
 
@@ -12,7 +12,7 @@ class Keyring {
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
         if(mnemonic == '') {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }
     
         return { response: mnemonic }
@@ -39,7 +39,7 @@ class Keyring {
             decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
             this.decryptedVault = decryptedVault;
         } catch(error) {
-            return { error: response.INCORRECT_ENCRYPTION_KEY };
+            return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
         }
 
         const accounts = decryptedVault.eth.public;
@@ -49,13 +49,13 @@ class Keyring {
 
     async exportPrivateKey(address, pin) {
         if(this.decryptedVault.eth.public.some(element => element.address === address) == false) {
-            return { error: response.ADDRESS_NOT_PRESENT };
+            return { error: errorMessage.ADDRESS_NOT_PRESENT };
         }
 
-        const { response } = await validatePin(pin)
+        const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }; 
 
         const privateKey = await this.keyringInstance.exportAccount(address)
@@ -64,10 +64,10 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        const { response } = await validatePin(pin)
+        const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }; 
     
         const accounts = await this.keyringInstance.getAccounts();
@@ -87,16 +87,16 @@ class Keyring {
     }
 
     async signMessage(address, data, pin) {
-        const { response } = await validatePin(pin)
+        const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }; 
 
         const accounts = await this.keyringInstance.getAccounts();
         
         if (accounts.includes(address) === false) {
-            return { error: response.NONEXISTENT_KEYRING_ACCOUNT };
+            return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
         }
 
         const msg = await helper.stringToArrayBuffer(data);
@@ -109,10 +109,10 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin) {
-        const { response } = await validatePin(pin)
+        const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }; 
 
         const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
@@ -129,7 +129,7 @@ class Keyring {
             decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
             this.decryptedVault = decryptedVault;
         } catch(error) {
-            return { error: response.INCORRECT_ENCRYPTION_KEY };
+            return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
         }
 
         const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin);
@@ -154,16 +154,16 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        const { response } = await validatePin(pin)
+        const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: response.INCORRECT_PIN };
+            return { error: errorMessage.INCORRECT_PIN };
         }; 
 
         const accounts = await this.keyringInstance.getAccounts();
         
         if (accounts.includes(address) === false) {
-            return { error: response.ADDRESS_NOT_PRESENT };
+            return { error: errorMessage.ADDRESS_NOT_PRESENT };
         };
 
         const objIndex = this.decryptedVault.eth.public.findIndex((obj => obj.address === address));

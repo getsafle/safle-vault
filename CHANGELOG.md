@@ -32,8 +32,15 @@
 
 * Implemented the updated vault-eth-controller sdk to sign eip1559 transactions.
 
-### 1.1.3 (2021-11-28)
+### 1.1.3 (2021-11-23)
 
 ##### Added method to validate PIN
 
 * Implemented the method to validate the user's PIN.
+
+### 1.1.4 (2021-11-25)
+
+##### Updated the validatePin function call
+
+* Fixed the issue where some function were calling the validatePin function incorrectly.
+* Updated the variable to return the error messages from `response` to `errorMessage` since `response` was conflicting with the function success.
