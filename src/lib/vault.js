@@ -91,6 +91,8 @@ class Vault extends Keyring {
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts: (numberOfAccounts + 1) } }
                 
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
+
+        this.vault = vault;
     
         return { response: vault };
     }

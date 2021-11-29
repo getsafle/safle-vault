@@ -82,6 +82,8 @@ class Keyring {
         this.decryptedVault.eth.numberOfAccounts++;
                     
         const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+        this.vault = encryptedVault;
     
         return { response: encryptedVault }
     }
@@ -132,6 +134,8 @@ class Keyring {
             return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
         }
 
+        this.vault = vault;
+
         const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin);
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
@@ -171,6 +175,8 @@ class Keyring {
         this.decryptedVault.eth.public[objIndex].isDeleted = true;
 
         const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+        this.vault = vault;
 
         return { response: vault };
     }

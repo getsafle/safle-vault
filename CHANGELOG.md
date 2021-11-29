@@ -44,3 +44,10 @@
 
 * Fixed the issue where some function were calling the validatePin function incorrectly.
 * Updated the variable to return the error messages from `response` to `errorMessage` since `response` was conflicting with the function success.
+
+### 1.1.5 (2021-11-29)
+
+##### Persist the updated vault in the local storage
+
+* Fixed the issue where the updated vault was not getting stored in the local storage.
+* Updated the README with the new constructor initialization and also the `validatePin` function.
