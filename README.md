@@ -25,14 +25,14 @@ Else, pass the encrypted vault string in the constructor along with the `rpcURL`
 
 > Methods
 
-- Generate Mnemonic: 
+Generate Mnemonic: 
 This method is used to generate the 12 word seed phrase for the vault.
 
 `const mnemonic = await vault.generateMnemonic(entropy);`
 
 * `entropy` (optional) - The entropy used to generate the 12 word seed phrase. (Uses crypto.randomBytes under the hood). Defaults to 128-bits of entropy.
 
-- Generate Vault:
+Generate Vault:
 This method is used to generate the vault using the mnemonic passed as parameter and encrypted by the encryption key and pin.
 
  `const userVault = await vault.generateVault(encryptionKey, pin, mnemonic);`
@@ -41,7 +41,7 @@ This method is used to generate the vault using the mnemonic passed as parameter
 * `pin` - The pin to access the vault's private functions.
 * `mnemonic` - The mnemonic to generate the vault from.
 
-- Get Accounts:
+Get Accounts:
 This method is used to get the list of all the accounts in the vault.
 
  `const accounts = await vault.getAccounts(encryptionKey);`
@@ -50,7 +50,7 @@ This method is used to get the list of all the accounts in the vault.
 * `encryptionKey` - The encryption key used to decrypt the vault.
 
 
-- Export Mnemonic:
+Export Mnemonic:
 This method is used to export the 12 word mnemonic phrase which was used to initialize the vault.
 
  `const mnemonic = await vault.exportMnemonic(pin);`
@@ -58,7 +58,7 @@ This method is used to export the 12 word mnemonic phrase which was used to init
 * `pin` - The pin to access the vault's private functions.
 
 
-- Export Private Key:
+Export Private Key:
 This method is used to export the private key of a particular address.
 
  `const privateKey = await vault.exportPrivateKey(address, pin);`
@@ -67,7 +67,7 @@ This method is used to export the private key of a particular address.
 * `pin` - The pin to access the vault's private functions.
 
 
-- Add Account:
+Add Account:
 This method is used to add an another account to the vault.
 
  `const userVault = await vault.addAccount(encryptionKey, pin);`
@@ -75,7 +75,7 @@ This method is used to add an another account to the vault.
 * `encryptionKey` - The encryption key used to decrypt the vault.
 * `pin` - The pin to access the vault's private functions.
 
-- Sign Message:
+Sign Message:
 This method is used to sign a message.
 
  `const signedMessage = await vault.signMessage(address, data, pin)`
@@ -84,7 +84,7 @@ This method is used to sign a message.
 * `data` - The data to be signed.
 * `pin` - The pin to access the vault's private functions.
 
-- Sign Transaction:
+Sign Transaction:
 This method is used to sign a transaction.
 
  `const signedTransaction = await vault.signTransaction(rawTx, pin);`
@@ -92,7 +92,7 @@ This method is used to sign a transaction.
 * `rawTx` - The raw transaction object to be signed.
 * `pin` - The pin to access the vault's private functions.
 
-- Restore Keyring State
+Restore Keyring State
 This method is used to restore the vault state in the keyring controller.
  
  `await vault.restoreKeyringState(vault, pin, encryptionKey);`
@@ -101,7 +101,7 @@ This method is used to restore the vault state in the keyring controller.
 * `pin` - The pin to access the vault's private functions.
 * `encryptionKey` - The encryption key used to decrypt the vault.
 
-- Delete Account:
+Delete Account:
 This method is used to delete an account from the vault.
 
  `const userVault = await vault.deleteAccount(encryptionKey, address, pin);`
@@ -110,7 +110,7 @@ This method is used to delete an account from the vault.
 * `address` - The address to be deleted.
 * `pin` - The pin to access the vault's private functions.
 
-- Recover Vault:
+Recover Vault:
 This method is used to recover the vault using the mnemonic phrase. The new vault will be re-encrypted using the pin and encryption key.
 
  `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, safleID);`
@@ -120,7 +120,7 @@ This method is used to recover the vault using the mnemonic phrase. The new vaul
 * `pin` - The pin to access the vault's private functions.
 * `safleID` - The safleId of the user to validate the ownership of the vault.
 
-- Validate PIN
+Validate PIN
 This method is used to validate the PIN of the user's vault
 
 `const isPinValid = await vault.validatePin(pin);`
