@@ -1,6 +1,6 @@
 # **Safle Vault SDK**
 
-Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault housekeeper SDK is used to manage the vault and provide methods to generate, persist, update the vault and also enable the user to perform several vault related operations.  
+Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault SDK is used to manage the vault and provide methods to generate vault, add new accounts, update the state and also enable the user to perform several vault related operations.  
 
 
 ## **Installation and Usage**
