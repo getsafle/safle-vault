@@ -1,6 +1,8 @@
 const cryptojs = require('crypto-js');
 const safleAssetController = require('@getsafle/asset-controller');
 
+const Chains = require('../chains');
+
 async function stringToArrayBuffer(str) {
   const buf = new ArrayBuffer(32);
   const bufView = new Uint16Array(buf);
@@ -75,4 +77,10 @@ async function getEthBalance(address, web3) {
   return ethBalance
 }
 
-module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts }
+async function getCoinInstance(chain) {
+  const keyringInstance = new Chains[chain]({ });
+
+  return keyringInstance;
+}
+
+module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance };

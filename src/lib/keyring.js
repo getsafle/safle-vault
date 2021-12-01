@@ -1,7 +1,6 @@
 const cryptojs = require('crypto-js');
 
 const helper = require('../utils/helper');
-
 const errorMessage = require('../constants/responses');
 
 class Keyring {
@@ -110,14 +109,28 @@ class Keyring {
         return { response: signedMsg };
     }
 
-    async signTransaction(rawTx, pin) {
+    async signTransaction(rawTx, pin, chain) {
         const { response } = await this.validatePin(pin)
-
+        
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
-        }; 
+        };
+ 
+        if (chain === 'ethereum') {
+            const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
+    
+            return { response: signedTx };
+        }
 
-        const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
+        const { error, response: privateKey} = await this.exportPrivateKey(rawTx.from, pin);
+
+        if (error) {
+            return { error };
+        }
+
+        const keyringInstance = await helper.getCoinInstance(this.otherChain);
+
+        const signedTx = await keyringInstance.signTransaction(rawTx, privateKey);
 
         return { response: signedTx };
     }

@@ -51,3 +51,9 @@
 
 * Fixed the issue where the updated vault was not getting stored in the local storage.
 * Updated the README with the new constructor initialization and also the `validatePin` function.
+
+### 1.2.0 (2021-12-01)
+
+##### Integrated BSC controller
+
+* Integrated the BSC controller with the vault.

@@ -14,6 +14,7 @@ class Vault extends Keyring {
     constructor(rpcURL, vault) {
         super();
         this.rpcURL = rpcURL;
+        this.otherChain = null;
         this.vault = vault;
         this.web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
         this.initializeKeyringController()
@@ -49,6 +50,10 @@ class Vault extends Keyring {
         }
 
         return mnemonic;
+    }
+
+    async changeNetwork(chain) {
+        this.otherChain = chain;
     }
 
     async generateVault(encryptionKey, pin, mnemonic) {

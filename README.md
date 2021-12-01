@@ -1,6 +1,6 @@
 # **Safle Vault SDK**
 
-Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault housekeeper SDK is used to manage the vault and provide methods to generate, persist, update the vault and also enable the user to perform several vault related operations.  
+Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault SDK is used to manage the vault and provide methods to generate vault, add new accounts, update the state and also enable the user to perform several vault related operations.  
 
 
 ## **Installation and Usage**
@@ -87,10 +87,11 @@ This method is used to sign a message.
 Sign Transaction:
 This method is used to sign a transaction.
 
- `const signedTransaction = await vault.signTransaction(rawTx, pin);`
+ `const signedTransaction = await vault.signTransaction(rawTx, pin, chain);`
 
 * `rawTx` - The raw transaction object to be signed.
 * `pin` - The pin to access the vault's private functions.
+* `chain` - The name of the chain for which the transaction has to be signed. eg. `ethereum`, `bsc`, `harmony`, etc.
 
 Restore Keyring State
 This method is used to restore the vault state in the keyring controller.
@@ -126,3 +127,10 @@ This method is used to validate the PIN of the user's vault
 `const isPinValid = await vault.validatePin(pin);`
 
 * `pin` - User's vault pin.
+
+Change Network
+This method is used to switch the network if a transaction has to be signed for any network other than Ethereum
+
+`await changeNetwork(chain)`
+
+* `chain` - Name of the chain to change to. eg. `bsc`, `harmony`, etc.
