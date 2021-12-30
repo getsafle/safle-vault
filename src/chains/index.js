@@ -1,5 +1,5 @@
 const ethereum = require('@getsafle/vault-eth-controller');
-const bsc = require('@getsafle/bsc-wallet-controller');
+const bsc = require('@getsafle/vault-bsc-controller');
 
 module.exports = {
     ethereum,
