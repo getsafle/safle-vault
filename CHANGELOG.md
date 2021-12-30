@@ -57,3 +57,10 @@
 ##### Integrated BSC controller
 
 * Integrated the BSC controller with the vault.
+
+### 1.2.1 (2021-12-30)
+
+##### Updated BSC controller package
+
+* Updated the bsc controller package.
+Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@getsafle/vault-bsc-controller`.
