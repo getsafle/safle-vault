@@ -2,6 +2,7 @@ const cryptojs = require('crypto-js');
 
 const helper = require('../utils/helper');
 const errorMessage = require('../constants/responses');
+const Chains = require('../chains');
 
 class Keyring {
 
@@ -41,25 +42,42 @@ class Keyring {
             return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
         }
 
-        const accounts = decryptedVault.eth.public;
-    
-        return { response: accounts }
+        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+
+        if (chain  === 'eth') {
+            const accounts = decryptedVault.eth.public;
+        
+            return { response: accounts }
+        }
+
+        const accounts = decryptedVault[this.chain].public;
+
+        return { response: accounts };
+
     }
 
     async exportPrivateKey(address, pin) {
-        if(this.decryptedVault.eth.public.some(element => element.address === address) == false) {
+        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+
+        if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
             return { error: errorMessage.ADDRESS_NOT_PRESENT };
         }
 
         const { response } = await this.validatePin(pin)
 
-        if(response == false) {
+        if (response == false) {
             return { error: errorMessage.INCORRECT_PIN };
-        }; 
+        };
 
-        const privateKey = await this.keyringInstance.exportAccount(address)
-    
-        return { response: privateKey }
+        if (chain === 'eth') {
+            const privateKey = await this.keyringInstance.exportAccount(address)
+        
+            return { response: privateKey }
+        }
+
+        const { privateKey } = await this[chain].exportPrivateKey(address);
+        
+        return { response: privateKey };
     }
 
     async addAccount(encryptionKey, pin) {
@@ -67,24 +85,52 @@ class Keyring {
 
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
-        }; 
+        };
+
+        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+            const accounts = await this.keyringInstance.getAccounts();
+
+            const keyring = await this.keyringInstance.getKeyringForAccount(accounts[0]);
+
+            await this.keyringInstance.addNewAccount(keyring);
+
+            const newAccount = await this.keyringInstance.getAccounts();
+
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false })
+            this.decryptedVault.eth.numberOfAccounts++;
+
+            const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+            this.vault = encryptedVault;
+
+            return { response: encryptedVault };
+        }
+
+        const { response: mnemonic } = await this.exportMnemonic(pin);
+
+        let keyringInstance;
+
+        if (this[this.chain] === undefined) {
+            keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
     
-        const accounts = await this.keyringInstance.getAccounts();
+            this[this.chain] = keyringInstance;
 
-        const keyring = await this.keyringInstance.getKeyringForAccount(accounts[0]);
+            const { address } = await this[this.chain].addAccount();
+    
+            const publicData = [ { address, isDeleted: false } ];
+            this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
+        } else {
+            const { address } = await this[this.chain].addAccount();
+    
+            this.decryptedVault[this.chain].public.push({ address, isDeleted: false });
+            this.decryptedVault[this.chain].numberOfAccounts++;
+        }
 
-        await this.keyringInstance.addNewAccount(keyring);
-
-        const newAccount = await this.keyringInstance.getAccounts();
-
-        this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false })
-        this.decryptedVault.eth.numberOfAccounts++;
-                    
         const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
-
+        
         this.vault = encryptedVault;
     
-        return { response: encryptedVault }
+        return { response: encryptedVault };
     }
 
     async signMessage(address, data, pin) {
@@ -92,33 +138,47 @@ class Keyring {
 
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
-        }; 
+        };
 
-        const accounts = await this.keyringInstance.getAccounts();
-        
+        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+            const accounts = await this.keyringInstance.getAccounts();
+            
+            if (accounts.includes(address) === false) {
+                return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
+            }
+    
+            const msg = await helper.stringToArrayBuffer(data);
+    
+            const msgParams = { from: address, data: msg };
+    
+            const signedMsg = await this.keyringInstance.signMessage(msgParams);
+    
+            return { response: signedMsg };
+        }
+
+        const accounts = await this[this.chain].getAccounts();
+            
         if (accounts.includes(address) === false) {
             return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
         }
 
-        const msg = await helper.stringToArrayBuffer(data);
-
         const msgParams = { from: address, data: msg };
 
-        const signedMsg = await this.keyringInstance.signMessage(msgParams);
+        const { signedMessage } = await this[this.chain].signMessage(msgParams, address);
 
-        return { response: signedMsg };
+        return { response: signedMessage };
     }
 
-    async signTransaction(rawTx, pin, chain) {
+    async signTransaction(rawTx, pin) {
         const { response } = await this.validatePin(pin)
         
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
         };
  
-        if (chain === 'ethereum') {
-            const signedTx = await this.keyringInstance.signTransaction(rawTx,this.web3);
-    
+        if (this.chain === 'ethereum') {
+            const signedTx = await this.keyringInstance.signTransaction(rawTx, this.web3);
+
             return { response: signedTx };
         }
 
@@ -128,11 +188,17 @@ class Keyring {
             return { error };
         }
 
-        const keyringInstance = await helper.getCoinInstance(this.otherChain);
+        if (Chains.evmChains.includes(this.chain)) {
+            const keyringInstance = await helper.getCoinInstance(this.chain);
 
-        const signedTx = await keyringInstance.signTransaction(rawTx, privateKey);
+            const signedTx = await keyringInstance.signTransaction(rawTx, privateKey);
 
-        return { response: signedTx };
+            return { response: signedTx };
+        }
+
+        const { signedTransaction } = await this[this.chain].signTransaction(rawTx, privateKey);
+
+        return { response: signedTransaction };
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {

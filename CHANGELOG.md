@@ -70,3 +70,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Polygon controller
 
 * Integrated the [Polygon wallet controller](https://github.com/getsafle/vault-polygon-controller).
+
+### 1.2.3 (2021-12-30)
+
+##### Integrated Bitcoin controller
+
+* Integrated the [Bitcoin wallet controller](https://github.com/getsafle/vault-bitcoin-controller).

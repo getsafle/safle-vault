@@ -77,9 +77,15 @@ async function getEthBalance(address, web3) {
   return ethBalance
 }
 
-async function getCoinInstance(chain) {
-  const keyringInstance = new Chains[chain]({ });
+async function getCoinInstance(chain, mnemonic) {
+  if(Chains.evmChains.includes(chain)) {
+    const keyringInstance = new Chains[chain]({ });
+  
+    return keyringInstance;
+  }
 
+  const keyringInstance = new Chains[chain]({ mnemonic });
+  
   return keyringInstance;
 }
 

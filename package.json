@@ -1,6 +1,6 @@
 {
   "name": "@getsafle/safle-vault",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault SDK is used to manage the vault and provide methods to generate vault, add new accounts, update the state and also enable the user to perform several vault related operations.",
   "main": "src/index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "@ethereumjs/tx": "^3.3.2",
     "@getsafle/asset-controller": "^1.0.2",
     "@getsafle/safle-identity-wallet": "^1.0.1",
+    "@getsafle/vault-bitcoin-controller": "^1.0.0",
     "@getsafle/vault-bsc-controller": "^1.0.0",
     "@getsafle/vault-eth-controller": "^1.0.1",
     "@getsafle/vault-polygon-controller": "^1.0.0",
