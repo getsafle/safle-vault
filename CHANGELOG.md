@@ -76,3 +76,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Bitcoin controller
 
 * Integrated the [Bitcoin wallet controller](https://github.com/getsafle/vault-bitcoin-controller).
+
+### 1.2.4 (2022-01-05)
+
+##### Delete account for non-eth chains
+
+* Extended the functionality to delete an account for all the chains.
