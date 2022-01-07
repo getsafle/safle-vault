@@ -237,21 +237,22 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        const { response } = await this.validatePin(pin)
+        const { response } = await this.validatePin(pin);
 
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
-        }; 
-
-        const accounts = await this.keyringInstance.getAccounts();
-        
-        if (accounts.includes(address) === false) {
-            return { error: errorMessage.ADDRESS_NOT_PRESENT };
         };
 
-        const objIndex = this.decryptedVault.eth.public.findIndex((obj => obj.address === address));
+        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
-        this.decryptedVault.eth.public[objIndex].isDeleted = true;
+        if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
+            return { error: errorMessage.ADDRESS_NOT_PRESENT };
+        }
+
+        const objIndex = this.decryptedVault[chain].public.findIndex((obj => obj.address === address));
+
+        this.decryptedVault[chain].public[objIndex].isDeleted = true;
+        this.decryptedVault[chain].numberOfAccounts--;
 
         const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
 
