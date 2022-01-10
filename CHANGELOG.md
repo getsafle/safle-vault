@@ -82,3 +82,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Delete account for non-eth chains
 
 * Extended the functionality to delete an account for all the chains.
+
+### 1.2.5 (2022-01-10)
+
+##### Get the list of all the supported chains
+
+* Implemented a method to get the list of all the supported EVM and non-EVM chains.
