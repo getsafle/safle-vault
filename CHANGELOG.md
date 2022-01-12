@@ -88,3 +88,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Get the list of all the supported chains
 
 * Implemented a method to get the list of all the supported EVM and non-EVM chains.
+
+### 1.2.6 (2022-01-12)
+
+##### Integrated Harmony Controller
+
+* Integrated the [Harmony wallet controller](https://github.com/getsafle/vault-harmony-controller).
