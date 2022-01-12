@@ -6,6 +6,7 @@ const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 
 const helper = require('../utils/helper');
 const Keyring = require('./keyring');
+const Chains = require('../chains');
 
 const errorMessage = require('../constants/responses')
 
@@ -100,6 +101,13 @@ class Vault extends Keyring {
         this.vault = vault;
     
         return { response: vault };
+    }
+
+    getSupportedChains() {
+        const evmChains = Chains.evmChains;
+        const nonEvmChains = Chains.nonEvmChains;
+
+        return { response: { evmChains, nonEvmChains } };
     }
 }
 

@@ -25,6 +25,11 @@ Else, pass the encrypted vault string in the constructor along with the `rpcURL`
 
 > Methods
 
+Get supported chains:
+Returns the list of all the supported EVM and non-EVM chains.
+
+`const supportedChains = vault.getSupportedChains();`
+
 Generate Mnemonic: 
 This method is used to generate the 12 word seed phrase for the vault.
 
