@@ -94,3 +94,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Harmony Controller
 
 * Integrated the [Harmony wallet controller](https://github.com/getsafle/vault-harmony-controller).
+
+### 1.2.7 (2022-01-12)
+
+##### Integrated Avalanche Controller
+
+* Integrated the [Avalanche wallet controller](https://github.com/getsafle/vault-avalanche-controller).
