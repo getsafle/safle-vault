@@ -97,6 +97,12 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 ### 1.2.7 (2022-01-12)
 
+##### Integrated Avalanche Controller
+
+* Integrated the [Avalanche wallet controller](https://github.com/getsafle/vault-avalanche-controller).
+
+### 1.2.8 (2022-01-13)
+
 ##### Integrated Velas Controller
 
-* Integrated the [Velas wallet controller](https://github.com/getsafle/vault-velas-controller).
+* Integrated the [Velas vault controller](https://github.com/getsafle/vault-velas-controller).
