@@ -26,8 +26,8 @@
   "dependencies": {
     "@ethereumjs/common": "^2.5.0",
     "@ethereumjs/tx": "^3.3.2",
-    "@getsafle/asset-controller": "^1.0.2",
     "@getsafle/safle-identity-wallet": "^1.0.1",
+    "@getsafle/transaction-controller": "^1.0.2",
     "@getsafle/vault-avalanche-controller": "^1.0.0",
     "@getsafle/vault-bitcoin-controller": "^1.0.0",
     "@getsafle/vault-bsc-controller": "^1.0.0",

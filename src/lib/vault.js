@@ -77,7 +77,7 @@ class Vault extends Keyring {
         return { response: vault };
     }
 
-    async recoverVault(mnemonic, encryptionKey, pin, safleID) {
+    async recoverVault(mnemonic, encryptionKey, pin, safleID, etherscanApiKey, polygonscanApiKey) {
         const safle = new SafleId('mainnet');
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
@@ -88,7 +88,7 @@ class Vault extends Keyring {
             return { error: errorMessage.WRONG_MNEMONIC };
         }
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, this.web3, this.rpcURL);
+        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, etherscanApiKey, polygonscanApiKey);
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 

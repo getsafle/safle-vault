@@ -1,5 +1,5 @@
 const cryptojs = require('crypto-js');
-const safleAssetController = require('@getsafle/asset-controller');
+const safleTransactionController = require('@getsafle/transaction-controller');
 
 const Chains = require('../chains');
 
@@ -24,7 +24,7 @@ async function generatePrivData(mnemonic, pin) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, web3, rpcURL) {
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, etherscanApiKey, polygonscanApiKey) {
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
@@ -36,14 +36,11 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, we
     zeroCounter = 0;
     for(let i=0; i < 5; i++) {
       const vaultState = await keyringInstance.addNewAccount(keyring[0]);
-  
-      const nonce = await getNonce(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], web3);
 
-      const tokens = await getTokens({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], rpcURL });
+      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'mainnet', etherscanApiKey);
+      const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
 
-      const ethBalance = await getEthBalance(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], web3);
-  
-      if (nonce === 0 && tokens.length === 0 && ethBalance === '0') {
+      if (!ethActivity && !polygonActivity) {
         accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true });
         zeroCounter++;
       } else {
@@ -52,29 +49,34 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, we
       }
     }
   }
+
   while (zeroCounter < 5 )
 
   return accountsArray;
 }
 
-async function getTokens({ address, rpcURL }) {
-  const assetController = new safleAssetController.AssetController({ address, rpcURL });
+async function getETHTransactions(address, network, etherscanAPIKey) {
+  const transactionController = new safleTransactionController.TransactionController();
 
-  const tokens = await assetController.detectTokens();
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: etherscanAPIKey });
 
-  return tokens
+  if (transactions.length > 0) {
+    return true;
+  }
+
+  return false;
 }
 
-async function getNonce(address, web3) {
-  const nonce = await web3.eth.getTransactionCount(address);
+async function getPolygonTransactions(address, network, polygonscanAPIKey) {
+  const transactionController = new safleTransactionController.TransactionController();
 
-  return nonce
-}
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: polygonscanAPIKey });
 
-async function getEthBalance(address, web3) {
-  const ethBalance = await web3.eth.getBalance(address);
+  if (transactions.length > 0) {
+    return true;
+  }
 
-  return ethBalance
+  return false;
 }
 
 async function getCoinInstance(chain, mnemonic) {
