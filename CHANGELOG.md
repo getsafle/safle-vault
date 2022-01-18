@@ -106,3 +106,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Velas Controller
 
 * Integrated the [Velas vault controller](https://github.com/getsafle/vault-velas-controller).
+
+### 1.2.9 (2022-01-18)
+
+##### Integrated Transaction Controller
+
+* Integrated the [Transaction Controller](https://github.com/getsafle/transaction-controller) for asset discovery on Ethereum and Polygon chains for vault recovery.
