@@ -1,5 +1,6 @@
 const cryptojs = require('crypto-js');
 const safleTransactionController = require('@getsafle/transaction-controller');
+const Web3 = require('web3');
 
 const Chains = require('../chains');
 
@@ -24,7 +25,9 @@ async function generatePrivData(mnemonic, pin) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, etherscanApiKey, polygonscanApiKey) {
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey) {
+  const web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
+
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
@@ -32,12 +35,18 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, et
 
   accountsArray.push({ address: indexAddress, isDeleted: false });
 
+  let network;
+
+  await web3.eth.net.getNetworkType().then((e) => network = e);
+
+  network = network === 'main' ? network = 'mainnet' : network;
+
   do {
     zeroCounter = 0;
     for(let i=0; i < 5; i++) {
       const vaultState = await keyringInstance.addNewAccount(keyring[0]);
 
-      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'mainnet', etherscanApiKey);
+      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], network, etherscanApiKey);
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
 
       if (!ethActivity && !polygonActivity) {

@@ -88,13 +88,13 @@ class Vault extends Keyring {
             return { error: errorMessage.WRONG_MNEMONIC };
         }
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, etherscanApiKey, polygonscanApiKey);
+        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, this.rpcURL, etherscanApiKey, polygonscanApiKey);
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
         const numberOfAccounts = accountsArray.filter(item => item.isDeleted === false).length;
 
-        const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts: (numberOfAccounts + 1) } }
+        const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
                 
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 
