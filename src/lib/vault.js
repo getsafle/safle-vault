@@ -68,7 +68,7 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false } ], private: privData, numberOfAccounts: 1 } }
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false } ], private: privData, numberOfAccounts: 1 } }
                 
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 

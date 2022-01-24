@@ -96,7 +96,7 @@ class Keyring {
 
             const newAccount = await this.keyringInstance.getAccounts();
 
-            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false })
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false })
             this.decryptedVault.eth.numberOfAccounts++;
 
             const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
@@ -117,12 +117,12 @@ class Keyring {
 
             const { address } = await this[this.chain].addAccount();
     
-            const publicData = [ { address, isDeleted: false } ];
+            const publicData = [ { address, isDeleted: false, isImported: false } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
             const { address } = await this[this.chain].addAccount();
     
-            this.decryptedVault[this.chain].public.push({ address, isDeleted: false });
+            this.decryptedVault[this.chain].public.push({ address, isDeleted: false, isImported: false });
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
@@ -259,6 +259,33 @@ class Keyring {
         this.vault = vault;
 
         return { response: vault };
+    }
+
+    async importWallet(privateKey, pin, encryptionKey) {
+        const { response } = await this.validatePin(pin);
+
+        if(response == false) {
+            return { error: errorMessage.INCORRECT_PIN };
+        };
+
+        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+            const address = await this.keyringInstance.importWallet(privateKey);
+
+            const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin).toString();
+
+            if(this.decryptedVault.importedWallets === undefined || this.decryptedVault.importedWallets.evmChains === undefined) {    
+                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] } };
+            } else {
+                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true });
+            }
+
+            const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+            this.vault = vault;
+
+            return { response: vault };
+
+        }
     }
 
 }
