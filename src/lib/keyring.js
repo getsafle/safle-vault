@@ -1,4 +1,6 @@
 const cryptojs = require('crypto-js');
+const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
+const { ethers } = require("ethers");
 
 const helper = require('../utils/helper');
 const errorMessage = require('../constants/responses');
@@ -24,6 +26,20 @@ class Keyring {
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
         if(mnemonic == '') {
+            return { response: false };
+        }
+
+        return { response: true };
+    }
+
+    async validateMnemonic(mnemonic, safleID) {
+        const safle = new SafleId('mainnet');
+
+        const { address } = await ethers.Wallet.fromMnemonic(mnemonic);
+
+        const safleId = await safle.getSafleId(address);
+        
+        if (safleId === '' || safleId != safleID) {
             return { response: false };
         }
 
