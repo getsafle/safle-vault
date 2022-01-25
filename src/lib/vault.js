@@ -2,7 +2,6 @@ const CryptoJS = require('crypto-js');
 const KeyringController = require('@getsafle/vault-eth-controller');
 const Web3 = require('web3');
 const bip39 = require('bip39');
-const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 
 const helper = require('../utils/helper');
 const Keyring = require('./keyring');
@@ -77,16 +76,8 @@ class Vault extends Keyring {
         return { response: vault };
     }
 
-    async recoverVault(mnemonic, encryptionKey, pin, safleID, etherscanApiKey, polygonscanApiKey) {
-        const safle = new SafleId('mainnet');
-
+    async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey) {
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
-
-        const safleId = await safle.getSafleId(vaultState.keyrings[0].accounts[0]);
-        
-        if (safleId === '' || safleId != safleID) {
-            return { error: errorMessage.WRONG_MNEMONIC };
-        }
 
         const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, this.rpcURL, etherscanApiKey, polygonscanApiKey);
 

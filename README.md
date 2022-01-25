@@ -116,15 +116,22 @@ This method is used to delete an account from the vault.
 * `address` - The address to be deleted.
 * `pin` - The pin to access the vault's private functions.
 
+Validate Mnemonic:
+This method is used to validate the user's mnemonic by querying the first 0th address for its safleId.
+
+`const isMnemonicValid = await vault.validateMnemonic(mnemonic, safleID);`
+ 
+* `mnemonic` - The mnemonic phrase to be validated.
+* `safleID` - The safleId of the user.
+
 Recover Vault:
 This method is used to recover the vault using the mnemonic phrase. The new vault will be re-encrypted using the pin and encryption key.
 
- `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, safleID, etherscanApiKey, polygonscanApiKey);`
+ `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey);`
 
 * `mnemonic` - The mnemonic of the vault to be recovered.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `pin` - The pin to access the vault's private functions.
-* `safleID` - The safleId of the user to validate the ownership of the vault.
 * `etherscanApiKey` - API Key of etherscan.
 * `polygonscanApiKey` - API Key of polygonscan.
 
