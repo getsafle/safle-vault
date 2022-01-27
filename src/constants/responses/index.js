@@ -5,5 +5,6 @@ module.exports = {
     ENTER_CREDS: 'Please enter both encryptionKey and pin',
     WRONG_MNEMONIC: 'Incorrect mnemonic passed',
     INCORRECT_PIN: 'Incorrect pin',
-    NO_ACCOUNTS_FOUND: 'No accounts found for this chain'
+    NO_ACCOUNTS_FOUND: 'No accounts found for this chain',
+    CHAIN_NOT_SUPPORTED: 'The selected chain is not supported',
 };
