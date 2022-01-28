@@ -277,6 +277,16 @@ class Keyring {
         return { response: vault };
     }
 
+    async getActiveChains() {
+        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+
+        let chains = [];
+
+        chains.push(...Object.keys(this.decryptedVault));
+
+        console.log(chains);
+    }
+
 }
 
 module.exports = Keyring;
