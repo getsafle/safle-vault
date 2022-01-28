@@ -53,7 +53,7 @@ class Vault extends Keyring {
     }
 
     async changeNetwork(chain) {
-        if (!Chains.evmChains.includes(chain) || !Chains.nonEvmChains.includes(chain)) {
+        if (chain !== 'ethereum' && !Chains.evmChains.includes(chain) && !Chains.nonEvmChains.includes(chain)) {
             throw errorMessage.CHAIN_NOT_SUPPORTED;
         }
         this.chain = chain;

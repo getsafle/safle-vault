@@ -92,7 +92,17 @@ class Keyring {
     async exportPrivateKey(address, pin) {
         let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
-        if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
+        let isImportedAddress;
+
+        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+        } else {
+            isImportedAddress = false;
+        }
+
+        if (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false) {
             return { error: errorMessage.ADDRESS_NOT_PRESENT };
         }
 
@@ -101,6 +111,16 @@ class Keyring {
         if (response == false) {
             return { error: errorMessage.INCORRECT_PIN };
         };
+
+        if (isImportedAddress) {
+            const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
+
+            const decryptedPrivKeyBytes = cryptojs.AES.decrypt(privateKey, pin);
+
+            const decryptedPrivKey = decryptedPrivKeyBytes.toString(cryptojs.enc.Utf8);
+
+            return { response: decryptedPrivKey };
+        }
 
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
