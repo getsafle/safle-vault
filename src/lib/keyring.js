@@ -16,7 +16,7 @@ class Keyring {
         if(mnemonic == '') {
             return { error: errorMessage.INCORRECT_PIN };
         }
-    
+
         return { response: mnemonic }
     }
 
@@ -38,7 +38,7 @@ class Keyring {
         const { address } = await ethers.Wallet.fromMnemonic(mnemonic);
 
         const safleId = await safle.getSafleId(address);
-        
+
         if (safleId === '' || safleId != safleID) {
             return { response: false };
         }
@@ -60,22 +60,49 @@ class Keyring {
 
         let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
+        let accounts = [];
+
         if (chain  === 'eth') {
-            const accounts = decryptedVault.eth.public;
-        
-            return { response: accounts }
+            accounts.push(...decryptedVault.eth.public);
+
+            const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets.evmChains !== undefined) ? true : false;
+
+            if (containsImported) {
+                accounts.push(...decryptedVault.importedWallets.evmChains.data);
+            }
+
+            return { response: accounts };
         }
 
-        const accounts = decryptedVault[this.chain].public;
+        if (decryptedVault[this.chain] === undefined && decryptedVault.importedWallets === undefined) {
+            return { error: errorMessage.NO_ACCOUNTS_FOUND };
+        }
+
+        (decryptedVault[this.chain] !== undefined) ? accounts.push(...decryptedVault[this.chain].public) : null;
+
+        const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets[this.chain] !== undefined) ? true : false;
+
+        if (containsImported) {
+            accounts.push(...decryptedVault.importedWallets[this.chain].data);
+        }
 
         return { response: accounts };
-
     }
 
     async exportPrivateKey(address, pin) {
         let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
-        if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
+        let isImportedAddress;
+
+        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+        } else {
+            isImportedAddress = false;
+        }
+
+        if (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false) {
             return { error: errorMessage.ADDRESS_NOT_PRESENT };
         }
 
@@ -85,14 +112,24 @@ class Keyring {
             return { error: errorMessage.INCORRECT_PIN };
         };
 
+        if (isImportedAddress) {
+            const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
+
+            const decryptedPrivKeyBytes = cryptojs.AES.decrypt(privateKey, pin);
+
+            const decryptedPrivKey = decryptedPrivKeyBytes.toString(cryptojs.enc.Utf8);
+
+            return { response: decryptedPrivKey };
+        }
+
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
-        
+
             return { response: privateKey }
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
-        
+
         return { response: privateKey };
     }
 
@@ -112,7 +149,7 @@ class Keyring {
 
             const newAccount = await this.keyringInstance.getAccounts();
 
-            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false })
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false })
             this.decryptedVault.eth.numberOfAccounts++;
 
             const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
@@ -124,28 +161,26 @@ class Keyring {
 
         const { response: mnemonic } = await this.exportMnemonic(pin);
 
-        let keyringInstance;
-
         if (this[this.chain] === undefined) {
-            keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
-    
+            const keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
+
             this[this.chain] = keyringInstance;
 
             const { address } = await this[this.chain].addAccount();
-    
-            const publicData = [ { address, isDeleted: false } ];
+
+            const publicData = [ { address, isDeleted: false, isImported: false } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
-            const { address } = await this[this.chain].addAccount();
-    
-            this.decryptedVault[this.chain].public.push({ address, isDeleted: false });
+            const { address: newAddress } = await this[this.chain].addAccount();
+
+            (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false });
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
         const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
-        
+
         this.vault = encryptedVault;
-    
+
         return { response: encryptedVault };
     }
 
@@ -158,22 +193,22 @@ class Keyring {
 
         if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
-            
+
             if (accounts.includes(address) === false) {
                 return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
             }
-    
+
             const msg = await helper.stringToArrayBuffer(data);
-    
+
             const msgParams = { from: address, data: msg };
-    
+
             const signedMsg = await this.keyringInstance.signMessage(msgParams);
-    
+
             return { response: signedMsg };
         }
 
         const accounts = await this[this.chain].getAccounts();
-            
+
         if (accounts.includes(address) === false) {
             return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
         }
@@ -187,7 +222,7 @@ class Keyring {
 
     async signTransaction(rawTx, pin) {
         const { response } = await this.validatePin(pin)
-        
+
         if(response == false) {
             return { error: errorMessage.INCORRECT_PIN };
         };
@@ -277,14 +312,80 @@ class Keyring {
         return { response: vault };
     }
 
+    async importWallet(privateKey, pin, encryptionKey) {
+        const { response } = await this.validatePin(pin);
+
+        if(response == false) {
+            return { error: errorMessage.INCORRECT_PIN };
+        };
+
+        const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin).toString();
+
+        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+            const address = await this.keyringInstance.importWallet(privateKey);
+
+            if(this.decryptedVault.importedWallets === undefined) {    
+                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] } };
+            } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
+                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] };
+            } else {
+                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true });
+            }
+        } else {
+            const { response: mnemonic } = await this.exportMnemonic(pin);
+
+            let address;
+
+            if (this[this.chain] === undefined) {
+                const keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
+
+                this[this.chain] = keyringInstance;
+
+                address = await keyringInstance.importWallet(privateKey);
+            } else {
+                address = await this[this.chain].importWallet(privateKey);
+            }
+
+            if (this.decryptedVault.importedWallets === undefined) {
+                let object = {};
+
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey } ];
+
+                object[this.chain] = { data };
+                this.decryptedVault.importedWallets = object;
+            } else if (this.decryptedVault.importedWallets[this.chain] === undefined) {        
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey } ];
+
+                this.decryptedVault.importedWallets[this.chain] = { data };
+            } else {
+                this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey });
+            }
+        }
+
+        const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+
+        this.vault = vault;
+
+        return { response: vault };
+    }
+
     async getActiveChains() {
-        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        let importedChains = [];
+        let generatedChains = [];
 
-        let chains = [];
+        (this.decryptedVault.importedWallets !== undefined) ? importedChains.push(...Object.keys(this.decryptedVault.importedWallets)) : null;
 
-        chains.push(...Object.keys(this.decryptedVault));
+        generatedChains.push(...Object.keys(this.decryptedVault));
 
-        console.log(chains);
+        (generatedChains.includes('importedWallets')) ? generatedChains.splice(generatedChains.indexOf('importedWallets'), 1) : null;
+
+        (importedChains.includes('evmChains')) ? importedChains.splice(importedChains.indexOf('evmChains'), 1) : null;
+
+        const array = importedChains.concat(generatedChains);
+
+        const result = array.filter((item, pos) => array.indexOf(item) === pos)
+
+        return { response: result };
     }
 
 }
