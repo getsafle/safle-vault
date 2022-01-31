@@ -148,3 +148,12 @@ This method is used to switch the network if a transaction has to be signed for 
 `await changeNetwork(chain)`
 
 * `chain` - Name of the chain to change to. eg. `bsc`, `harmony`, etc.
+
+Import Wallet:
+This method is used to import a new wallet using private key for all supported chains.
+
+ `const userVault = await vault.importWallet(privateKey, pin, encryptionKey);`
+
+* `privatekey` - The private key of the wallet to be imported.
+* `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
+* `pin` - The pin to access the vault's private functions.

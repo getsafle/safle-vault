@@ -33,7 +33,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
   let zeroCounter = 0;
   let accountsArray = [];
 
-  accountsArray.push({ address: indexAddress, isDeleted: false });
+  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false });
 
   let network;
 
@@ -50,10 +50,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
 
       if (!ethActivity && !polygonActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false });
         zeroCounter = 0;
       }
     }

@@ -112,3 +112,15 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Transaction Controller
 
 * Integrated the [Transaction Controller](https://github.com/getsafle/transaction-controller) for asset discovery on Ethereum and Polygon chains for vault recovery.
+
+### 1.3.0 (2022-01-24)
+
+##### Method to validate mnemonic
+
+* Added a method to validate the mnemonic phrase of the user.
+
+### 1.4.0 (2022-01-29)
+
+##### Import Wallets
+
+* Created a method to import a wallet using private key for all the supported chains.
