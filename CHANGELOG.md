@@ -124,3 +124,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Import Wallets
 
 * Created a method to import a wallet using private key for all the supported chains.
+
+### 1.5.0 (2022-01-29)
+
+##### List active chains
+
+* Created a method to get the list of chains for which the user has generated or imported a wallet.

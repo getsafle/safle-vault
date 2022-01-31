@@ -157,3 +157,8 @@ This method is used to import a new wallet using private key for all supported c
 * `privatekey` - The private key of the wallet to be imported.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `pin` - The pin to access the vault's private functions.
+
+List Active Chains:
+This method is used to list all the chains for which the user has generated or imported a wallet.
+
+ `const chainArray = await vault.getActiveChains();`

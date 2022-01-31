@@ -369,6 +369,29 @@ class Keyring {
         return { response: vault };
     }
 
+    async getActiveChains() {
+        let importedChains = [];
+        let generatedChains = [];
+
+        (this.decryptedVault.importedWallets !== undefined) ? importedChains.push(...Object.keys(this.decryptedVault.importedWallets)) : null;
+
+        generatedChains.push(...Object.keys(this.decryptedVault));
+
+        generatedChains.push('ethereum', ...Chains.evmChains);
+
+        (generatedChains.includes('importedWallets')) ? generatedChains.splice(generatedChains.indexOf('importedWallets'), 1) : null;
+        
+        (generatedChains.includes('eth')) ? generatedChains.splice(generatedChains.indexOf('eth'), 1) : null;
+
+        (importedChains.includes('evmChains')) ? importedChains.splice(importedChains.indexOf('evmChains'), 1) : null;
+
+        const array = importedChains.concat(generatedChains);
+
+        const result = array.filter((item, pos) => array.indexOf(item) === pos)
+
+        return { response: result };
+    }
+
 }
 
 module.exports = Keyring;
