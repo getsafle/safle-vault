@@ -130,3 +130,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### List active chains
 
 * Created a method to get the list of chains for which the user has generated or imported a wallet.
+
+### 1.5.1 (2022-01-31)
+
+##### Import wallet function return the public address
+
+* Updated the importWallet function to return the public address of the private key along with the encrypted vault string.
