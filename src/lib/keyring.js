@@ -321,8 +321,10 @@ class Keyring {
 
         const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin).toString();
 
+        let address;
+
         if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
-            const address = await this.keyringInstance.importWallet(privateKey);
+            address = await this.keyringInstance.importWallet(privateKey);
 
             if(this.decryptedVault.importedWallets === undefined) {    
                 this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] } };
@@ -333,8 +335,6 @@ class Keyring {
             }
         } else {
             const { response: mnemonic } = await this.exportMnemonic(pin);
-
-            let address;
 
             if (this[this.chain] === undefined) {
                 const keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
@@ -366,7 +366,7 @@ class Keyring {
 
         this.vault = vault;
 
-        return { response: vault };
+        return { response: { vault, address } };
     }
 
     async getActiveChains() {
