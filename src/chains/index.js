@@ -6,8 +6,8 @@ const harmony = require('@getsafle/vault-harmony-controller');
 const avalanche = require('@getsafle/vault-avalanche-controller');
 const velas = require('@getsafle/vault-velas-controller');
 
-const evmChains = ['bsc', 'polygon', 'harmony', 'avalanche', 'velas'];
-const nonEvmChains = ['bitcoin'];
+const evmChains = { 'ethereum': 'ETH', 'binance smart chain': 'BSC', 'polygon': 'MATIC', 'harmony': 'ONE', 'avalanche': 'AVAX', 'velas': 'VLX' };
+const nonEvmChains = { 'bitcoin': 'BTC' };
 
 module.exports = {
     ethereum,
