@@ -89,7 +89,7 @@ async function getPolygonTransactions(address, network, polygonscanAPIKey) {
 }
 
 async function getCoinInstance(chain, mnemonic) {
-  if(Chains.evmChains.includes(chain)) {
+  if(Chains.evmChains.hasOwnProperty(chain)) {
     const keyringInstance = new Chains[chain]({ });
   
     return keyringInstance;

@@ -136,3 +136,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Import wallet function return the public address
 
 * Updated the importWallet function to return the public address of the private key along with the encrypted vault string.
+
+### 1.5.2 (2022-02-05)
+
+##### Updated `getActiveChains()` and `getSupportedChains()`
+
+* Updated the `getActiveChains()` and `getSupportedChains()` functions to return the chains along with their symbols.

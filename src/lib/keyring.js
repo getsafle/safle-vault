@@ -58,7 +58,7 @@ class Keyring {
             return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
         }
 
-        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         let accounts = [];
 
@@ -90,7 +90,7 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
-        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         let isImportedAddress;
 
@@ -140,7 +140,7 @@ class Keyring {
             return { error: errorMessage.INCORRECT_PIN };
         };
 
-        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+        if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
 
             const keyring = await this.keyringInstance.getKeyringForAccount(accounts[0]);
@@ -191,7 +191,7 @@ class Keyring {
             return { error: errorMessage.INCORRECT_PIN };
         };
 
-        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+        if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
 
             if (accounts.includes(address) === false) {
@@ -239,7 +239,7 @@ class Keyring {
             return { error };
         }
 
-        if (Chains.evmChains.includes(this.chain)) {
+        if (Chains.evmChains.hasOwnProperty(this.chain)) {
             const keyringInstance = await helper.getCoinInstance(this.chain);
 
             const signedTx = await keyringInstance.signTransaction(rawTx, privateKey);
@@ -294,7 +294,7 @@ class Keyring {
             return { error: errorMessage.INCORRECT_PIN };
         };
 
-        let chain = (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
             return { error: errorMessage.ADDRESS_NOT_PRESENT };
@@ -323,7 +323,7 @@ class Keyring {
 
         let address;
 
-        if (Chains.evmChains.includes(this.chain) || this.chain === 'ethereum') {
+        if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             address = await this.keyringInstance.importWallet(privateKey);
 
             if(this.decryptedVault.importedWallets === undefined) {    
@@ -377,7 +377,7 @@ class Keyring {
 
         generatedChains.push(...Object.keys(this.decryptedVault));
 
-        generatedChains.push('ethereum', ...Chains.evmChains);
+        generatedChains.push(...Object.keys(Chains.evmChains));
 
         (generatedChains.includes('importedWallets')) ? generatedChains.splice(generatedChains.indexOf('importedWallets'), 1) : null;
         
@@ -387,9 +387,25 @@ class Keyring {
 
         const array = importedChains.concat(generatedChains);
 
-        const result = array.filter((item, pos) => array.indexOf(item) === pos)
+        const result = array.filter((item, pos) => array.indexOf(item) === pos);
 
-        return { response: result };
+        let chains = [];
+        
+        result.map(chain => {
+            if(Chains.evmChains.hasOwnProperty(chain)) {
+                chains.push({
+                    chain: chain,
+                    symbol: Chains.evmChains[chain],
+                });
+            } else {
+                chains.push({
+                    chain: chain,
+                    symbol: Chains.nonEvmChains[chain],
+                });
+            }
+        });
+
+        return { response: chains };
     }
 
 }
