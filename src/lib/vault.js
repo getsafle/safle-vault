@@ -98,7 +98,7 @@ class Vault extends Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault })
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault });
     
         return { response: vault };
     }

@@ -197,7 +197,7 @@ class Keyring {
         this.vault = encryptedVault;
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAddress });
-        
+
         return { response: { vault: encryptedVault, address: newAddress }};
     }
 
@@ -431,7 +431,7 @@ class Keyring {
         return { response: chains };
     }
 
-    getState() {
+    getLogs() {
         return this.logs.getState();
     }
 
