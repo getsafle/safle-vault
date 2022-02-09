@@ -75,7 +75,11 @@ class Vault extends Keyring {
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 
         this.vault = vault;
-    
+
+        this.logs.updateState({
+            logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault }],
+        });
+
         return { response: vault };
     }
 
@@ -93,6 +97,8 @@ class Vault extends Keyring {
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 
         this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault })
     
         return { response: vault };
     }

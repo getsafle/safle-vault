@@ -1,12 +1,19 @@
 const cryptojs = require('crypto-js');
 const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 const { ethers } = require("ethers");
+const ObservableStore = require('obs-store');
 
 const helper = require('../utils/helper');
 const errorMessage = require('../constants/responses');
 const Chains = require('../chains');
 
 class Keyring {
+
+    constructor() {
+        this.logs = new ObservableStore({
+            logs: [],
+        });
+    }
 
     async exportMnemonic(pin) {
         const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
@@ -156,10 +163,14 @@ class Keyring {
 
             this.vault = encryptedVault;
 
-            return { response: encryptedVault };
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAccount[newAccount.length - 1] });
+
+            return { response: { vault: encryptedVault, address: newAccount[newAccount.length - 1] }};
         }
 
         const { response: mnemonic } = await this.exportMnemonic(pin);
+
+        let newAddress;
 
         if (this[this.chain] === undefined) {
             const keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
@@ -168,10 +179,14 @@ class Keyring {
 
             const { address } = await this[this.chain].addAccount();
 
+            newAddress = address;
+
             const publicData = [ { address, isDeleted: false, isImported: false } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
-            const { address: newAddress } = await this[this.chain].addAccount();
+            const { address } = await this[this.chain].addAccount();
+
+            newAddress = address;
 
             (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false });
             this.decryptedVault[this.chain].numberOfAccounts++;
@@ -181,7 +196,9 @@ class Keyring {
 
         this.vault = encryptedVault;
 
-        return { response: encryptedVault };
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAddress });
+        
+        return { response: { vault: encryptedVault, address: newAddress }};
     }
 
     async signMessage(address, data, pin) {
@@ -266,6 +283,8 @@ class Keyring {
 
         this.vault = vault;
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
+
         const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin);
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
@@ -308,6 +327,8 @@ class Keyring {
         const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
 
         this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
 
         return { response: vault };
     }
@@ -366,6 +387,8 @@ class Keyring {
 
         this.vault = vault;
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'import-wallet', vault: this.vault, chain: this.chain, address });
+
         return { response: { vault, address } };
     }
 
@@ -406,6 +429,10 @@ class Keyring {
         });
 
         return { response: chains };
+    }
+
+    getState() {
+        return this.logs.getState();
     }
 
 }
