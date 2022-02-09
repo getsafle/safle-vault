@@ -149,3 +149,4 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * All the functions which changes the state of the vault now also maintains a log of the changes.
 * Implemented a function to retrieve all the logs `getLogs()`.
+* BREAKING CHANGE: `addAccounts()` function now returns an object with vault and the newly added account.
