@@ -162,3 +162,8 @@ List Active Chains:
 This method is used to list all the chains for which the user has generated or imported a wallet.
 
  `const chainArray = await vault.getActiveChains();`
+
+ Get Logs:
+This method retrieves all the logs of all the vault changes.
+
+ `const logs = await vault.getLogs();`
