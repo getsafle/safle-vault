@@ -90,12 +90,12 @@ async function getPolygonTransactions(address, network, polygonscanAPIKey) {
 
 async function getCoinInstance(chain, mnemonic) {
   if(Chains.evmChains.hasOwnProperty(chain)) {
-    const keyringInstance = new Chains[chain]({ });
+    const keyringInstance = new Chains[chain].KeyringController({ });
   
     return keyringInstance;
   }
 
-  const keyringInstance = new Chains[chain]({ mnemonic });
+  const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
   
   return keyringInstance;
 }

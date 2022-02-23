@@ -1,5 +1,5 @@
 const CryptoJS = require('crypto-js');
-const KeyringController = require('@getsafle/vault-eth-controller');
+const { KeyringController } = require('@getsafle/vault-eth-controller');
 const Web3 = require('web3');
 const bip39 = require('bip39');
 
@@ -7,7 +7,7 @@ const helper = require('../utils/helper');
 const Keyring = require('./keyring');
 const Chains = require('../chains');
 
-const errorMessage = require('../constants/responses')
+const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
@@ -54,24 +54,24 @@ class Vault extends Keyring {
 
     async changeNetwork(chain) {
         if (chain !== 'ethereum' && !Chains.evmChains.hasOwnProperty(chain) && !Chains.nonEvmChains.hasOwnProperty(chain)) {
-            throw errorMessage.CHAIN_NOT_SUPPORTED;
+            throw ERROR_MESSAGE.CHAIN_NOT_SUPPORTED;
         }
         this.chain = chain;
     }
 
     async generateVault(encryptionKey, pin, mnemonic) {
         if(!encryptionKey || !pin) {
-            return { error: errorMessage.ENTER_CREDS };
+            return { error: ERROR_MESSAGE.ENTER_CREDS };
         }
 
         await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
-    
+
         const accounts = await this.keyringInstance.getAccounts();
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
         const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false } ], private: privData, numberOfAccounts: 1 } }
-                
+
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 
         this.vault = vault;
@@ -93,13 +93,13 @@ class Vault extends Keyring {
         const numberOfAccounts = accountsArray.filter(item => item.isDeleted === false).length;
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
-                
+
         const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
 
         this.vault = vault;
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault });
-    
+
         return { response: vault };
     }
 

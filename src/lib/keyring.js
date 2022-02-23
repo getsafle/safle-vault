@@ -4,7 +4,7 @@ const { ethers } = require("ethers");
 const ObservableStore = require('obs-store');
 
 const helper = require('../utils/helper');
-const errorMessage = require('../constants/responses');
+const ERROR_MESSAGE = require('../constants/responses');
 const Chains = require('../chains');
 
 class Keyring {
@@ -21,7 +21,7 @@ class Keyring {
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
         if(mnemonic == '') {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
         return { response: mnemonic }
@@ -62,7 +62,7 @@ class Keyring {
             decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
             this.decryptedVault = decryptedVault;
         } catch(error) {
-            return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
+            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
         }
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
@@ -82,7 +82,7 @@ class Keyring {
         }
 
         if (decryptedVault[this.chain] === undefined && decryptedVault.importedWallets === undefined) {
-            return { error: errorMessage.NO_ACCOUNTS_FOUND };
+            return { error: ERROR_MESSAGE.NO_ACCOUNTS_FOUND };
         }
 
         (decryptedVault[this.chain] !== undefined) ? accounts.push(...decryptedVault[this.chain].public) : null;
@@ -110,13 +110,13 @@ class Keyring {
         }
 
         if (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false) {
-            return { error: errorMessage.ADDRESS_NOT_PRESENT };
+            return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
         const { response } = await this.validatePin(pin)
 
         if (response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
         if (isImportedAddress) {
@@ -144,7 +144,7 @@ class Keyring {
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
@@ -205,14 +205,14 @@ class Keyring {
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
 
             if (accounts.includes(address) === false) {
-                return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
+                return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
             }
 
             const msg = await helper.stringToArrayBuffer(data);
@@ -227,7 +227,7 @@ class Keyring {
         const accounts = await this[this.chain].getAccounts();
 
         if (accounts.includes(address) === false) {
-            return { error: errorMessage.NONEXISTENT_KEYRING_ACCOUNT };
+            return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
         }
 
         const msgParams = { from: address, data: msg };
@@ -241,7 +241,7 @@ class Keyring {
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
         if (this.chain === 'ethereum') {
@@ -278,7 +278,7 @@ class Keyring {
             decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
             this.decryptedVault = decryptedVault;
         } catch(error) {
-            return { error: errorMessage.INCORRECT_ENCRYPTION_KEY };
+            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
         }
 
         this.vault = vault;
@@ -310,13 +310,13 @@ class Keyring {
         const { response } = await this.validatePin(pin);
 
         if(response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
-            return { error: errorMessage.ADDRESS_NOT_PRESENT };
+            return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
         const objIndex = this.decryptedVault[chain].public.findIndex((obj => obj.address === address));
@@ -337,7 +337,7 @@ class Keyring {
         const { response } = await this.validatePin(pin);
 
         if(response == false) {
-            return { error: errorMessage.INCORRECT_PIN };
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
         const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin).toString();
