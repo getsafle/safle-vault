@@ -1,6 +1,7 @@
 const cryptojs = require('crypto-js');
 const safleTransactionController = require('@getsafle/transaction-controller');
 const Web3 = require('web3');
+const { AssetController } = require('@getsafle/asset-controller');
 
 const Chains = require('../chains');
 
@@ -100,4 +101,37 @@ async function getCoinInstance(chain, mnemonic) {
   return keyringInstance;
 }
 
-module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance };
+async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl) {
+
+  let output = { };
+
+  for (let i = 0; i < addresses.length; i++) {
+    if (addresses[i].isDeleted === false) {
+      const ethAssets = await getEthAssets(addresses[i].address, EthRpcUrl);
+    
+      const polygonAssets = await getPolygonAssets(addresses[i].address, polygonRpcUrl);
+  
+      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets } };
+    }
+  }
+
+  return output;
+}
+
+async function getEthAssets(address, ethRpcUrl) {
+  const assetController = new AssetController({ rpcURL: ethRpcUrl, chain: 'ethereum' });
+
+  const tokens = await assetController.detectTokens({ userAddress: address });
+
+  return tokens;
+}
+
+async function getPolygonAssets(address, polygonRpcUrl) {
+  const assetController = new AssetController({ rpcURL: polygonRpcUrl, chain: 'polygon' });
+
+  const tokens = await assetController.detectTokens({ userAddress: address });
+
+  return tokens;
+}
+
+module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails };

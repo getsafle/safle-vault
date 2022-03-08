@@ -150,3 +150,12 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * All the functions which changes the state of the vault now also maintains a log of the changes.
 * Implemented a function to retrieve all the logs `getLogs()`.
 * BREAKING CHANGE: `addAccounts()` function now returns an object with vault and the newly added account.
+
+### 1.7.0 (2022-03-08)
+
+##### Added a function to get the detailed list of all the accounts for all chains [Breaking Changes]
+
+* Added a function (`getVaultDetails()`) to get the detailed list of all accounts for all chains. Implemented token detection for all evm supported wallets for eth and polygon chains.
+* BREAKING CHANGE: Vault initialization accepts only the vault string as the parameter. If the vault has not been generated, then the constructor will be empty.
+* BREAKING CHANGE: `recoverVault()` function also accepts `rpcUrl` as the parameter.
+* BREAKING CHANGE: `signTransaction()` function also accepts `rpcUrl` as the parameter.

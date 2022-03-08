@@ -1,6 +1,5 @@
 const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
-const Web3 = require('web3');
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -11,12 +10,10 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor(rpcURL, vault) {
+    constructor(vault) {
         super();
-        this.rpcURL = rpcURL;
         this.chain = 'ethereum';
         this.vault = vault;
-        this.web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
         this.initializeKeyringController()
     }
 
@@ -83,10 +80,10 @@ class Vault extends Keyring {
         return { response: vault };
     }
 
-    async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey) {
+    async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, rpcUrl) {
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, this.rpcURL, etherscanApiKey, polygonscanApiKey);
+        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey);
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 

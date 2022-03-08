@@ -2,6 +2,7 @@ const cryptojs = require('crypto-js');
 const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 const { ethers } = require("ethers");
 const ObservableStore = require('obs-store');
+const Web3 = require('web3');
 
 const helper = require('../utils/helper');
 const ERROR_MESSAGE = require('../constants/responses');
@@ -20,7 +21,9 @@ class Keyring {
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
-        if(mnemonic == '') {
+        const spaceCount = mnemonic.split(" ").length - 1;
+
+        if(spaceCount !== 11) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
@@ -32,7 +35,9 @@ class Keyring {
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
-        if(mnemonic == '') {
+        const spaceCount = mnemonic.split(" ").length - 1;
+
+        if(spaceCount !== 11) {
             return { response: false };
         }
 
@@ -237,7 +242,7 @@ class Keyring {
         return { response: signedMessage };
     }
 
-    async signTransaction(rawTx, pin) {
+    async signTransaction(rawTx, pin, rpcUrl) {
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
@@ -245,12 +250,14 @@ class Keyring {
         };
  
         if (this.chain === 'ethereum') {
-            const signedTx = await this.keyringInstance.signTransaction(rawTx, this.web3);
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+
+            const signedTx = await this.keyringInstance.signTransaction(rawTx, web3);
 
             return { response: signedTx };
         }
 
-        const { error, response: privateKey} = await this.exportPrivateKey(rawTx.from, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, pin);
 
         if (error) {
             return { error };
@@ -429,6 +436,66 @@ class Keyring {
         });
 
         return { response: chains };
+    }
+
+    async getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl) {
+        const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
+
+        let decryptedVault;
+
+        try {
+            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+            this.decryptedVault = decryptedVault;
+        } catch(error) {
+            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+        }
+
+        let accounts = { evm: { } };
+
+        const activeChains = await this.getActiveChains();
+
+        const valuesToRemove = Object.keys(Chains.evmChains);
+
+        let assetsDetails;
+
+        assetsDetails = await helper.getAssetDetails(decryptedVault.eth.public, EthRpcUrl, polygonRpcUrl);
+
+        accounts.evm.generatedWallets = ({ ...assetsDetails })
+
+        const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets.evmChains !== undefined) ? true : false;
+
+        if (containsImported) {
+            assetsDetails = await helper.getAssetDetails(decryptedVault.importedWallets.evmChains.data, EthRpcUrl, polygonRpcUrl);
+
+            accounts.evm.importedWallets = ({ ...assetsDetails });
+        }
+
+        const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
+
+        let nonEvmAccs = [];
+
+        filteredChains.forEach(async ({ chain }) => {
+            const containsGenerated = (decryptedVault[chain] !== undefined) ? true : false;
+            const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets[chain] !== undefined) ? true : false;
+
+            if (containsGenerated) {
+                nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
+
+                let result = nonEvmAccs.map(a => a.address);
+
+                accounts[chain] = { generatedWallets: [ ...result ] };
+            }
+            
+            if (containsImported) {
+                nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
+
+                let result = nonEvmAccs.map(a => a.address);
+
+                (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
+            }
+        });
+
+        return { response: accounts };
     }
 
     getLogs() {
