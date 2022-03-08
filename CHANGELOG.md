@@ -159,3 +159,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * BREAKING CHANGE: Vault initialization accepts only the vault string as the parameter. If the vault has not been generated, then the constructor will be empty.
 * BREAKING CHANGE: `recoverVault()` function also accepts `rpcUrl` as the parameter.
 * BREAKING CHANGE: `signTransaction()` function also accepts `rpcUrl` as the parameter.
+
+### 1.8.0 (2022-03-09)
+
+##### Added a function to get the native asset balance of an account
+
+* Added a function (`getBalance()`) to get the native asset balance for an address.
