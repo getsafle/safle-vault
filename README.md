@@ -163,6 +163,15 @@ This method is used to list all the chains for which the user has generated or i
 
  `const chainArray = await vault.getActiveChains();`
 
+Get Vault Details:
+This method is used to get the list of all the accounts (`imported` and `generated`) of all the supported chains. Also returns the list of tokens assets for every address for Ethereum and Polygon chains.
+
+ `const details = await vault.getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl);`
+
+* `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
+* `EthRpcUrl` - Ethereum RPC URL.
+* `PolygonRpcUrl` - Polygon RPC URL.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 
