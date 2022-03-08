@@ -17,11 +17,9 @@ Import the package into your project using,
 
 Initialise the vault class,
 
-`const vault = new Vault(rpcURL, vault);`
+`const vault = new Vault(vault);`
 
 If the vault is not yet generated, then pass the `vault` parameter as null.
-
-Else, pass the encrypted vault string in the constructor along with the `rpcURL`.
 
 > Methods
 
