@@ -170,6 +170,14 @@ This method is used to get the list of all the accounts (`imported` and `generat
 * `EthRpcUrl` - Ethereum RPC URL.
 * `PolygonRpcUrl` - Polygon RPC URL.
 
+Get Native Asset Balance:
+This method is used to get the native asset balance of an address present in the vault.
+
+ `const balance = await vault.getBalance(address, rpcUrl);`
+
+* `address` - The public address for which the balance is to be fetched.
+* `rpcUrl` - RPC URL of the chain for which the balance is to be fetched. To be left blank for bitcoin chain.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 
