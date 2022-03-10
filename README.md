@@ -178,6 +178,16 @@ This method is used to get the native asset balance of an address present in the
 * `address` - The public address for which the balance is to be fetched.
 * `rpcUrl` - RPC URL of the chain for which the balance is to be fetched. To be left blank for bitcoin chain.
 
+Sign a rawTx or message and get signature object as output:
+This method is used to sign the rawTx object or message and get signature object as output.
+
+ `const signedMessage = await vault.sign(data, address, pin, rpcUrl);`
+
+* `data` - The rawTx object or message in string. If the message to be signed is in object format, then stringify the object before passing in the parameter.
+* `address` - The public address for which the balance is to be fetched.
+* `pin` - The pin to access the vault's private functions.
+* `rpcUrl` - RPC URL of the chain for which the balance is to be fetched. To be left blank for bitcoin chain.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 
