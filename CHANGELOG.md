@@ -165,3 +165,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Added a function to get the native asset balance of an account
 
 * Added a function (`getBalance()`) to get the native asset balance for an address.
+
+### 1.9.0 (2022-03-10)
+
+##### Added a function to sign a message or rawTx and get signature object
+
+* Added a function (`sign()`) to sign a transaction object or message and get the signature object.

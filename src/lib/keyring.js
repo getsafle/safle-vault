@@ -114,7 +114,7 @@ class Keyring {
             isImportedAddress = false;
         }
 
-        if (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false) {
+        if (!this.decryptedVault[chain] || (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false)) {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
@@ -522,6 +522,39 @@ class Keyring {
         const balance = await Chains[this.chain].getBalance(address);
 
         return { response: balance };   
+    }
+
+    async sign(data, address, pin, rpcUrl) {
+        const { response } = await this.validatePin(pin)
+
+        if(response == false) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
+        const { error, response: privateKey } = await this.exportPrivateKey(address, pin);
+
+        if (error) {
+            return { error };
+        }
+
+        const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+
+        if (this.chain === 'ethereum') {
+
+            const signedData = await this.keyringInstance.sign(data, privateKey, web3);
+
+            return { response: signedData };
+        }
+
+        if (Chains.evmChains.hasOwnProperty(this.chain)) {
+            const keyringInstance = await helper.getCoinInstance(this.chain);
+
+            const signedData = await keyringInstance.sign(data, privateKey, web3);
+
+            return { response: signedData };
+        }
+
+        return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
     }
 
     getLogs() {
