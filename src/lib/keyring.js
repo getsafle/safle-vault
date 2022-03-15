@@ -17,6 +17,10 @@ class Keyring {
     }
 
     async exportMnemonic(pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
@@ -31,6 +35,10 @@ class Keyring {
     }
 
     async validatePin(pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
@@ -102,6 +110,10 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         let isImportedAddress;
@@ -146,6 +158,10 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
@@ -207,6 +223,10 @@ class Keyring {
     }
 
     async signMessage(address, data, pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
@@ -243,6 +263,10 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
@@ -277,6 +301,10 @@ class Keyring {
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const bytes = cryptojs.AES.decrypt(vault, JSON.stringify(encryptionKey));
 
         let decryptedVault;
@@ -314,6 +342,10 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin);
 
         if(response == false) {
@@ -341,6 +373,10 @@ class Keyring {
     }
 
     async importWallet(privateKey, pin, encryptionKey) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin);
 
         if(response == false) {
@@ -525,6 +561,10 @@ class Keyring {
     }
 
     async sign(data, address, pin, rpcUrl) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const { response } = await this.validatePin(pin)
 
         if(response == false) {
