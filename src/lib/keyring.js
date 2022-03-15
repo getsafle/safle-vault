@@ -21,7 +21,7 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString());
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
@@ -39,7 +39,7 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin);
+        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString());
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
@@ -139,7 +139,7 @@ class Keyring {
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
-            const decryptedPrivKeyBytes = cryptojs.AES.decrypt(privateKey, pin);
+            const decryptedPrivKeyBytes = cryptojs.AES.decrypt(privateKey, pin.toString());
 
             const decryptedPrivKey = decryptedPrivKeyBytes.toString(cryptojs.enc.Utf8);
 
@@ -320,7 +320,7 @@ class Keyring {
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
 
-        const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin);
+        const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin.toString());
 
         const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
 
@@ -383,7 +383,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin).toString();
+        const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin.toString()).toString();
 
         let address;
 
