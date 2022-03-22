@@ -171,3 +171,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Added a function to sign a message or rawTx and get signature object
 
 * Added a function (`sign()`) to sign a transaction object or message and get the signature object.
+
+### 1.9.1 (2022-03-16)
+
+##### Added pin validation
+
+* Added a validation to ensure that the pin entered is a positive integer value

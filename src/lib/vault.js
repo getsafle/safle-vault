@@ -57,6 +57,10 @@ class Vault extends Keyring {
     }
 
     async generateVault(encryptionKey, pin, mnemonic) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         if(!encryptionKey || !pin) {
             return { error: ERROR_MESSAGE.ENTER_CREDS };
         }
@@ -81,6 +85,10 @@ class Vault extends Keyring {
     }
 
     async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, rpcUrl) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
         const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey);
