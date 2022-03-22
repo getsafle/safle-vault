@@ -354,14 +354,39 @@ class Keyring {
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
-        if (this.decryptedVault[chain].public.some(element => element.address === address) == false) {
-            return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
+        let objIndex;
+        let isImportedAddress;
+
+        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+
+            objIndex = this.decryptedVault.importedWallets.evmChains.data.findIndex((obj => 
+                obj.address === address
+            ));
+
+            this.decryptedVault.importedWallets.evmChains.data[objIndex].isDeleted = true;
+        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+
+            objIndex = this.decryptedVault.importedWallets[chain].data.findIndex((obj => 
+                obj.address === address
+            ));
+
+            this.decryptedVault.importedWallets[chain].data[objIndex].isDeleted = true;
+        } else {
+            isImportedAddress = false;
+
+            objIndex = this.decryptedVault[chain].public.findIndex((obj => 
+                obj.address === address
+            ));
+
+            if(objIndex < 0) {
+                return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
+            }
+
+            this.decryptedVault[chain].public[objIndex].isDeleted = true;
+            this.decryptedVault[chain].numberOfAccounts--;
         }
-
-        const objIndex = this.decryptedVault[chain].public.findIndex((obj => obj.address === address));
-
-        this.decryptedVault[chain].public[objIndex].isDeleted = true;
-        this.decryptedVault[chain].numberOfAccounts--;
 
         const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
 
