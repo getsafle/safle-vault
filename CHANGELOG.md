@@ -177,3 +177,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Added pin validation
 
 * Added a validation to ensure that the pin entered is a positive integer value
+
+### 1.9.2 (2022-03-22)
+
+##### Fixed bug where user cannot delete imported wallets
+
+* Fixed bug where user cannot delete imported wallets.
