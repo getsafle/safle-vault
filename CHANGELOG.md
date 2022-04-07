@@ -183,3 +183,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Fixed bug where user cannot delete imported wallets
 
 * Fixed bug where user cannot delete imported wallets.
+
+### 1.10.0 (2022-04-08)
+
+##### Integrated BSC chain
+
+* Integrated BSC chain wallet scanning for `recoverVault()` function.
+* Integrated BSC chain for `getVaultDetails()` function.

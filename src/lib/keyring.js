@@ -499,7 +499,7 @@ class Keyring {
         return { response: chains };
     }
 
-    async getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl) {
+    async getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl, bscRpcUrl) {
         const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
 
         let decryptedVault;
@@ -519,14 +519,14 @@ class Keyring {
 
         let assetsDetails;
 
-        assetsDetails = await helper.getAssetDetails(decryptedVault.eth.public, EthRpcUrl, polygonRpcUrl);
+        assetsDetails = await helper.getAssetDetails(decryptedVault.eth.public, EthRpcUrl, polygonRpcUrl, bscRpcUrl);
 
         accounts.evm.generatedWallets = ({ ...assetsDetails })
 
         const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets.evmChains !== undefined) ? true : false;
 
         if (containsImported) {
-            assetsDetails = await helper.getAssetDetails(decryptedVault.importedWallets.evmChains.data, EthRpcUrl, polygonRpcUrl);
+            assetsDetails = await helper.getAssetDetails(decryptedVault.importedWallets.evmChains.data, EthRpcUrl, polygonRpcUrl, bscRpcUrl);
 
             accounts.evm.importedWallets = ({ ...assetsDetails });
         }

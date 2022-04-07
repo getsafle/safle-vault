@@ -84,14 +84,14 @@ class Vault extends Keyring {
         return { response: vault };
     }
 
-    async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, rpcUrl) {
+    async recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, bscscanApiKey, rpcUrl) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey);
+        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey, bscscanApiKey);
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
