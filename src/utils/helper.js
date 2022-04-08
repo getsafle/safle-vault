@@ -26,7 +26,7 @@ async function generatePrivData(mnemonic, pin) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey) {
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey, bscscanApiKey) {
   const web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
 
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
@@ -49,8 +49,9 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
 
       const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], network, etherscanApiKey);
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
+      const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc-mainnet', bscscanApiKey);
 
-      if (!ethActivity && !polygonActivity) {
+      if (!ethActivity && !polygonActivity && !bscActivity) {
         accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false });
         zeroCounter++;
       } else {
@@ -89,6 +90,18 @@ async function getPolygonTransactions(address, network, polygonscanAPIKey) {
   return false;
 }
 
+async function getBSCTransactions(address, network, bscscanApiKey) {
+  const transactionController = new safleTransactionController.TransactionController();
+
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: bscscanApiKey });
+
+  if (transactions.length > 0) {
+    return true;
+  }
+
+  return false;
+}
+
 async function getCoinInstance(chain, mnemonic) {
   if(Chains.evmChains.hasOwnProperty(chain)) {
     const keyringInstance = new Chains[chain].KeyringController({ });
@@ -101,7 +114,7 @@ async function getCoinInstance(chain, mnemonic) {
   return keyringInstance;
 }
 
-async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl) {
+async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl, bscRpcUrl) {
 
   let output = { };
 
@@ -110,8 +123,10 @@ async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl) {
       const ethAssets = await getEthAssets(addresses[i].address, EthRpcUrl);
     
       const polygonAssets = await getPolygonAssets(addresses[i].address, polygonRpcUrl);
-  
-      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets } };
+
+      const bscAssets = await getBSCAssets(addresses[i].address, bscRpcUrl);
+
+      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets }, bsc: { ...bscAssets } };
     }
   }
 
@@ -128,6 +143,14 @@ async function getEthAssets(address, ethRpcUrl) {
 
 async function getPolygonAssets(address, polygonRpcUrl) {
   const assetController = new AssetController({ rpcURL: polygonRpcUrl, chain: 'polygon' });
+
+  const tokens = await assetController.detectTokens({ userAddress: address });
+
+  return tokens;
+}
+
+async function getBSCAssets(address, bscRpcUrl) {
+  const assetController = new AssetController({ rpcURL: bscRpcUrl, chain: 'bsc' });
 
   const tokens = await assetController.detectTokens({ userAddress: address });
 

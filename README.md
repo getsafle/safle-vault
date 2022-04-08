@@ -125,13 +125,14 @@ This method is used to validate the user's mnemonic by querying the first 0th ad
 Recover Vault:
 This method is used to recover the vault using the mnemonic phrase. The new vault will be re-encrypted using the pin and encryption key.
 
- `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, rpcUrl);`
+ `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, bscscanApiKey, rpcUrl);`
 
 * `mnemonic` - The mnemonic of the vault to be recovered.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `pin` - The pin to access the vault's private functions.
 * `etherscanApiKey` - API Key of etherscan.
 * `polygonscanApiKey` - API Key of polygonscan.
+* `bscscanApiKey` - API Key of bscscan.
 * `rpcUrl` - rpcUrl of the eth chain.
 
 Validate PIN
@@ -165,11 +166,12 @@ This method is used to list all the chains for which the user has generated or i
 Get Vault Details:
 This method is used to get the list of all the accounts (`imported` and `generated`) of all the supported chains. Also returns the list of tokens assets for every address for Ethereum and Polygon chains.
 
- `const details = await vault.getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl);`
+ `const details = await vault.getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl, bscRpcUrl);`
 
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `EthRpcUrl` - Ethereum RPC URL.
 * `PolygonRpcUrl` - Polygon RPC URL.
+* `bscRpcUrl` - BSC RPC URL.
 
 Get Native Asset Balance:
 This method is used to get the native asset balance of an address present in the vault.
