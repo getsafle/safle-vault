@@ -114,23 +114,20 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
 
         let isImportedAddress;
 
-        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+        if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[importedChain] !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
-            isImportedAddress = true;
-        } else {
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address === address) == true) {
             isImportedAddress = false;
-        }
-
-        if (!this.decryptedVault[chain] || (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false)) {
+        } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
-        const { response } = await this.validatePin(pin)
+        const { response } = await this.validatePin(pin);
 
         if (response == false) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };

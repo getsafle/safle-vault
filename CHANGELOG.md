@@ -190,3 +190,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Integrated BSC chain wallet scanning for `recoverVault()` function.
 * Integrated BSC chain for `getVaultDetails()` function.
+
+### 1.10.1 (2022-04-15)
+
+##### [Bugfix]: Fixed the bug where the user was unable to export the private keys of their bitcoin wallet
+
+* Fixed the bug where the user was unable to export the private keys of their bitcoin wallet
