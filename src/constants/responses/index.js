@@ -9,4 +9,5 @@ module.exports = {
     CHAIN_NOT_SUPPORTED: 'The selected chain is not supported',
     UNSUPPORTED_NON_EVM_FUNCTIONALITY: 'This functionality is not supported for non-EVM chains.',
     INCORRECT_PIN_TYPE: 'The pin should be a positive integer value',
+    ADDRESS_ALREADY_PRESENT: 'This address is already present in the vault'
 };
