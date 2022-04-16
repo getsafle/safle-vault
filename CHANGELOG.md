@@ -190,3 +190,16 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Integrated BSC chain wallet scanning for `recoverVault()` function.
 * Integrated BSC chain for `getVaultDetails()` function.
+
+### 1.10.1 (2022-04-15)
+
+##### [Bugfix]: Fixed the bug where the user was unable to export the private keys of their bitcoin wallet
+
+* Fixed the bug where the user was unable to export the private keys of their bitcoin wallet
+
+### 1.10.2 (2022-04-15)
+
+##### [Bugfix]: `importWallet()` function can be used to import an already existing wallet
+
+* `importWallet()` function throws an error if the address is already present in the vault.
+* Implemented lodash library to query the nested object keys for all functions.

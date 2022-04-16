@@ -3,6 +3,7 @@ const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 const { ethers } = require("ethers");
 const ObservableStore = require('obs-store');
 const Web3 = require('web3');
+const _ = require('lodash');
 
 const helper = require('../utils/helper');
 const ERROR_MESSAGE = require('../constants/responses');
@@ -85,7 +86,7 @@ class Keyring {
         if (chain  === 'eth') {
             accounts.push(...decryptedVault.eth.public);
 
-            const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets.evmChains !== undefined) ? true : false;
+            const containsImported = (_.get(decryptedVault, 'importedWallets.evmChains') !== undefined) ? true : false;
 
             if (containsImported) {
                 accounts.push(...decryptedVault.importedWallets.evmChains.data);
@@ -100,7 +101,7 @@ class Keyring {
 
         (decryptedVault[this.chain] !== undefined) ? accounts.push(...decryptedVault[this.chain].public) : null;
 
-        const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets[this.chain] !== undefined) ? true : false;
+        const containsImported = (_.get(decryptedVault, `importedWallets.${this.chain}`) !== undefined) ? true : false;
 
         if (containsImported) {
             accounts.push(...decryptedVault.importedWallets[this.chain].data);
@@ -114,23 +115,20 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
 
         let isImportedAddress;
 
-        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
-            isImportedAddress = true;
-        } else {
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address === address) == true) {
             isImportedAddress = false;
-        }
-
-        if (!this.decryptedVault[chain] || (this.decryptedVault[chain].public.some(element => element.address === address) == false && isImportedAddress == false)) {
+        } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
-        const { response } = await this.validatePin(pin)
+        const { response } = await this.validatePin(pin);
 
         if (response == false) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
@@ -357,7 +355,7 @@ class Keyring {
         let objIndex;
         let isImportedAddress;
 
-        if (chain === 'eth' && this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets.evmChains !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+        if (chain === 'eth' && _.get(this.decryptedVault, 'importedWallets.evmChains') !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
             isImportedAddress = true;
 
             objIndex = this.decryptedVault.importedWallets.evmChains.data.findIndex((obj => 
@@ -365,7 +363,7 @@ class Keyring {
             ));
 
             this.decryptedVault.importedWallets.evmChains.data[objIndex].isDeleted = true;
-        } else if (this.decryptedVault.importedWallets !== undefined && this.decryptedVault.importedWallets[chain] !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
+        } else if (_.get(this.decryptedVault, `importedWallets.${chain}`) !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
 
             objIndex = this.decryptedVault.importedWallets[chain].data.findIndex((obj => 
@@ -411,11 +409,25 @@ class Keyring {
         const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin.toString()).toString();
 
         let address;
+        let accounts;
+        let isDuplicateAddress;
+
+        accounts = await this.getAccounts(encryptionKey);
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             address = await this.keyringInstance.importWallet(privateKey);
 
-            if(this.decryptedVault.importedWallets === undefined) {    
+            accounts.response.forEach(element => { 
+                if (element.address === address) {
+                    isDuplicateAddress = true;
+                }
+            });
+
+            if (isDuplicateAddress) {
+                return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
+            }
+
+            if (this.decryptedVault.importedWallets === undefined) {
                 this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] } };
             } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
                 this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true }] };
@@ -433,6 +445,16 @@ class Keyring {
                 address = await keyringInstance.importWallet(privateKey);
             } else {
                 address = await this[this.chain].importWallet(privateKey);
+            }
+
+            accounts.response.forEach(element => { 
+                if (element.address === address) {
+                    isDuplicateAddress = true;
+                }
+            });
+
+            if (isDuplicateAddress) {
+                return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
@@ -523,7 +545,7 @@ class Keyring {
 
         accounts.evm.generatedWallets = ({ ...assetsDetails })
 
-        const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets.evmChains !== undefined) ? true : false;
+        const containsImported = (_.get(decryptedVault, 'importedWallets.evmChains') !== undefined) ? true : false;
 
         if (containsImported) {
             assetsDetails = await helper.getAssetDetails(decryptedVault.importedWallets.evmChains.data, EthRpcUrl, polygonRpcUrl, bscRpcUrl);
@@ -537,7 +559,7 @@ class Keyring {
 
         filteredChains.forEach(async ({ chain }) => {
             const containsGenerated = (decryptedVault[chain] !== undefined) ? true : false;
-            const containsImported = (decryptedVault.importedWallets !== undefined && decryptedVault.importedWallets[chain] !== undefined) ? true : false;
+            const containsImported = (_.get(decryptedVault, `importedWallets.${chain}`) !== undefined) ? true : false;
 
             if (containsGenerated) {
                 nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
