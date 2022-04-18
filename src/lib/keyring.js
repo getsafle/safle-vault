@@ -417,14 +417,16 @@ class Keyring {
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             address = await this.keyringInstance.importWallet(privateKey);
 
-            accounts.response.forEach(element => { 
-                if (element.address === address) {
-                    isDuplicateAddress = true;
-                }
-            });
+            if (!accounts.error) {
+                accounts.response.forEach(element => { 
+                    if (element.address === address) {
+                        isDuplicateAddress = true;
+                    }
+                });
 
-            if (isDuplicateAddress) {
-                return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
+                if (isDuplicateAddress) {
+                    return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
+                }
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
@@ -447,14 +449,16 @@ class Keyring {
                 address = await this[this.chain].importWallet(privateKey);
             }
 
-            accounts.response.forEach(element => { 
-                if (element.address === address) {
-                    isDuplicateAddress = true;
+            if (!accounts.error) {
+                accounts.response.forEach(element => { 
+                    if (element.address === address) {
+                        isDuplicateAddress = true;
+                    }
+                });
+    
+                if (isDuplicateAddress) {
+                    return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
                 }
-            });
-
-            if (isDuplicateAddress) {
-                return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
             }
 
             if (this.decryptedVault.importedWallets === undefined) {

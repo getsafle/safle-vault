@@ -203,3 +203,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * `importWallet()` function throws an error if the address is already present in the vault.
 * Implemented lodash library to query the nested object keys for all functions.
+
+### 1.10.3 (2022-04-18)
+
+##### [Bugfix]: `importWallet()` function throws an error when importing a non evm wallet
+
+* Added a condition in the `importWallet()` function to check if the output of the `getAccounts()` is an error.
