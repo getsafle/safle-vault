@@ -73,7 +73,7 @@ class Vault extends Keyring {
 
         const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false } ], private: privData, numberOfAccounts: 1 } }
 
-        const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
 
@@ -99,7 +99,7 @@ class Vault extends Keyring {
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
 
-        const vault = CryptoJS.AES.encrypt(JSON.stringify(rawVault), JSON.stringify(encryptionKey)).toString();
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
 

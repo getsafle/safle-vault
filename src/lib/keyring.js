@@ -1,4 +1,3 @@
-const cryptojs = require('crypto-js');
 const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
 const { ethers } = require("ethers");
 const ObservableStore = require('obs-store');
@@ -22,9 +21,7 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString());
-
-        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
 
         const spaceCount = mnemonic.split(" ").length - 1;
 
@@ -40,9 +37,7 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const mnemonicBytes = cryptojs.AES.decrypt(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString());
-
-        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
 
         const spaceCount = mnemonic.split(" ").length - 1;
 
@@ -68,16 +63,13 @@ class Keyring {
     }
 
     async getAccounts(encryptionKey) {
-        const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
-        let decryptedVault;
-
-        try {
-            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-            this.decryptedVault = decryptedVault;
-        } catch(error) {
-            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+        if (error) {
+            return { error }
         }
+
+        this.decryptedVault = decryptedVault;
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
@@ -137,9 +129,7 @@ class Keyring {
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
-            const decryptedPrivKeyBytes = cryptojs.AES.decrypt(privateKey, pin.toString());
-
-            const decryptedPrivKey = decryptedPrivKeyBytes.toString(cryptojs.enc.Utf8);
+            const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
 
             return { response: decryptedPrivKey };
         }
@@ -178,7 +168,7 @@ class Keyring {
             this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false })
             this.decryptedVault.eth.numberOfAccounts++;
 
-            const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+            const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
             this.vault = encryptedVault;
 
@@ -211,7 +201,7 @@ class Keyring {
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
-        const encryptedVault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+        const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = encryptedVault;
 
@@ -303,24 +293,19 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const bytes = cryptojs.AES.decrypt(vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
 
-        let decryptedVault;
-
-        try {
-            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-            this.decryptedVault = decryptedVault;
-        } catch(error) {
-            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+        if (error) {
+            return { error }
         }
+
+        this.decryptedVault = decryptedVault;
 
         this.vault = vault;
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
 
-        const mnemonicBytes = cryptojs.AES.decrypt(decryptedVault.eth.private.encryptedMnemonic, pin.toString());
-
-        const mnemonic = mnemonicBytes.toString(cryptojs.enc.Utf8);
+        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
 
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
@@ -353,10 +338,8 @@ class Keyring {
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         let objIndex;
-        let isImportedAddress;
 
         if (chain === 'eth' && _.get(this.decryptedVault, 'importedWallets.evmChains') !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
-            isImportedAddress = true;
 
             objIndex = this.decryptedVault.importedWallets.evmChains.data.findIndex((obj => 
                 obj.address === address
@@ -364,7 +347,6 @@ class Keyring {
 
             this.decryptedVault.importedWallets.evmChains.data[objIndex].isDeleted = true;
         } else if (_.get(this.decryptedVault, `importedWallets.${chain}`) !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
-            isImportedAddress = true;
 
             objIndex = this.decryptedVault.importedWallets[chain].data.findIndex((obj => 
                 obj.address === address
@@ -372,7 +354,6 @@ class Keyring {
 
             this.decryptedVault.importedWallets[chain].data[objIndex].isDeleted = true;
         } else {
-            isImportedAddress = false;
 
             objIndex = this.decryptedVault[chain].public.findIndex((obj => 
                 obj.address === address
@@ -386,7 +367,7 @@ class Keyring {
             this.decryptedVault[chain].numberOfAccounts--;
         }
 
-        const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
 
@@ -406,7 +387,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const encryptedPrivKey = cryptojs.AES.encrypt(privateKey, pin.toString()).toString();
+        const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption');
 
         let address;
         let accounts;
@@ -477,7 +458,7 @@ class Keyring {
             }
         }
 
-        const vault = cryptojs.AES.encrypt(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey)).toString();
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
 
@@ -526,16 +507,13 @@ class Keyring {
     }
 
     async getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl, bscRpcUrl) {
-        const bytes = cryptojs.AES.decrypt(this.vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
-        let decryptedVault;
-
-        try {
-            decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-            this.decryptedVault = decryptedVault;
-        } catch(error) {
-            return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+        if (error) {
+            return { error }
         }
+
+        this.decryptedVault = decryptedVault;
 
         let accounts = { evm: { } };
 
