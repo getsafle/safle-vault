@@ -4,6 +4,7 @@ const Web3 = require('web3');
 const { AssetController } = require('@getsafle/asset-controller');
 
 const Chains = require('../chains');
+const ERROR_MESSAGE = require('../constants/responses');
 
 async function stringToArrayBuffer(str) {
   const buf = new ArrayBuffer(32);
@@ -157,4 +158,32 @@ async function getBSCAssets(address, bscRpcUrl) {
   return tokens;
 }
 
-module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails };
+async function cryptography(data, key, action) {
+  let output;
+
+  if (action === 'encryption') {
+    output = cryptojs.AES.encrypt(data, key).toString();
+  } else {
+    const bytes = cryptojs.AES.decrypt(data, key);
+
+    output = bytes.toString(cryptojs.enc.Utf8);
+  }
+
+  return output;
+}
+
+async function validateEncryptionKey(data, encryptionKey) {
+  const bytes = cryptojs.AES.decrypt(data, encryptionKey);
+
+  let decryptedVault;
+
+  try {
+      decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+      
+      return { decryptedVault };
+  } catch(error) {
+      return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+  }
+}
+
+module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails, cryptography, validateEncryptionKey };
