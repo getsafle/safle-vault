@@ -339,22 +339,17 @@ class Keyring {
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
         let objIndex;
 
-        if (chain === 'eth' && _.get(this.decryptedVault, 'importedWallets.evmChains') !== undefined && this.decryptedVault.importedWallets.evmChains.data.some(element => element.address === address) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
 
-            objIndex = this.decryptedVault.importedWallets.evmChains.data.findIndex((obj => 
+            objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
                 obj.address === address
             ));
 
-            this.decryptedVault.importedWallets.evmChains.data[objIndex].isDeleted = true;
-        } else if (_.get(this.decryptedVault, `importedWallets.${chain}`) !== undefined && this.decryptedVault.importedWallets[chain].data.some(element => element.address === address) == true) {
-
-            objIndex = this.decryptedVault.importedWallets[chain].data.findIndex((obj => 
-                obj.address === address
-            ));
-
-            this.decryptedVault.importedWallets[chain].data[objIndex].isDeleted = true;
+            this.decryptedVault.importedWallets[importedChain].data[objIndex].isDeleted = true;
         } else {
 
             objIndex = this.decryptedVault[chain].public.findIndex((obj => 
@@ -635,6 +630,42 @@ class Keyring {
         }
 
         return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
+    }
+
+    async updateLabel(address, encryptionKey, newLabel) {
+        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        let objIndex;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
+
+            objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
+                obj.address === address
+            ));
+
+            this.decryptedVault.importedWallets[importedChain].data[objIndex].label = newLabel;
+        } else {
+
+            objIndex = this.decryptedVault[chain].public.findIndex((obj => 
+                obj.address === address
+            ));
+
+            if(objIndex < 0) {
+                return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
+            }
+
+            this.decryptedVault[chain].public[objIndex].label = newLabel;
+        }
+
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+
+        this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
+
+        return { response: vault };
     }
 
     getLogs() {
