@@ -191,6 +191,15 @@ This method is used to sign the rawTx object or message and get signature object
 * `pin` - The pin to access the vault's private functions.
 * `rpcUrl` - RPC URL of the chain.
 
+Update Wallet Label:
+This method is used to update the wallet label.
+
+ `const updatedVault = await vault.updateLabel(address, encryptionKey, newLabel);`
+
+* `address` - The address for which the label is to be updated.
+* `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
+* `newLabel` - The new label to be added.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 

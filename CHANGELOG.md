@@ -209,3 +209,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### [Bugfix]: `importWallet()` function throws an error when importing a non evm wallet
 
 * Added a condition in the `importWallet()` function to check if the output of the `getAccounts()` is an error.
+
+### 1.11.0 (2022-04-19)
+
+##### Wallet label
+
+* Every address in the vault will have a default wallet label.
+* Added the functionality to change the wallet label - `updateLabel()`.
