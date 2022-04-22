@@ -552,7 +552,7 @@ class Keyring {
             if (containsGenerated) {
                 nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
 
-                let result = nonEvmAccs.map(a => a.address);
+                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
 
                 accounts[chain] = { generatedWallets: [ ...result ] };
             }
@@ -560,7 +560,7 @@ class Keyring {
             if (containsImported) {
                 nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
 
-                let result = nonEvmAccs.map(a => a.address);
+                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
 
                 (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
             }

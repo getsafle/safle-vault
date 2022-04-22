@@ -216,3 +216,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Every address in the vault will have a default wallet label.
 * Added the functionality to change the wallet label - `updateLabel()`.
+
+### 1.11.1 (2022-04-22)
+
+##### Added the wallet label in `getVaultDetails()` function.
+
+* `getVaultDetails()` will also return the wallet label in the output.
