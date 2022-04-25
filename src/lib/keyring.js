@@ -37,9 +37,15 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        let spaceCount;
 
-        const spaceCount = mnemonic.split(" ").length - 1;
+        try {
+            const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+    
+            spaceCount = mnemonic.split(" ").length - 1;
+        } catch (error) {
+            return { response: false };
+        }
 
         if(spaceCount !== 11) {
             return { response: false };
