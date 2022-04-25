@@ -127,7 +127,7 @@ async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl, bscRpcUrl) {
 
       const bscAssets = await getBSCAssets(addresses[i].address, bscRpcUrl);
 
-      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets }, bsc: { ...bscAssets } };
+      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets }, bsc: { ...bscAssets }, label: addresses[i].label };
     }
   }
 
