@@ -222,3 +222,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Added the wallet label in `getVaultDetails()` function.
 
 * `getVaultDetails()` will also return the wallet label in the output.
+
+### 1.11.2 (2022-04-25)
+
+##### [BugFix] `validatePin()` function.
+
+* `validatePin()` fix an issue where the function returned an uncaught error `Malformed UTF-8 data`.
