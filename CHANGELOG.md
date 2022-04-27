@@ -228,3 +228,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### [BugFix] `validatePin()` function.
 
 * `validatePin()` fix an issue where the function returned an uncaught error `Malformed UTF-8 data`.
+
+### 1.11.3 (2022-04-26)
+
+##### [BugFix] Error when generate bitcoin account for the first time.
+
+* Fixed an issue where the user was unable to generate a bitcoin wallet for the first time.
