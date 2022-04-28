@@ -179,7 +179,7 @@ async function validateEncryptionKey(data, encryptionKey) {
 
   try {
       decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-      
+
       return { decryptedVault };
   } catch(error) {
       return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };

@@ -311,6 +311,30 @@ class Keyring {
 
         this.vault = vault;
 
+        const activeChains = await this.getActiveChains();
+
+        const valuesToRemove = Object.keys(Chains.evmChains);
+
+        const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
+
+        if (filteredChains.length > 0) {
+            filteredChains.forEach(async (chainData) => {
+                const { response: mnemonic } = await this.exportMnemonic(pin);
+
+                const keyringInstance = await helper.getCoinInstance(chainData.chain.toLowerCase(), mnemonic);
+
+                this[chainData.chain.toLowerCase()] = keyringInstance;
+
+                const numberOfAcc = this.decryptedVault[chainData.chain.toLowerCase()].numberOfAccounts;
+
+                console.log(numberOfAcc);
+
+                for (let i = 0; i < numberOfAcc; i++) {
+                    await this[chainData.chain].addAccount();
+                }
+            })
+        }
+
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
 
         const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
