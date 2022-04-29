@@ -234,3 +234,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### [BugFix] Error when generate bitcoin account for the first time.
 
 * Fixed an issue where the user was unable to generate a bitcoin wallet for the first time.
+
+### 1.12.0 (2022-04-28)
+
+##### Updated the `restoreKeyringState()` function to restore the state for non-evm chains too
+
+* Updated the `restoreKeyringState()` function to restore the state for non-evm chains too.
