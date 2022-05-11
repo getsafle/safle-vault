@@ -600,11 +600,17 @@ class Keyring {
     }
 
     async getBalance(address, rpcUrl) {
-        const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+        if (Chains.evmChains.hasOwnProperty(this.chain)) {
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
-        const balance = await Chains[this.chain].getBalance(address, web3);
+            const balance = await Chains[this.chain].getBalance(address, web3);
 
-        return { response: balance };
+            return { response: balance };
+        }
+
+        const balance = await Chains[this.chain].getBalance(address, rpcUrl);
+
+        return { response: balance }; 
     }
 
     async sign(data, address, pin, rpcUrl) {
