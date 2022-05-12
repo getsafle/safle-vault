@@ -240,3 +240,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Updated the `restoreKeyringState()` function to restore the state for non-evm chains too
 
 * Updated the `restoreKeyringState()` function to restore the state for non-evm chains too.
+
+### 1.12.1 (2022-05-11)
+
+##### Removed the condition which checks if the address is present in the vault to get the balance
+
+* Removed the condition which checks if the address is present in the vault to get the balance.

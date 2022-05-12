@@ -601,12 +601,6 @@ class Keyring {
 
     async getBalance(address, rpcUrl) {
         if (Chains.evmChains.hasOwnProperty(this.chain)) {
-            const accounts = await this.keyringInstance.getAccounts();
-
-            if (accounts.includes(address) === false) {
-                return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
-            }
-
             const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
             const balance = await Chains[this.chain].getBalance(address, web3);
@@ -614,15 +608,9 @@ class Keyring {
             return { response: balance };
         }
 
-        const accounts = await this[this.chain].getAccounts();
+        const balance = await Chains[this.chain].getBalance(address, rpcUrl);
 
-        if (accounts.includes(address) === false) {
-            return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
-        }
-
-        const balance = await Chains[this.chain].getBalance(address);
-
-        return { response: balance };   
+        return { response: balance }; 
     }
 
     async sign(data, address, pin, rpcUrl) {
