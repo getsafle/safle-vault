@@ -6,9 +6,10 @@ const harmony = require('@getsafle/vault-harmony-controller');
 const avalanche = require('@getsafle/vault-avalanche-controller');
 const velas = require('@getsafle/vault-velas-controller');
 const solana = require('@getsafle/vault-solana-controller');
+const tezos = require('@getsafle/vault-tezos-controller');
 
 const evmChains = { 'ethereum': 'ETH', 'binance smart chain': 'BSC', 'polygon': 'MATIC', 'harmony': 'ONE', 'avalanche': 'AVAX', 'velas': 'VLX' };
-const nonEvmChains = { 'bitcoin': 'BTC', 'solana': 'SOL' };
+const nonEvmChains = { 'bitcoin': 'BTC', 'solana': 'SOL', 'tezos': 'XTZ' };
 
 module.exports = {
     ethereum,
@@ -21,4 +22,5 @@ module.exports = {
     avalanche,
     velas,
     solana,
+    tezos,
 }
