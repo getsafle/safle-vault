@@ -246,3 +246,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Removed the condition which checks if the address is present in the vault to get the balance
 
 * Removed the condition which checks if the address is present in the vault to get the balance.
+
+### 1.13.0 (2022-05-17)
+
+##### Integrated Solana chain
+
+* Integrated Solana vault controller for generating solana wallets and perform operations.

@@ -218,7 +218,7 @@ class Keyring {
         return { response: { vault: encryptedVault, address: newAddress }};
     }
 
-    async signMessage(address, data, pin) {
+    async signMessage(address, data, pin, encryptionKey) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -229,13 +229,13 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
+        const accounts = await this.getAccounts(encryptionKey);
+
+        if(accounts.response.filter(e => e.address === address).length < 1) {
+            return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+        }
+
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
-            const accounts = await this.keyringInstance.getAccounts();
-
-            if (accounts.includes(address) === false) {
-                return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
-            }
-
             const msg = await helper.stringToArrayBuffer(data);
 
             const msgParams = { from: address, data: msg };
@@ -245,15 +245,7 @@ class Keyring {
             return { response: signedMsg };
         }
 
-        const accounts = await this[this.chain].getAccounts();
-
-        if (accounts.includes(address) === false) {
-            return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
-        }
-
-        const msgParams = { from: address, data: msg };
-
-        const { signedMessage } = await this[this.chain].signMessage(msgParams, address);
+        const { signedMessage } = await this[this.chain].signMessage(data, address);
 
         return { response: signedMessage };
     }
