@@ -164,14 +164,11 @@ This method is used to list all the chains for which the user has generated or i
  `const chainArray = await vault.getActiveChains();`
 
 Get Vault Details:
-This method is used to get the list of all the accounts (`imported` and `generated`) of all the supported chains. Also returns the list of tokens assets for every address for Ethereum and Polygon chains.
+This method is used to get the list of all the accounts (`imported` and `generated`) of all the supported chains.
 
- `const details = await vault.getVaultDetails(encryptionKey, EthRpcUrl, polygonRpcUrl, bscRpcUrl);`
+ `const details = await vault.getVaultDetails(encryptionKey);`
 
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
-* `EthRpcUrl` - Ethereum RPC URL.
-* `PolygonRpcUrl` - Polygon RPC URL.
-* `bscRpcUrl` - BSC RPC URL.
 
 Get Native Asset Balance:
 This method is used to get the native asset balance of an address present in the vault.
@@ -199,6 +196,17 @@ This method is used to update the wallet label.
 * `address` - The address for which the label is to be updated.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `newLabel` - The new label to be added.
+
+Get Assets:
+This method returns the list of assets for all the addresses on all the chains passed in the array.
+
+ `const assets = await vault.getAssets({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl });`
+
+* `addresses` - The list of addresses in an array.
+* `chains` - The list of chains in an array.
+* `EthRpcUrl` - Ethereum RPC URL.
+* `PolygonRpcUrl` - Polygon RPC URL.
+* `bscRpcUrl` - BSC RPC URL.
 
  Get Logs:
 This method retrieves all the logs of all the vault changes.

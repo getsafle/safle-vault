@@ -258,3 +258,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Tezos chain
 
 * Integrated Tezos vault controller for generating tezos wallets and perform operations.
+
+### 1.15.0 (2022-05-18)
+
+##### [BREAKING Changes] Segregated the functionality of `getVaultDetails()` function into 2 diferent functions.
+
+* `getVaultDetails()` function will only return the address of all the chains
+* Created a new function `getAssets()` which returns the list of assets for all the addresses on all the chains passed in an array.

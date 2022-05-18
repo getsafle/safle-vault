@@ -115,21 +115,33 @@ async function getCoinInstance(chain, mnemonic) {
   return keyringInstance;
 }
 
-async function getAssetDetails(addresses, EthRpcUrl, polygonRpcUrl, bscRpcUrl) {
+async function getAssetDetails({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl }) {
 
   let output = { };
+  let chainAssets  = [];
 
-  for (let i = 0; i < addresses.length; i++) {
-    if (addresses[i].isDeleted === false) {
-      const ethAssets = await getEthAssets(addresses[i].address, EthRpcUrl);
-    
-      const polygonAssets = await getPolygonAssets(addresses[i].address, polygonRpcUrl);
+  for (let j = 0; j < addresses.length; j++) {
+    for (let i = 0; i < chains.length; i++) {
 
-      const bscAssets = await getBSCAssets(addresses[i].address, bscRpcUrl);
+        if (chains[i] === 'ethereum') {
+          const assets = await getEthAssets(addresses[j], EthRpcUrl);
 
-      output[addresses[i].address] = { eth: { ...ethAssets }, polygon: { ...polygonAssets }, bsc: { ...bscAssets }, label: addresses[i].label };
+          chainAssets.push({ 'ethereum': { ...assets } });
+        } else if (chains[i] === 'bsc') {
+          const assets = await getBSCAssets(addresses[j], bscRpcUrl);
+
+          chainAssets.push({ 'bsc': { ...assets } });
+        } else {
+          const assets = await getPolygonAssets(addresses[j], polygonRpcUrl);
+
+          chainAssets.push({ 'polygon': { ...assets } });
+        }
+      }
+
+      output[addresses[j]] = { ...chainAssets };
+
+      chainAssets = [];
     }
-  }
 
   return output;
 }
