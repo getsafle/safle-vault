@@ -383,7 +383,6 @@ class Keyring {
             }
 
             this.decryptedVault[chain].public[objIndex].isDeleted = true;
-            this.decryptedVault[chain].numberOfAccounts--;
         }
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');

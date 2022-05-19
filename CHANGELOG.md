@@ -265,3 +265,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * `getVaultDetails()` function will only return the address of all the chains
 * Created a new function `getAssets()` which returns the list of assets for all the addresses on all the chains passed in an array.
+
+### 1.15.1 (2022-05-19)
+
+##### [Bug] Fixed duplicate address issue.
+
+* Fixed the issue where the addresses generated after executing `restoreKeyringState()` are duplicates.
