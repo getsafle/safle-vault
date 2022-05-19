@@ -95,7 +95,7 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const numberOfAccounts = accountsArray.filter(item => item.isDeleted === false).length;
+        const numberOfAccounts = accountsArray.length;
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
 
