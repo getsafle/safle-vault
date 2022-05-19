@@ -252,3 +252,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Integrated Solana chain
 
 * Integrated Solana vault controller for generating solana wallets and perform operations.
+
+### 1.14.0 (2022-05-17)
+
+##### Integrated Tezos chain
+
+* Integrated Tezos vault controller for generating tezos wallets and perform operations.
