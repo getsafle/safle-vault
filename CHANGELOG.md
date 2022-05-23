@@ -271,3 +271,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### [Bug] Fixed duplicate address issue.
 
 * Fixed the issue where the addresses generated after executing `restoreKeyringState()` are duplicates.
+
+### 1.15.2 (2022-05-23)
+
+##### Removed Tezos integration.
+
+* Removed tezos integration due to some compatibility issue in the tezos controller with RN framework.
