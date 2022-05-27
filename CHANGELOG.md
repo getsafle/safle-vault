@@ -277,3 +277,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Removed Tezos integration.
 
 * Removed tezos integration due to some compatibility issue in the tezos controller with RN framework.
+
+### 1.15.3 (2022-05-27)
+
+##### Updated Polygon controller version.
+
+* Updated Polygon controller version to support type2 transaction signing.
