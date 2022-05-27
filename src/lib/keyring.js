@@ -55,7 +55,7 @@ class Keyring {
     }
 
     async validateMnemonic(mnemonic, safleID, network) {
-        if (network !== 'mainnet' || network !== 'testnet') {
+        if (network !== 'mainnet' && network !== 'testnet') {
             throw ERROR_MESSAGE.INVALID_NETWORK;
         }
 
