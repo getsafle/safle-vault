@@ -286,6 +286,6 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 ### 1.16.0 (2022-05-27)
 
-##### Added network selection for `validateMnemonic()` function.
+##### [BREAKING] Added network selection for `validateMnemonic()` function.
 
-* Added network selection for `validateMnemonic()` function.
+* [BREAKING] Added network selection for `validateMnemonic()` function.
