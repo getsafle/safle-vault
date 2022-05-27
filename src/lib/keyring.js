@@ -54,8 +54,12 @@ class Keyring {
         return { response: true };
     }
 
-    async validateMnemonic(mnemonic, safleID) {
-        const safle = new SafleId('mainnet');
+    async validateMnemonic(mnemonic, safleID, network) {
+        if (network !== 'mainnet' || network !== 'testnet') {
+            throw ERROR_MESSAGE.INVALID_NETWORK;
+        }
+
+        const safle = new SafleId(network);
 
         const { address } = await ethers.Wallet.fromMnemonic(mnemonic);
 

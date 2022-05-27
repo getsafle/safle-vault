@@ -283,3 +283,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Updated Polygon controller version.
 
 * Updated Polygon controller version to support type2 transaction signing.
+
+### 1.16.0 (2022-05-27)
+
+##### Added network selection for `validateMnemonic()` function.
+
+* Added network selection for `validateMnemonic()` function.

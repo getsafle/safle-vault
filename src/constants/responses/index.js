@@ -10,5 +10,6 @@ module.exports = {
     UNSUPPORTED_NON_EVM_FUNCTIONALITY: 'This functionality is not supported for non-EVM chains.',
     INCORRECT_PIN_TYPE: 'The pin should be a positive integer value',
     ADDRESS_ALREADY_PRESENT: 'This address is already present in the vault',
-    SHOULD_BE_AN_ARRAY: 'Addresses and chains should be an array'
+    SHOULD_BE_AN_ARRAY: 'Addresses and chains should be an array',
+    INVALID_NETWORK: 'Invalid network selected'
 };
