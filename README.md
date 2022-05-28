@@ -117,10 +117,11 @@ This method is used to delete an account from the vault.
 Validate Mnemonic:
 This method is used to validate the user's mnemonic by querying the first 0th address for its safleId.
 
-`const isMnemonicValid = await vault.validateMnemonic(mnemonic, safleID);`
+`const isMnemonicValid = await vault.validateMnemonic(mnemonic, safleID, network);`
  
 * `mnemonic` - The mnemonic phrase to be validated.
 * `safleID` - The safleId of the user.
+* `networks` - The network to query the safleId. Valid values - `mainnet` or `testnet`.
 
 Recover Vault:
 This method is used to recover the vault using the mnemonic phrase. The new vault will be re-encrypted using the pin and encryption key.
