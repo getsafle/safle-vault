@@ -289,3 +289,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### [BREAKING] Added network selection for `validateMnemonic()` function.
 
 * [BREAKING] Added network selection for `validateMnemonic()` function.
+
+### 1.17.0 (2022-06-06)
+
+##### `changePin()` function.
+
+* Implemented a function to change the vault pin.

@@ -209,6 +209,14 @@ This method returns the list of assets for all the addresses on all the chains p
 * `PolygonRpcUrl` - Polygon RPC URL.
 * `bscRpcUrl` - BSC RPC URL.
 
+Change Pin:
+This method is used to change the pin of the vault.
+
+ `const newPin = await vault.changePin(currentPin, newPin);`
+
+* `currentPin` - The existing vault pin.
+* `newPin` - The new vault pin.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 

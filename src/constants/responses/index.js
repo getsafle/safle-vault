@@ -11,5 +11,6 @@ module.exports = {
     INCORRECT_PIN_TYPE: 'The pin should be a positive integer value',
     ADDRESS_ALREADY_PRESENT: 'This address is already present in the vault',
     SHOULD_BE_AN_ARRAY: 'Addresses and chains should be an array',
-    INVALID_NETWORK: 'Invalid network selected'
+    INVALID_NETWORK: 'Invalid network selected',
+    INCORRECT_CURRENT_PIN: 'The current pin passed is incorrect',
 };

@@ -21,6 +21,12 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
+        const { response } = await this.validatePin(pin);
+
+        if (response == false) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        }
+
         const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
 
         const spaceCount = mnemonic.split(" ").length - 1;
@@ -683,6 +689,28 @@ class Keyring {
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
 
         return { response: vault };
+    }
+
+    async changePin(currentPin, newPin) {
+        if (!Number.isInteger(currentPin) || currentPin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
+        if (!Number.isInteger(newPin) || newPin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
+        const { error, response: mnemonic }= await this.exportMnemonic(currentPin);
+
+        if (error) {
+            return { error: ERROR_MESSAGE.INCORRECT_CURRENT_PIN };
+        };
+
+        const privData = await helper.generatePrivData(mnemonic, newPin);
+
+        this.decryptedVault.eth.private = privData;
+
+        return { response: 'Pin changed successfully.' }
     }
 
     getLogs() {
