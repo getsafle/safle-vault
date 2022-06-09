@@ -295,3 +295,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### `changePin()` function.
 
 * Implemented a function to change the vault pin.
+
+### 1.17.1 (2022-06-09)
+
+##### [Breaking] `changePin()` function returns the new vault string.
+
+* `changePin()` function returns the new vault string.
+* Added a new parameter `encryptionKey`.

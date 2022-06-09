@@ -212,10 +212,11 @@ This method returns the list of assets for all the addresses on all the chains p
 Change Pin:
 This method is used to change the pin of the vault.
 
- `const newPin = await vault.changePin(currentPin, newPin);`
+ `const newPin = await vault.changePin(currentPin, newPin, encryptionKey);`
 
 * `currentPin` - The existing vault pin.
 * `newPin` - The new vault pin.
+* `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 
  Get Logs:
 This method retrieves all the logs of all the vault changes.
