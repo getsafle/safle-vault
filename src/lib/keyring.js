@@ -691,7 +691,7 @@ class Keyring {
         return { response: vault };
     }
 
-    async changePin(currentPin, newPin) {
+    async changePin(currentPin, newPin, encryptionKey) {
         if (!Number.isInteger(currentPin) || currentPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -710,7 +710,13 @@ class Keyring {
 
         this.decryptedVault.eth.private = privData;
 
-        return { response: 'Pin changed successfully.' }
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+
+        this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'change-pin', vault: this.vault });
+
+        return { response: vault };
     }
 
     getLogs() {
