@@ -302,3 +302,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * `changePin()` function returns the new vault string.
 * Added a new parameter `encryptionKey`.
+
+### 1.18.0 (2022-06-10)
+
+##### Removed `velas`, `avalanche`, `solana` and `harmony` chain integration.
+
+* Removed `velas`, `avalanche`, `solana` and `harmony` chain integration.
