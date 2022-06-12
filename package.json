@@ -43,6 +43,7 @@
     "@getsafle/vault-polygon-controller": "^1.2.3",
     "bip39": "^3.0.4",
     "browser-passworder": "^2.0.3",
+    "browserify-cryptojs": "^0.3.1",
     "crypto-js": "^4.0.0",
     "eth-hd-keyring": "^3.6.0",
     "ethereumjs-util": "^7.1.2",

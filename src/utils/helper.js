@@ -1,4 +1,11 @@
-const cryptojs = require('crypto-js');
+let cryptojs;
+
+if (typeof window == 'undefined') {
+  cryptojs = require('cryptojs');
+} else {
+  window.cryptojs = require('browserify-cryptojs');
+}
+
 const safleTransactionController = require('@getsafle/transaction-controller');
 const Web3 = require('web3');
 const { AssetController } = require('@getsafle/asset-controller');

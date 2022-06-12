@@ -1,4 +1,11 @@
-const CryptoJS = require('crypto-js');
+let CryptoJS;
+
+if (typeof window == 'undefined') {
+    CryptoJS = require('cryptojs');
+} else {
+    window.CryptoJS = require('browserify-cryptojs');
+}
+
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const bip39 = require('bip39');
 
