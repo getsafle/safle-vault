@@ -1,7 +1,7 @@
 let CryptoJS;
 
 if (typeof window == 'undefined') {
-    CryptoJS = require('cryptojs');
+    CryptoJS = require('crypto-js');
 } else {
     window.CryptoJS = require('browserify-cryptojs');
 }
