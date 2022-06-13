@@ -308,3 +308,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Removed `velas`, `avalanche`, `solana` and `harmony` chain integration.
 
 * Removed `velas`, `avalanche`, `solana` and `harmony` chain integration.
+
+### 1.18.1 (2022-06-13)
+
+##### Uncaught error in `validateMnemonic()`.
+
+* Added error handling for an uncaught error when user inputs an invalid mnemonic in the `validateMnemonic()` function .
