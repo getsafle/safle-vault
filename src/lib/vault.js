@@ -15,7 +15,7 @@ class Vault extends Keyring {
         this.chain = 'ethereum';
         this.vault = vault;
         this.encryptor = opts.encryptor || encryptor;
-        this.customEncryptor = true ? opts.encryptor : false;
+        this.isCustomEncryptor = opts.encryptor ? true : false;
         this.initializeKeyringController()
     }
 

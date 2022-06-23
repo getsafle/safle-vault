@@ -87,11 +87,13 @@ class Keyring {
     }
 
     async getAccounts(encryptionKey) {
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey), this.encryptor, this.isCustomEncryptor);
+        const { decryptedVault: _decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey), this.encryptor, this.isCustomEncryptor);
 
         if (error) {
             return { error }
         }
+
+        const decryptedVault = typeof _decryptedVault === 'string' ? JSON.parse(_decryptedVault) : _decryptedVault; 
 
         this.decryptedVault = decryptedVault;
 
