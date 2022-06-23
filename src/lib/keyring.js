@@ -67,7 +67,15 @@ class Keyring {
 
         const safle = new SafleId(network);
 
-        const { address } = await ethers.Wallet.fromMnemonic(mnemonic);
+        let address;
+
+        try {
+            const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+
+            address = wallet.address;
+        } catch (e) {
+            return { response: false };
+        }
 
         const safleId = await safle.getSafleId(address);
 
