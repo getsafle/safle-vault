@@ -27,7 +27,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
-        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
         const spaceCount = mnemonic.split(" ").length - 1;
 
@@ -46,7 +46,7 @@ class Keyring {
         let spaceCount;
 
         try {
-            const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+            const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
     
             spaceCount = mnemonic.split(" ").length - 1;
         } catch (error) {
@@ -79,7 +79,7 @@ class Keyring {
     }
 
     async getAccounts(encryptionKey) {
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey), this.encryptor, this.isCustomEncryptor);
 
         if (error) {
             return { error }
@@ -145,7 +145,7 @@ class Keyring {
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
-            const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
+            const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
             return { response: decryptedPrivKey };
         }
@@ -186,7 +186,7 @@ class Keyring {
             this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `Wallet ${acc.response.length + 1}` })
             this.decryptedVault.eth.numberOfAccounts++;
 
-            const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+            const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
             this.vault = encryptedVault;
 
@@ -219,7 +219,7 @@ class Keyring {
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
-        const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+        const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = encryptedVault;
 
@@ -303,7 +303,7 @@ class Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey), this.encryptor, this.isCustomEncryptor);
 
         if (error) {
             return { error }
@@ -339,7 +339,7 @@ class Keyring {
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
 
-        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
@@ -395,7 +395,7 @@ class Keyring {
             this.decryptedVault[chain].public[objIndex].isDeleted = true;
         }
 
-        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 
@@ -415,7 +415,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption');
+        const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         let address;
         let accounts;
@@ -495,7 +495,7 @@ class Keyring {
             }
         }
 
-        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 
@@ -544,7 +544,7 @@ class Keyring {
     }
 
     async getVaultDetails(encryptionKey) {
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey), this.encryptor, this.isCustomEncryptor);
 
         if (error) {
             return { error }
@@ -682,7 +682,7 @@ class Keyring {
             this.decryptedVault[chain].public[objIndex].label = newLabel;
         }
 
-        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 
@@ -706,11 +706,11 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_CURRENT_PIN };
         };
 
-        const privData = await helper.generatePrivData(mnemonic, newPin);
+        const privData = await helper.generatePrivData(mnemonic, newPin, this.encryptor);
 
         this.decryptedVault.eth.private = privData;
 
-        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 

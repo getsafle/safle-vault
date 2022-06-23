@@ -1,11 +1,4 @@
-let CryptoJS;
-
-if (typeof window == 'undefined') {
-    CryptoJS = require('crypto-js');
-} else {
-    window.CryptoJS = require('browserify-cryptojs');
-}
-
+const encryptor = require('crypto-js').AES;
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const bip39 = require('bip39');
 
@@ -17,28 +10,24 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor(vault) {
+    constructor(vault, opts) {
         super();
         this.chain = 'ethereum';
         this.vault = vault;
+        this.encryptor = opts.encryptor || encryptor;
+        this.customEncryptor = true ? opts.encryptor : false;
         this.initializeKeyringController()
     }
 
     initializeKeyringController() {
         const keyringController = new KeyringController({
-        encryptor: {
-            encrypt(pass, object) {
-                const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(object), pass).toString();
+            encryptor: {
+                encrypt(pass, object) {
+                    const ciphertext = encryptor.encrypt(JSON.stringify(object), pass).toString();
 
-                return ciphertext;
+                    return ciphertext;
+                },
             },
-            decrypt(pass, encryptedString) {
-                const bytes = CryptoJS.AES.decrypt(encryptedString, pass);
-                const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-
-                return decryptedData;
-            },
-        },
         });
 
         this.keyringInstance = keyringController;
@@ -76,11 +65,11 @@ class Vault extends Keyring {
 
         const accounts = await this.keyringInstance.getAccounts();
 
-        const privData = await helper.generatePrivData(mnemonic, pin);
+        const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
 
         const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 } }
 
-        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 
@@ -100,13 +89,13 @@ class Vault extends Keyring {
 
         const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey, bscscanApiKey);
 
-        const privData = await helper.generatePrivData(mnemonic, pin);
+        const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
 
         const numberOfAccounts = accountsArray.length;
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
 
-        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
 
