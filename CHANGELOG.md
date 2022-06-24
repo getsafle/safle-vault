@@ -314,3 +314,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Uncaught error in `validateMnemonic()`.
 
 * Added error handling for an uncaught error when user inputs an invalid mnemonic in the `validateMnemonic()` function .
+
+### 1.18.2 (2022-06-24)
+
+##### Updated `safle-identity-wallet` package version.
+
+* Updated `safle-identity-wallet` package version.
+* [Breaking Change] - `validateMnemonic()` also accepts polygonRpcUrl.
