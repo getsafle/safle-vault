@@ -20,7 +20,7 @@ Initialise the vault class,
 ```
 const vault = new Vault({ 
     vault,
-    encryptor: {
+    customEncryptor: {
     // An optional object for defining encryption schemes:
     // Defaults to crypto-js library
     encrypt(password, object) {
