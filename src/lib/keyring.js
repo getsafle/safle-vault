@@ -60,12 +60,12 @@ class Keyring {
         return { response: true };
     }
 
-    async validateMnemonic(mnemonic, safleID, network) {
+    async validateMnemonic(mnemonic, safleID, network, polygonRpcUrl) {
         if (network !== 'mainnet' && network !== 'testnet') {
             throw ERROR_MESSAGE.INVALID_NETWORK;
         }
 
-        const safle = new SafleId(network);
+        const safle = new SafleId(network, polygonRpcUrl);
 
         let address;
 
