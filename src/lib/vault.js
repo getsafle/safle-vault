@@ -57,7 +57,7 @@ class Vault extends Keyring {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        if(!encryptionKey || !pin) {
+        if(!encryptionKey || pin === undefined || pin === null) {
             return { error: ERROR_MESSAGE.ENTER_CREDS };
         }
 

@@ -322,6 +322,12 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * Updated `safle-identity-wallet` package version.
 * [Breaking Change] - `validateMnemonic()` also accepts polygonRpcUrl.
 
+### 1.18.3 (2022-06-30)
+
+##### Updated the condition check for pin in the `generateVault()` function.
+
+* Updated the condition check for pin in the `generateVault()` function. Now users can also choose `000000` as the pin.
+
 ### 1.19.0 (2022-06-23)
 
 ##### Added a functionality for the host app to plug in their own encryption decryption functions
