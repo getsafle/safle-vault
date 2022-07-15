@@ -327,3 +327,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Updated the condition check for pin in the `generateVault()` function.
 
 * Updated the condition check for pin in the `generateVault()` function. Now users can also choose `000000` as the pin.
+
+### 1.19.0 (2022-06-23)
+
+##### Added a functionality for the host app to plug in their own encryption decryption functions
+
+* The developer who wants to integrate the safle-vault sdk can inject their own encryption/decryption function in the constructor. The functions can be passed inside `encryptor` object.
+* [Breaking Change] - Constructor parameters have to be passed as an object.

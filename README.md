@@ -17,7 +17,24 @@ Import the package into your project using,
 
 Initialise the vault class,
 
-`const vault = new Vault(vault);`
+```
+const vault = new Vault({ 
+    vault,
+    customEncryptor: {
+    // An optional object for defining encryption schemes:
+    // Defaults to crypto-js library
+    encrypt(password, object) {
+      return encryptedString;
+    },
+    decrypt(password, encryptedString) {
+      return decryptedData;
+    },
+  },
+});
+```
+
+* `vault` (optional) - If the user already has a vault string generated, then it can be passed as the first parameter. If the vault string is not passed, then the vault has to be generated using the `generateVault()` function.
+* `encryptor` (optional) - If the user wants to use their own custom encryption/decryption function.
 
 If the vault is not yet generated, then pass the `vault` parameter as null.
 

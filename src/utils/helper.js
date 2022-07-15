@@ -17,10 +17,10 @@ async function stringToArrayBuffer(str) {
   return buf;
 }
 
-async function generatePrivData(mnemonic, pin) {
+async function generatePrivData(mnemonic, pin, encryptor) {
   var priv = {};
 
-  const encryptedMnemonic = cryptojs.AES.encrypt(mnemonic, pin.toString()).toString();
+  const encryptedMnemonic = encryptor.encrypt(mnemonic, pin.toString()).toString();
 
   priv.encryptedMnemonic = encryptedMnemonic;
 
@@ -170,31 +170,45 @@ async function getBSCAssets(address, bscRpcUrl) {
   return tokens;
 }
 
-async function cryptography(data, key, action) {
+async function cryptography(data, key, action, encryptor, isCustomEncryptor) {
   let output;
 
   if (action === 'encryption') {
-    output = cryptojs.AES.encrypt(data, key).toString();
+    output = encryptor.encrypt(data, key).toString();
   } else {
-    const bytes = cryptojs.AES.decrypt(data, key);
+    if (isCustomEncryptor) {
+      output = encryptor.decrypt(data, key);
+    } else {
+      const bytes = cryptojs.AES.decrypt(data, key);
 
-    output = bytes.toString(cryptojs.enc.Utf8);
+      output = bytes.toString(cryptojs.enc.Utf8);
+    }
   }
 
   return output;
 }
 
-async function validateEncryptionKey(data, encryptionKey) {
-  const bytes = cryptojs.AES.decrypt(data, encryptionKey);
-
-  let decryptedVault;
-
-  try {
-      decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-
+async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEncryptor) {
+  if (isCustomEncryptor) {
+    try {
+      const decryptedVault = encryptor.decrypt(data, encryptionKey);
+  
       return { decryptedVault };
-  } catch(error) {
-      return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+    } catch(error) {
+        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+    }
+  } else {
+    const bytes = cryptojs.AES.decrypt(data, encryptionKey);
+
+    let decryptedVault;
+
+    try {
+        decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+
+        return { decryptedVault };
+    } catch(error) {
+        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+    }
   }
 }
 
