@@ -568,14 +568,12 @@ class Keyring {
 
         const valuesToRemove = Object.keys(Chains.evmChains);
 
-        accounts.evm.generatedWallets = ([...decryptedVault.eth.public ])
+        accounts.evm.generatedWallets = ({ ...decryptedVault.eth.public })
 
         const containsImported = (_.get(decryptedVault, 'importedWallets.evmChains') !== undefined) ? true : false;
 
         if (containsImported) {
-            accounts.evm.importedWallets = ([ ...decryptedVault.importedWallets.evmChains.data ]);
-        } else {
-            accounts.evm.importedWallets = ([ ])
+            accounts.evm.importedWallets = ({ ...decryptedVault.importedWallets.evmChains.data });
         }
 
         const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
@@ -600,12 +598,6 @@ class Keyring {
                 let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
 
                 (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
-            } 
-            
-            if (!containsGenerated) {
-                (accounts[chain] === undefined) ? accounts[chain] = { generatedWallets: [ ] } : accounts[chain].generatedWallets = [ ];
-            } else {
-                (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ] } : accounts[chain].importedWallets = [ ];
             }
         });
 
