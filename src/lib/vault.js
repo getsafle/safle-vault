@@ -10,9 +10,10 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor({ vault, customEncryptor }) {
+    constructor({ vault, customEncryptor, platform }) {
         super();
         this.chain = 'ethereum';
+        this.platform = platform;
         this.vault = vault || null;
         this.encryptor = customEncryptor || encryptor;
         this.isCustomEncryptor = customEncryptor ? true : false;
@@ -74,7 +75,7 @@ class Vault extends Keyring {
         this.vault = vault;
 
         this.logs.updateState({
-            logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault }],
+            logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault, platform: this.platform }],
         });
 
         return { response: vault };
@@ -99,7 +100,7 @@ class Vault extends Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault, platform: this.platform });
 
         return { response: vault };
     }

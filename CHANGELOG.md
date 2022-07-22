@@ -334,3 +334,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * The developer who wants to integrate the safle-vault sdk can inject their own encryption/decryption function in the constructor. The functions can be passed inside `encryptor` object.
 * [Breaking Change] - Constructor parameters have to be passed as an object.
+
+### 1.20.0 (2022-07-20)
+
+##### Added a extra optional parameter (`platform`) in the constructor
+
+* The constructor accepts a new optional parameter called `platform` which will be saved in the logs.

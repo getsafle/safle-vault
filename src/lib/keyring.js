@@ -200,7 +200,7 @@ class Keyring {
 
             this.vault = encryptedVault;
 
-            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAccount[newAccount.length - 1] });
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAccount[newAccount.length - 1], platform: this.platform });
 
             return { response: { vault: encryptedVault, address: newAccount[newAccount.length - 1] }};
         }
@@ -233,7 +233,7 @@ class Keyring {
 
         this.vault = encryptedVault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAddress });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAddress, platform: this.platform });
 
         return { response: { vault: encryptedVault, address: newAddress }};
     }
@@ -347,7 +347,7 @@ class Keyring {
             })
         }
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault, platform: this.platform });
 
         const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
@@ -409,7 +409,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, address, platform: this.platform });
 
         return { response: vault };
     }
@@ -509,7 +509,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'import-wallet', vault: this.vault, chain: this.chain, address });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'import-wallet', vault: this.vault, chain: this.chain, address, platform: this.platform});
 
         return { response: { vault, address } };
     }
@@ -696,7 +696,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, platform: this.platform});
 
         return { response: vault };
     }
@@ -724,7 +724,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'change-pin', vault: this.vault });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'change-pin', vault: this.vault, platform: this.platform});
 
         return { response: vault };
     }
