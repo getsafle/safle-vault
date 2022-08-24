@@ -27,15 +27,18 @@ async function generatePrivData(mnemonic, pin, encryptor) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey, bscscanApiKey) {
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey, bscscanApiKey, mnemonic) {
   const web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
+
+  const btcInstance = await this.getCoinInstance('bitcoin', mnemonic);
 
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
-  let accountsArray = [];
+  let evmArray = [];
+  let btcArray = [];
 
-  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
+  evmArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
   let network;
 
@@ -45,18 +48,30 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
 
   do {
     zeroCounter = 0;
+
     for(let i=0; i < 5; i++) {
       const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+
+      const { address: btcAddress } = await btcInstance.addAccount();
 
       const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], network, etherscanApiKey);
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
       const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc-mainnet', bscscanApiKey);
+      const btcActivity = await getBTCTransactions(btcAddress, 'bitcoin');
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
+        evmArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}` });
+        evmArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}` });
+        zeroCounter = 0;
+      }
+
+      if (!btcActivity) {
+        btcArray.push({ address: btcAddress, isDeleted: true, isImported: false, label: `Wallet ${i + 1}` });
+        zeroCounter++;
+      } else {
+        btcArray.push({ address: btcAddress, isDeleted: false, isImported: false, label: `Wallet ${i + 1}` });
         zeroCounter = 0;
       }
     }
@@ -64,7 +79,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
 
   while (zeroCounter < 5 )
 
-  return accountsArray;
+  return { evmArray, btcArray };
 }
 
 async function getETHTransactions(address, network, etherscanAPIKey) {
@@ -95,6 +110,18 @@ async function getBSCTransactions(address, network, bscscanApiKey) {
   const transactionController = new safleTransactionController.TransactionController();
 
   const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: bscscanApiKey });
+
+  if (transactions.length > 0) {
+    return true;
+  }
+
+  return false;
+}
+
+async function getBTCTransactions(address, network) {
+  const transactionController = new safleTransactionController.TransactionController();
+
+  const transactions = await transactionController.getTransactions({ address, network });
 
   if (transactions.length > 0) {
     return true;

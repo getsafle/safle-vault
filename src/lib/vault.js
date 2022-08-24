@@ -88,13 +88,14 @@ class Vault extends Keyring {
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey, bscscanApiKey);
+        const { evmArray, btcArray } = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, rpcUrl, etherscanApiKey, polygonscanApiKey, bscscanApiKey, mnemonic);
 
         const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
 
-        const numberOfAccounts = accountsArray.length;
+        const numberOfEVMAccounts = evmArray.length;
+        const numberOfBTCAccounts = btcArray.length;
 
-        const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+        const rawVault = { eth: { public: evmArray, private: privData, numberOfAccounts: numberOfEVMAccounts }, bitcoin: { public: btcArray, numberOfAccounts: numberOfBTCAccounts } }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
