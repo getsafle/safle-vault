@@ -327,3 +327,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Updated the condition check for pin in the `generateVault()` function.
 
 * Updated the condition check for pin in the `generateVault()` function. Now users can also choose `000000` as the pin.
+
+### 1.18.4 (2022-08-24)
+
+##### Fixed the bsc chain naming convention from `binance smart chain` to `bsc`.
+
+* Fixed the bsc chain naming convention from `binance smart chain` to `bsc`.

@@ -2,7 +2,6 @@
 
 Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault SDK is used to manage the vault and provide methods to generate vault, add new accounts, update the state and also enable the user to perform several vault related operations.  
 
-
 ## **Installation and Usage**
 
 > Installation
@@ -223,3 +222,15 @@ This method is used to change the pin of the vault.
 This method retrieves all the logs of all the vault changes.
 
  `const logs = await vault.getLogs();`
+
+<br>
+
+<details>
+<summary> Supported Chains </summary>
+    <ol> 
+        <li> Ethereum </li>
+        <li> Polygon </li>
+        <li> Binance Smart Chain </li>
+        <li> Bitcoin </li>
+    </ol>
+</details>
