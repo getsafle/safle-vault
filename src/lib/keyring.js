@@ -430,6 +430,7 @@ class Keyring {
         let address;
         let accounts;
         let isDuplicateAddress;
+        let isDeletedAddress;
         let numOfAcc;
 
         accounts = await this.getAccounts(encryptionKey);
@@ -445,7 +446,7 @@ class Keyring {
                 numOfAcc = accounts.response.length;
 
                 accounts.response.forEach(element => { 
-                    if (element.address === address) {
+                    if (element.address === address && element.isDeleted === false) {
                         isDuplicateAddress = true;
                     }
                 });
@@ -453,12 +454,21 @@ class Keyring {
                 if (isDuplicateAddress) {
                     return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
                 }
+
+                accounts.response.forEach(obj => {
+                    if (obj.address === address && obj.isDeleted === true) {
+                        isDeletedAddress = true;
+                    }
+                });
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
                 this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] } };
             } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
                 this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] };
+            } else if (isDeletedAddress) {
+                this.decryptedVault.importedWallets.evmChains.data.map(obj => {
+                    (obj.address === address && obj.isDeleted === true) ? obj.isDeleted = false : true});
             } else {
                 this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` });
             }
@@ -479,7 +489,7 @@ class Keyring {
                 accounts.response.forEach(element => { 
                     numOfAcc = accounts.response.length;
 
-                    if (element.address === address) {
+                    if (element.address === address && element.isDeleted === false) {
                         isDuplicateAddress = true;
                     }
                 });
@@ -487,6 +497,12 @@ class Keyring {
                 if (isDuplicateAddress) {
                     return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
                 }
+
+                accounts.response.forEach(obj => {
+                    if (obj.address === address && obj.isDeleted === true) {
+                        isDeletedAddress = true;
+                    }
+                });
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
@@ -500,6 +516,9 @@ class Keyring {
                 const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` } ];
 
                 this.decryptedVault.importedWallets[this.chain] = { data };
+            } else if (isDeletedAddress) {
+                this.decryptedVault.importedWallets[this.chain].data.map(obj => {
+                    (obj.address === address && obj.isDeleted === true) ? obj.isDeleted = false : true});
             } else {
                 this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` });
             }
