@@ -376,3 +376,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Rebase the different released versions into one single version
 
 * Rebased the versions 1.19.0, 1.20.0, 1.18.4, 1.18.5, 1.18.6, 1.18.7 and 1.18.8 into a new version 1.21.1
+
+### 1.22.0 (2022-10-17)
+
+##### Constructor also accepts the parameter `storage`
+
+* Constructor also accepts the parameter `storage` where the developer can pass the vault storage mechanisms as an array.
