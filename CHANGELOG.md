@@ -340,3 +340,39 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Added a extra optional parameter (`platform`) in the constructor
 
 * The constructor accepts a new optional parameter called `platform` which will be saved in the logs.
+
+### 1.18.4 (2022-08-24)
+
+##### Fixed the bsc chain naming convention from `binance smart chain` to `bsc`.
+
+* Fixed the bsc chain naming convention from `binance smart chain` to `bsc`.
+
+### 1.18.5 (2022-08-29)
+
+##### Fixed a bug which prevented a user from importing the same account post deleting it
+
+* Fixed a bug which prevented a user from importing the same account post deleting it
+
+### 1.18.6 (2022-09-07)
+
+##### Updated BTC vault controller version
+
+* Updated BTC vault controller version and fixed Bitcoin transaction signing issue
+
+### 1.18.7 (2022-09-14)
+
+##### Updated transaction controller version
+
+* Updated transaction controller version
+
+### 1.18.8 (2022-09-16)
+
+##### Updated bitcoin controller version
+
+* Updated bitcoin controller version to fix the utxo calculation while transaction signing.
+
+### 1.21.0 (2022-10-17)
+
+##### Rebase the different released versions into one single version
+
+* Rebased the versions 1.19.0, 1.20.0, 1.18.4, 1.18.5, 1.18.6, 1.18.7 and 1.18.8 into a new version 1.21.1
