@@ -31,12 +31,14 @@ const vault = new Vault({
     },
   },
   platform,
+  storage,
 });
 ```
 
 * `vault` (optional) - If the user already has a vault string generated, then it can be passed as the first parameter. If the vault string is not passed, then the vault has to be generated using the `generateVault()` function.
-* `encryptor` (optional) - If the user wants to use their own custom encryption/decryption function.
+* `customEncryptor` (optional) - If the user wants to use their own custom encryption/decryption function.
 * `platform` (optional) - The platform on which the vault sdk is integrated with. This data will be helpful for logging purpose.
+* `storage` (optional) - The storage mechanism for vault. Can be an array of strings incase there are multiple storage mechanisms.
 
 If the vault is not yet generated, then pass the `vault` parameter as null.
 
