@@ -128,7 +128,7 @@ class Keyring {
         return { response: accounts };
     }
 
-    async exportPrivateKey(address, pin) {
+    async exportPrivateKey(address, encryptionKey, pin, call = 'external') {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -157,16 +157,52 @@ class Keyring {
 
             const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
+            if (call === 'external') {
+                (chain === 'eth') ? _.chain(this.decryptedVault.importedWallets.evmChains.data).find({ address }).merge({ isExported: true }).value() : _.chain(this.decryptedVault.importedWallets[chain].data).find({ address }).merge({ isExported: true }).value()
+                
+                const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+    
+                this.vault = encryptedVault;
+    
+                this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
+    
+                return { response: { vault: this.vault, privateKey: decryptedPrivKey} };
+            }
+
             return { response: decryptedPrivKey };
         }
 
         if (chain === 'eth') {
-            const privateKey = await this.keyringInstance.exportAccount(address)
+            const privateKey = await this.keyringInstance.exportAccount(address);
 
-            return { response: privateKey }
+            if (call === 'external') {
+                _.chain(this.decryptedVault.eth.public).find({ address }).merge({ isExported: true }).value();
+                
+                const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+    
+                this.vault = encryptedVault;
+    
+                this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
+    
+                return { response: { vault: this.vault, privateKey } };
+            }
+
+            return { response: privateKey };
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
+
+        if (call === 'external') {
+            _.chain(this.decryptedVault[chain].public).find({ address }).merge({ isExported: true }).value();
+            
+            const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+    
+            this.vault = encryptedVault;
+    
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
+    
+            return { response: { vault: this.vault, privateKey } };
+        }
 
         return { response: privateKey };
     }
@@ -193,7 +229,7 @@ class Keyring {
 
             const newAccount = await this.keyringInstance.getAccounts();
 
-            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `Wallet ${acc.response.length + 1}` })
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `Wallet ${acc.response.length + 1}`, isExported: false })
             this.decryptedVault.eth.numberOfAccounts++;
 
             const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
@@ -218,14 +254,14 @@ class Keyring {
 
             newAddress = address;
 
-            const publicData = [ { address, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response ? acc.response.length + 1 : 1}` } ];
+            const publicData = [ { address, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response ? acc.response.length + 1 : 1}`, isExported: false } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
             const { address } = await this[this.chain].addAccount();
 
             newAddress = address;
 
-            (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}` } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}` });
+            (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}`, isExported: false } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}`, isExported: false });
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
@@ -270,7 +306,7 @@ class Keyring {
         return { response: signedMessage };
     }
 
-    async signTransaction(rawTx, pin, rpcUrl) {
+    async signTransaction(rawTx, encryptionKey, pin, rpcUrl) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -289,7 +325,7 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, encryptionKey, pin, 'internal');
 
         if (error) {
             return { error };
@@ -463,14 +499,14 @@ class Keyring {
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
-                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] } };
+                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false }] } };
             } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
-                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] };
+                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false }] };
             } else if (isDeletedAddress) {
                 this.decryptedVault.importedWallets.evmChains.data.map(obj => {
                     (obj.address === address && obj.isDeleted === true) ? obj.isDeleted = false : true});
             } else {
-                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` });
+                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false });
             }
         } else {
             const { response: mnemonic } = await this.exportMnemonic(pin);
@@ -508,19 +544,19 @@ class Keyring {
             if (this.decryptedVault.importedWallets === undefined) {
                 let object = {};
 
-                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` } ];
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}`, isExported: false } ];
 
                 object[this.chain] = { data };
                 this.decryptedVault.importedWallets = object;
             } else if (this.decryptedVault.importedWallets[this.chain] === undefined) {        
-                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` } ];
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}`, isExported: false } ];
 
                 this.decryptedVault.importedWallets[this.chain] = { data };
             } else if (isDeletedAddress) {
                 this.decryptedVault.importedWallets[this.chain].data.map(obj => {
                     (obj.address === address && obj.isDeleted === true) ? obj.isDeleted = false : true});
             } else {
-                this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` });
+                this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}`, isExported: false });
             }
         }
 
@@ -587,34 +623,30 @@ class Keyring {
 
         const valuesToRemove = Object.keys(Chains.evmChains);
 
-        accounts.evm.generatedWallets = ({ ...decryptedVault.eth.public })
+        accounts.evm.generatedWallets = ([ ...decryptedVault.eth.public ])
 
         const containsImported = (_.get(decryptedVault, 'importedWallets.evmChains') !== undefined) ? true : false;
 
         if (containsImported) {
-            accounts.evm.importedWallets = ({ ...decryptedVault.importedWallets.evmChains.data });
+            decryptedVault.importedWallets.evmChains.data.forEach(function(v){ delete v.privateKey });
+
+            accounts.evm.importedWallets = ([ ...decryptedVault.importedWallets.evmChains.data ]);
         }
 
         const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
-
-        let nonEvmAccs = [];
 
         filteredChains.forEach(async ({ chain }) => {
             const containsGenerated = (decryptedVault[chain] !== undefined) ? true : false;
             const containsImported = (_.get(decryptedVault, `importedWallets.${chain}`) !== undefined) ? true : false;
 
             if (containsGenerated) {
-                nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
-
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
+                let result = decryptedVault[chain].public.map(a => { return { address: a.address, label: a.label, isDeleted: a.isDeleted, isExported: a.isExported, isImported: a.isImported }});
 
                 accounts[chain] = { generatedWallets: [ ...result ] };
             }
             
             if (containsImported) {
-                nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
-
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
+                let result = decryptedVault.importedWallets[chain].data.map(a => { return { address: a.address, label: a.label, isDeleted: a.isDeleted, isExported: a.isExported, isImported: a.isImported }});
 
                 (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
             }
@@ -647,7 +679,7 @@ class Keyring {
         return { response: balance }; 
     }
 
-    async sign(data, address, pin, rpcUrl) {
+    async sign(data, address, encryptionKey, pin, rpcUrl) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -658,7 +690,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: privateKey } = await this.exportPrivateKey(address, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(address, encryptionKey, pin, 'internal');
 
         if (error) {
             return { error };

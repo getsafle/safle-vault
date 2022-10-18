@@ -35,7 +35,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
   let zeroCounter = 0;
   let accountsArray = [];
 
-  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
+  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1', isExported: false });
 
   let network;
 
@@ -53,10 +53,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
       const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc-mainnet', bscscanApiKey);
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}`, isExported: false });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}` });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}`, isExported: false });
         zeroCounter = 0;
       }
     }

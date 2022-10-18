@@ -377,6 +377,19 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Rebased the versions 1.19.0, 1.20.0, 1.18.4, 1.18.5, 1.18.6, 1.18.7 and 1.18.8 into a new version 1.21.1
 
+### 1.21.1 (2022-10-17)
+
+##### Track which address has exported their private key
+
+* Every address has a new flag `isExported` associated with it to track if the private key of that address has been exported.
+* [Breaking Change] encryptedEncryptionKey has to be passed in the `exportPrivateKey()`, `signTransaction()` and `sign()`function.
+
+### 1.21.2 (2022-10-17)
+
+##### Updated the output of `getVaultDetails()` function to make it more consistent
+
+* Updated the output of `getVaultDetails()` function to make it more consistent. All the wallet objects are returned in an array inside the `generatedWallets` or `importedWallets` object under their respective chains.
+
 ### 1.22.0 (2022-10-17)
 
 ##### Constructor also accepts the parameter `storage`

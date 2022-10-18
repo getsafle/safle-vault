@@ -85,10 +85,11 @@ This method is used to export the 12 word mnemonic phrase which was used to init
 Export Private Key:
 This method is used to export the private key of a particular address.
 
- `const privateKey = await vault.exportPrivateKey(address, pin);`
+ `const privateKey = await vault.exportPrivateKey(address, encryptionKey, pin);`
 
 * `address` - The address for which the private key is to be exported.
 * `pin` - The pin to access the vault's private functions.
+* `encryptionKey` - The encryption key used to decrypt the vault.
 
 
 Add Account:
@@ -111,11 +112,12 @@ This method is used to sign a message.
 Sign Transaction:
 This method is used to sign a transaction.
 
- `const signedTransaction = await vault.signTransaction(rawTx, pin, chain);`
+ `const signedTransaction = await vault.signTransaction(rawTx, encryptionKey, pin, chain);`
 
 * `rawTx` - The raw transaction object to be signed.
 * `pin` - The pin to access the vault's private functions.
 * `chain` - The name of the chain for which the transaction has to be signed. eg. `ethereum`, `bsc`, `harmony`, etc.
+* `encryptionKey` - The encryption key used to decrypt the vault.
 
 Restore Keyring State
 This method is used to restore the vault state in the keyring controller.
@@ -204,12 +206,13 @@ This method is used to get the native asset balance of an address present in the
 Sign a rawTx or message and get signature object as output:
 This method is used to sign the rawTx object or message and get signature object as output.
 
- `const signedMessage = await vault.sign(data, address, pin, rpcUrl);`
+ `const signedMessage = await vault.sign(data, address, encryptionKey, pin, rpcUrl);`
 
 * `data` - The rawTx object or message in string. If the message to be signed is in object format, then stringify the object before passing in the parameter.
 * `address` - The public address for which the balance is to be fetched.
 * `pin` - The pin to access the vault's private functions.
 * `rpcUrl` - RPC URL of the chain.
+* `encryptionKey` - The encryption key used to decrypt the vault.
 
 Update Wallet Label:
 This method is used to update the wallet label.
