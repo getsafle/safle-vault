@@ -408,3 +408,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Enabled the user to change the wallet label for a specific EVM chain.
 * [Breaking Change] - `updateLabel()` function accepts an extra parameter `chainName` which is the name of the EVM chain for which the label is to be updated.
+
+### 1.24.1 (2022-10-18)
+
+##### Updated the vault logs parameter
+
+* Updated the vault logs parameters by removing the vault string and adding the platform and storage values.

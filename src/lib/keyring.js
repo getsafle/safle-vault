@@ -35,6 +35,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-seeds', platform: this.platform, storage: this.storage });
+
         return { response: mnemonic }
     }
 
@@ -164,10 +166,12 @@ class Keyring {
     
                 this.vault = encryptedVault;
     
-                this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
+                this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
     
                 return { response: { vault: this.vault, privateKey: decryptedPrivKey} };
             }
+
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
 
             return { response: decryptedPrivKey };
         }
@@ -182,10 +186,12 @@ class Keyring {
     
                 this.vault = encryptedVault;
     
-                this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
+                this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
     
                 return { response: { vault: this.vault, privateKey } };
             }
+
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
 
             return { response: privateKey };
         }
@@ -199,10 +205,12 @@ class Keyring {
     
             this.vault = encryptedVault;
     
-            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-privateKey', vault: this.vault, chain: this.chain, address, platform: this.platform });
-    
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
+
             return { response: { vault: this.vault, privateKey } };
         }
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'export-privateKey', address, platform: this.platform, storage: this.storage });
 
         return { response: privateKey };
     }
@@ -238,7 +246,7 @@ class Keyring {
 
             this.vault = encryptedVault;
 
-            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAccount[newAccount.length - 1], platform: this.platform });
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'add-wallet', address: newAccount[newAccount.length - 1], chain: this.chain, platform: this.platform, storage: this.storage });
 
             return { response: { vault: encryptedVault, address: newAccount[newAccount.length - 1] }};
         }
@@ -257,6 +265,9 @@ class Keyring {
             newAddress = address;
 
             const publicData = [ { address, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response ? acc.response.length + 1 : 1}`, isExported: false } ];
+
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'add-wallet', address, platform: this.platform, storage: this.storage });
+
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
             const { address } = await this[this.chain].addAccount();
@@ -264,14 +275,15 @@ class Keyring {
             newAddress = address;
 
             (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}`, isExported: false } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}`, isExported: false });
+            
+            this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'add-wallet', address: newAddress, platform: this.platform, storage: this.storage });
+
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
         const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = encryptedVault;
-
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'add-account', vault: this.vault, chain: this.chain, address: newAddress, platform: this.platform });
 
         return { response: { vault: encryptedVault, address: newAddress }};
     }
@@ -385,8 +397,6 @@ class Keyring {
             })
         }
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault, platform: this.platform });
-
         const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption', this.encryptor, this.isCustomEncryptor);
 
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
@@ -447,7 +457,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, address, platform: this.platform });
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'delete-wallet', address, platform: this.platform, storage: this.storage });
 
         return { response: vault };
     }
@@ -568,7 +578,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'import-wallet', vault: this.vault, chain: this.chain, address, platform: this.platform});
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'import-wallet', address, platform: this.platform, storage: this.storage });
 
         return { response: { vault, address } };
     }
@@ -747,7 +757,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, platform: this.platform});
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'update-label', address, platform: this.platform, storage: this.storage });
 
         return { response: vault };
     }
@@ -775,7 +785,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'change-pin', vault: this.vault, platform: this.platform});
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'pin-change', platform: this.platform, storage: this.storage });
 
         return { response: vault };
     }
@@ -821,7 +831,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-account', vault: this.vault, chain: this.chain, address, platform: this.platform });
+        this.logs.getState().logs.push({ timestamp: Date.now(), activity: 'restore-wallet', address, platform: this.platform, storage: this.storage });
 
         return { response: vault };
     }
