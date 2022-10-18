@@ -217,11 +217,12 @@ This method is used to sign the rawTx object or message and get signature object
 Update Wallet Label:
 This method is used to update the wallet label.
 
- `const updatedVault = await vault.updateLabel(address, encryptionKey, newLabel);`
+ `const updatedVault = await vault.updateLabel(address, encryptionKey, newLabel, chainName);`
 
 * `address` - The address for which the label is to be updated.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `newLabel` - The new label to be added.
+* `chainName` - Only required if the evm wallet label is to be updated. Need to specify the chain name.
 
 Get Assets:
 This method returns the list of assets for all the addresses on all the chains passed in the array.

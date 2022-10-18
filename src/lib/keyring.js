@@ -229,7 +229,9 @@ class Keyring {
 
             const newAccount = await this.keyringInstance.getAccounts();
 
-            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `Wallet ${acc.response.length + 1}`, isExported: false })
+            const label = helper.createWalletLabels('all', acc.response.length + 1);
+
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label, isExported: false })
             this.decryptedVault.eth.numberOfAccounts++;
 
             const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
@@ -498,15 +500,17 @@ class Keyring {
                 });
             }
 
+            const label = helper.createWalletLabels('all', numOfAcc + 1);
+
             if (this.decryptedVault.importedWallets === undefined) {
-                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false }] } };
+                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label, isExported: false }] } };
             } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
-                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false }] };
+                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label, isExported: false }] };
             } else if (isDeletedAddress) {
                 this.decryptedVault.importedWallets.evmChains.data.map(obj => {
                     (obj.address === address && obj.isDeleted === true) ? obj.isDeleted = false : true});
             } else {
-                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}`, isExported: false });
+                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label, isExported: false });
             }
         } else {
             const { response: mnemonic } = await this.exportMnemonic(pin);
@@ -716,7 +720,7 @@ class Keyring {
         return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
     }
 
-    async updateLabel(address, encryptionKey, newLabel) {
+    async updateLabel(address, encryptionKey, newLabel, chainName) {
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;
@@ -725,22 +729,18 @@ class Keyring {
 
         if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
 
-            objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
-                obj.address === address
-            ));
+            objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => obj.address === address ));
 
-            this.decryptedVault.importedWallets[importedChain].data[objIndex].label = newLabel;
+            (importedChain === 'evmChains') ? this.decryptedVault.importedWallets[importedChain].data[objIndex].label[chainName] = newLabel : this.decryptedVault.importedWallets[importedChain].data[objIndex].label = newLabel;
         } else {
 
-            objIndex = this.decryptedVault[chain].public.findIndex((obj => 
-                obj.address === address
-            ));
+            objIndex = this.decryptedVault[chain].public.findIndex((obj => obj.address === address ));
 
             if(objIndex < 0) {
                 return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
             }
 
-            this.decryptedVault[chain].public[objIndex].label = newLabel;
+            (chain === 'eth') ? this.decryptedVault[chain].public[objIndex].label[chainName] = newLabel : this.decryptedVault[chain].public[objIndex].label = newLabel;
         }
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);

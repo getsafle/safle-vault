@@ -35,7 +35,9 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
   let zeroCounter = 0;
   let accountsArray = [];
 
-  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1', isExported: false });
+  const label = this.createWalletLabels();
+
+  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label, isExported: false });
 
   let network;
 
@@ -52,11 +54,13 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
       const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc-mainnet', bscscanApiKey);
 
+      const label = this.createWalletLabels('all', i+2);
+
       if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}`, isExported: false });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label, isExported: false });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}`, isExported: false });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label, isExported: false });
         zeroCounter = 0;
       }
     }
@@ -212,4 +216,31 @@ async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEnc
   }
 }
 
-module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails, cryptography, validateEncryptionKey };
+function createWalletLabels(labelObj = 'all', walletIndex = 1) {
+  let labels = {};
+
+  const chains = Object.keys(Chains.evmChains);
+  
+  if (labelObj === 'all') {
+    chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
+  } else {
+    chains.forEach(chain => {
+      if (labels[chain] !== undefined) {
+        labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
+      }
+    })
+  }
+
+  return labels;
+}
+
+module.exports = {
+  stringToArrayBuffer,
+  generatePrivData,
+  removeEmptyAccounts,
+  getCoinInstance,
+  getAssetDetails,
+  cryptography,
+  validateEncryptionKey,
+  createWalletLabels 
+};
