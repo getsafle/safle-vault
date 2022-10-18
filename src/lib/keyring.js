@@ -306,7 +306,7 @@ class Keyring {
         return { response: signedMessage };
     }
 
-    async signTransaction(rawTx, pin, rpcUrl) {
+    async signTransaction(rawTx, encryptionKey, pin, rpcUrl) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -325,7 +325,7 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, pin, 'internal');
+        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, encryptionKey, pin, 'internal');
 
         if (error) {
             return { error };
@@ -679,7 +679,7 @@ class Keyring {
         return { response: balance }; 
     }
 
-    async sign(data, address, pin, rpcUrl) {
+    async sign(data, address, encryptionKey, pin, rpcUrl) {
         if (!Number.isInteger(pin) || pin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -690,7 +690,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: privateKey } = await this.exportPrivateKey(address, pin, 'internal');
+        const { error, response: privateKey } = await this.exportPrivateKey(address, encryptionKey, pin, 'internal');
 
         if (error) {
             return { error };

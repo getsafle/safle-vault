@@ -10,11 +10,12 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor({ vault, customEncryptor, platform }) {
+    constructor({ vault, customEncryptor, platform, storage }) {
         super();
         this.chain = 'ethereum';
         this.platform = platform;
         this.vault = vault || null;
+        this.storage = storage;
         this.encryptor = customEncryptor || encryptor;
         this.isCustomEncryptor = customEncryptor ? true : false;
         this.initializeKeyringController()
