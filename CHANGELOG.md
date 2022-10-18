@@ -395,3 +395,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Constructor also accepts the parameter `storage`
 
 * Constructor also accepts the parameter `storage` where the developer can pass the vault storage mechanisms as an array.
+
+### 1.23.0 (2022-10-18)
+
+##### Function to restore the deleted wallets
+
+* Created a function (`restoreAccount()`) to restore the deleted wallets.
