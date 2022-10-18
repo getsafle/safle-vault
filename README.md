@@ -243,6 +243,15 @@ This method is used to change the pin of the vault.
 * `newPin` - The new vault pin.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 
+Restore Wallet:
+This method is used to restore the deleted account from the vault.
+
+`const restore = await vault.restoreAccount(encryptionKey, address, pin);`
+
+* `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
+* `address` - The public address to be restored.
+* `pin` - The vault pin.
+
  Get Logs:
 This method retrieves all the logs of all the vault changes.
 
