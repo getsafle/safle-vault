@@ -69,7 +69,9 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1', isExported: false } ], private: privData, numberOfAccounts: 1 } }
+        const label = helper.createWalletLabels();
+
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, isExported: false, label } ], private: privData, numberOfAccounts: 1 } }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
