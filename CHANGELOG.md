@@ -376,3 +376,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Rebase the different released versions into one single version
 
 * Rebased the versions 1.19.0, 1.20.0, 1.18.4, 1.18.5, 1.18.6, 1.18.7 and 1.18.8 into a new version 1.21.1
+
+### 1.21.1 (2022-10-17)
+
+##### Track which address has exported their private key
+
+* Every address has a new flag `isExported` associated with it to track if the private key of that address has been exported.
+

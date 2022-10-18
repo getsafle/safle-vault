@@ -83,10 +83,11 @@ This method is used to export the 12 word mnemonic phrase which was used to init
 Export Private Key:
 This method is used to export the private key of a particular address.
 
- `const privateKey = await vault.exportPrivateKey(address, pin);`
+ `const privateKey = await vault.exportPrivateKey(address, encryptionKey, pin);`
 
 * `address` - The address for which the private key is to be exported.
 * `pin` - The pin to access the vault's private functions.
+* `encryptionKey` - The encryption key used to decrypt the vault.
 
 
 Add Account:
