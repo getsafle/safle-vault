@@ -623,34 +623,30 @@ class Keyring {
 
         const valuesToRemove = Object.keys(Chains.evmChains);
 
-        accounts.evm.generatedWallets = ({ ...decryptedVault.eth.public })
+        accounts.evm.generatedWallets = ([ ...decryptedVault.eth.public ])
 
         const containsImported = (_.get(decryptedVault, 'importedWallets.evmChains') !== undefined) ? true : false;
 
         if (containsImported) {
-            accounts.evm.importedWallets = ({ ...decryptedVault.importedWallets.evmChains.data });
+            decryptedVault.importedWallets.evmChains.data.forEach(function(v){ delete v.privateKey });
+
+            accounts.evm.importedWallets = ([ ...decryptedVault.importedWallets.evmChains.data ]);
         }
 
         const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
-
-        let nonEvmAccs = [];
 
         filteredChains.forEach(async ({ chain }) => {
             const containsGenerated = (decryptedVault[chain] !== undefined) ? true : false;
             const containsImported = (_.get(decryptedVault, `importedWallets.${chain}`) !== undefined) ? true : false;
 
             if (containsGenerated) {
-                nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
-
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
+                let result = decryptedVault[chain].public.map(a => { return { address: a.address, label: a.label, isDeleted: a.isDeleted, isExported: a.isExported, isImported: a.isImported }});
 
                 accounts[chain] = { generatedWallets: [ ...result ] };
             }
             
             if (containsImported) {
-                nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
-
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
+                let result = decryptedVault.importedWallets[chain].data.map(a => { return { address: a.address, label: a.label, isDeleted: a.isDeleted, isExported: a.isExported, isImported: a.isImported }});
 
                 (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
             }
