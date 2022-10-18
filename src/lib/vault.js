@@ -78,7 +78,7 @@ class Vault extends Keyring {
         this.vault = vault;
 
         this.logs.updateState({
-            logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault, platform: this.platform }],
+            logs: [{ timestamp: Date.now(), activity: 'vault-generation', address: accounts[0], platform: this.platform, storage: this.storage }],
         });
 
         return { response: vault };
@@ -102,8 +102,6 @@ class Vault extends Keyring {
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 
         this.vault = vault;
-
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault, platform: this.platform });
 
         return { response: vault };
     }
