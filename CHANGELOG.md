@@ -420,3 +420,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### New release with all the functionalities till v1.24.1
 
 * New release with all the functionalities till v1.24.1.
+
+### 1.25.0 (2022-12-16)
+
+##### Roll back to version 1.18.4
+
+* Roll back to version 1.18.4.
+* Updated the asset controller version.
