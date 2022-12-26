@@ -427,3 +427,10 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Roll back to version 1.18.4.
 * Updated the asset controller version.
+
+### 1.25.1 (2022-12-26)
+
+##### Fixed the parameters passed in the transaction controller
+
+* Updated the network name in the transaction controller parameter.
+* [Breaking change] - `recoverVault()` parameters are updated. rpcURL not required to pass. Etherscan, Polygonscan and BSCscan keys are replaced with unmarshal api key .
