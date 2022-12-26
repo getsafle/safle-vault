@@ -27,9 +27,7 @@ async function generatePrivData(mnemonic, pin) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rpcURL, etherscanApiKey, polygonscanApiKey, bscscanApiKey) {
-  const web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
-
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, unmarshalApiKey) {
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
@@ -37,20 +35,14 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, rp
 
   accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
-  let network;
-
-  await web3.eth.net.getNetworkType().then((e) => network = e);
-
-  network = network === 'main' ? network = 'mainnet' : network;
-
   do {
     zeroCounter = 0;
     for(let i=0; i < 5; i++) {
       const vaultState = await keyringInstance.addNewAccount(keyring[0]);
 
-      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], network, etherscanApiKey);
-      const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon-mainnet', polygonscanApiKey);
-      const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc-mainnet', bscscanApiKey);
+      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'ethereum', unmarshalApiKey);
+      const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon', unmarshalApiKey);
+      const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc', unmarshalApiKey);
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
         accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });

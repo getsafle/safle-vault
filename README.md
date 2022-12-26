@@ -150,15 +150,12 @@ This method is used to validate the user's mnemonic by querying the first 0th ad
 Recover Vault:
 This method is used to recover the vault using the mnemonic phrase. The new vault will be re-encrypted using the pin and encryption key.
 
- `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, etherscanApiKey, polygonscanApiKey, bscscanApiKey, rpcUrl);`
+ `const userVault = await vault.recoverVault(mnemonic, encryptionKey, pin, unmarshalApiKey);`
 
 * `mnemonic` - The mnemonic of the vault to be recovered.
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 * `pin` - The pin to access the vault's private functions.
-* `etherscanApiKey` - API Key of etherscan.
-* `polygonscanApiKey` - API Key of polygonscan.
-* `bscscanApiKey` - API Key of bscscan.
-* `rpcUrl` - rpcUrl of the eth chain.
+* `unmarshalApiKey` - API Key of unmarshal api.
 
 Validate PIN
 This method is used to validate the PIN of the user's vault
