@@ -749,9 +749,18 @@ class Keyring {
             if(objIndex < 0) {
                 return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
             }
-
+            if (typeof this.decryptedVault[chain].public[objIndex].label === 'string' || this.decryptedVault[chain].public[objIndex].label instanceof String){
+                const chains = Object.keys(Chains.evmChains);
+                let obj = chains.reduce(function(acc, curr) {
+                    acc[curr] = newLabel;
+                    return acc;
+                  }, {});
+                  this.decryptedVault[chain].public[objIndex].label = obj;
+            }
+            else{
             (chain === 'eth') ? this.decryptedVault[chain].public[objIndex].label[chainName] = newLabel : this.decryptedVault[chain].public[objIndex].label = newLabel;
         }
+    }
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
 

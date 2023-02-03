@@ -425,4 +425,12 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 ##### Fixed bug with recover vault
 
+### 1.24.4 (2023-02-03)
+##### Backward compatiblity for updateLabel
+
+* Implemented backward compatiblity for update label method for wallets created on versions before 1.24.1
+
+
+
+
 
