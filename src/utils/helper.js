@@ -17,10 +17,10 @@ async function stringToArrayBuffer(str) {
   return buf;
 }
 
-async function generatePrivData(mnemonic, pin, encryptor) {
+async function generatePrivData(mnemonic, pin) {
   var priv = {};
 
-  const encryptedMnemonic = encryptor.encrypt(mnemonic, pin.toString()).toString();
+  const encryptedMnemonic = cryptojs.AES.encrypt(mnemonic, pin.toString()).toString();
 
   priv.encryptedMnemonic = encryptedMnemonic;
 
@@ -32,9 +32,6 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
 
   let zeroCounter = 0;
   let accountsArray = [];
-
-  
-
   accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
   do {
@@ -48,10 +45,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       const label = this.createWalletLabels('all', i+2);
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label, isExported: false });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label, isExported: false });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}` });
         zeroCounter = 0;
       }
     }
@@ -165,73 +162,32 @@ async function getBSCAssets(address, bscRpcUrl) {
   return tokens;
 }
 
-async function cryptography(data, key, action, encryptor, isCustomEncryptor) {
+async function cryptography(data, key, action) {
   let output;
 
   if (action === 'encryption') {
-    output = encryptor.encrypt(data, key).toString();
+    output = cryptojs.AES.encrypt(data, key).toString();
   } else {
-    if (isCustomEncryptor) {
-      output = encryptor.decrypt(data, key);
-    } else {
-      const bytes = cryptojs.AES.decrypt(data, key);
+    const bytes = cryptojs.AES.decrypt(data, key);
 
-      output = bytes.toString(cryptojs.enc.Utf8);
-    }
+    output = bytes.toString(cryptojs.enc.Utf8);
   }
 
   return output;
 }
 
-async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEncryptor) {
-  if (isCustomEncryptor) {
-    try {
-      const decryptedVault = encryptor.decrypt(data, encryptionKey);
-  
+async function validateEncryptionKey(data, encryptionKey) {
+  const bytes = cryptojs.AES.decrypt(data, encryptionKey);
+
+  let decryptedVault;
+
+  try {
+      decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+
       return { decryptedVault };
-    } catch(error) {
-        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
-    }
-  } else {
-    const bytes = cryptojs.AES.decrypt(data, encryptionKey);
-
-    let decryptedVault;
-
-    try {
-        decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-
-        return { decryptedVault };
-    } catch(error) {
-        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
-    }
+  } catch(error) {
+      return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
   }
 }
 
-function createWalletLabels(labelObj = 'all', walletIndex = 1) {
-  let labels = {};
-
-  const chains = Object.keys(Chains.evmChains);
-  
-  if (labelObj === 'all') {
-    chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
-  } else {
-    chains.forEach(chain => {
-      if (labels[chain] !== undefined) {
-        labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
-      }
-    })
-  }
-
-  return labels;
-}
-
-module.exports = {
-  stringToArrayBuffer,
-  generatePrivData,
-  removeEmptyAccounts,
-  getCoinInstance,
-  getAssetDetails,
-  cryptography,
-  validateEncryptionKey,
-  createWalletLabels 
-};
+module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails, cryptography, validateEncryptionKey };

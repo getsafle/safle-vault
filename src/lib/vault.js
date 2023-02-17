@@ -1,4 +1,4 @@
-const encryptor = require('crypto-js').AES;
+const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const bip39 = require('bip39');
 
@@ -10,26 +10,28 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor({ vault, customEncryptor, platform, storage }) {
+    constructor(vault) {
         super();
         this.chain = 'ethereum';
-        this.platform = platform;
-        this.vault = vault || null;
-        this.storage = storage;
-        this.encryptor = customEncryptor || encryptor;
-        this.isCustomEncryptor = customEncryptor ? true : false;
+        this.vault = vault;
         this.initializeKeyringController()
     }
 
     initializeKeyringController() {
         const keyringController = new KeyringController({
-            encryptor: {
-                encrypt(pass, object) {
-                    const ciphertext = encryptor.encrypt(JSON.stringify(object), pass).toString();
+        encryptor: {
+            encrypt(pass, object) {
+                const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(object), pass).toString();
 
-                    return ciphertext;
-                },
+                return ciphertext;
             },
+            decrypt(pass, encryptedString) {
+                const bytes = CryptoJS.AES.decrypt(encryptedString, pass);
+                const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+                return decryptedData;
+            },
+        },
         });
 
         this.keyringInstance = keyringController;
@@ -67,18 +69,16 @@ class Vault extends Keyring {
 
         const accounts = await this.keyringInstance.getAccounts();
 
-        const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
+        const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const label = helper.createWalletLabels();
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 } }
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, isExported: false, label } ], private: privData, numberOfAccounts: 1 } }
-
-        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
 
         this.logs.updateState({
-            logs: [{ timestamp: Date.now(), activity: 'vault-generation', address: accounts[0], platform: this.platform, storage: this.storage }],
+            logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault }],
         });
 
         return { response: vault };
@@ -93,15 +93,17 @@ class Vault extends Keyring {
 
         const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, unmarshalApiKey);
 
-        const privData = await helper.generatePrivData(mnemonic, pin, this.encryptor);
+        const privData = await helper.generatePrivData(mnemonic, pin);
 
         const numberOfAccounts = accountsArray.length;
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
 
-        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+        const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'vault-recovery', vault: this.vault });
 
         return { response: vault };
     }
