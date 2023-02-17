@@ -32,7 +32,6 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
 
   let zeroCounter = 0;
   let accountsArray = [];
-
   accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
   do {
@@ -43,6 +42,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'ethereum', unmarshalApiKey);
       const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon', unmarshalApiKey);
       const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc', unmarshalApiKey);
+      const label = this.createWalletLabels('all', i+2);
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
         accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
