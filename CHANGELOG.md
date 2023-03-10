@@ -434,4 +434,8 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Stable release 1.26.0 
 
+### 1.26.1 (2023-03-10)
+
+* Added helper method createWalletLabels to create dynamic labels for wallets
+
 
