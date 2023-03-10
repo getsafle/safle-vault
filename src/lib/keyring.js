@@ -248,7 +248,7 @@ class Keyring {
         };
 
         const accounts = await this.getAccounts(encryptionKey);
-
+        console.log('accounts--->',accounts)
         if(accounts.response.filter(e => e.address === address).length < 1) {
             return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
         }
