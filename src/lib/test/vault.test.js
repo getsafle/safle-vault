@@ -108,16 +108,109 @@ describe("generateVault",()=>{
     })
 })
 
-// error to be fixed
 
-// describe("recoverVault",()=>{
-//     test('recoverVault/empty unmarshalkey' , async()=>{
+describe("recoverVault",()=>{
+    test('recoverVault/valid' , async()=>{
        
-//         let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//         console.log("recoverVault result--->",result)
-//         // expect(result).toHaveProperty('response')
-//     })
-// })
+        let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+        console.log("recoverVault result--->",result)
+        expect(result).toHaveProperty('response')
+    })
+    test('recoverVault/empty phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault(null,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
+
+    test('recoverVault/invalid phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault("eafe",bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
+    test('recoverVault/invalid phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
+    test('recoverVault/empty encryption key' , async()=>{
+           let result = await vault.recoverVault(phrase,null,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+            expect(result).toHaveProperty('response')
+      
+    })
+     test('recoverVault/invalid encryption key' , async()=>{
+           let result = await vault.recoverVault(phrase,"fwefe",pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+            expect(result).toHaveProperty('response')
+      
+    })
+    test('recoverVault/empty pin' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,null,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+
+        }
+        catch(e){
+        expect(e).toBe('The pin should be a positive integer value')
+
+        }
+      
+    })
+    test('recoverVault/invalid pin' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,"aefew",'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+
+        }
+        catch(e){
+        expect(e).toBe('The pin should be a positive integer value')
+
+        }
+      
+    })
+    test('recoverVault/empty marshal key' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,pin,null)
+
+        }
+        catch(e){
+        expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
+
+        }
+      
+    })
+    test('recoverVault/invalid marshal key' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,pin,'efrwfrw')
+        console.log(" recoverVault result--->",result)
+
+        }
+        catch(e){
+        expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
+
+        }
+      
+    })
+    test('recoverVault/all empty params' , async()=>{
+        try{
+        let result = await vault.recoverVault(null,null,null,null)
+
+        }
+        catch(e){
+         expect(e).toBe('The pin should be a positive integer value')
+
+        }
+      
+    })
+})
 
 
 
