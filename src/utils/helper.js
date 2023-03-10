@@ -45,10 +45,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       const label = this.createWalletLabels('all', i+2);
 
       if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label: `Wallet ${i + 2}` });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label, isExported: false });
         zeroCounter++;
       } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label: `Wallet ${i + 2}` });
+        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label, isExported: false });
         zeroCounter = 0;
       }
     }
@@ -176,18 +176,47 @@ async function cryptography(data, key, action) {
   return output;
 }
 
-async function validateEncryptionKey(data, encryptionKey) {
-  const bytes = cryptojs.AES.decrypt(data, encryptionKey);
+async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEncryptor) {
 
-  let decryptedVault;
+    const bytes = cryptojs.AES.decrypt(data, encryptionKey);
 
-  try {
-      decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+    let decryptedVault;
 
-      return { decryptedVault };
-  } catch(error) {
-      return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+    try {
+        decryptedVault = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+
+        return { decryptedVault };
+    } catch(error) {
+        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+    }
   }
+
+
+function createWalletLabels(labelObj = 'all', walletIndex = 1) {
+  let labels = {};
+
+  const chains = Object.keys(Chains.evmChains);
+  
+  if (labelObj === 'all') {
+    chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
+  } else {
+    chains.forEach(chain => {
+      if (labels[chain] !== undefined) {
+        labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
+      }
+    })
+  }
+
+  return labels;
 }
 
-module.exports = { stringToArrayBuffer, generatePrivData, removeEmptyAccounts, getCoinInstance, getAssetDetails, cryptography, validateEncryptionKey };
+module.exports = {
+  stringToArrayBuffer,
+  generatePrivData,
+  removeEmptyAccounts,
+  getCoinInstance,
+  getAssetDetails,
+  cryptography,
+  validateEncryptionKey,
+  createWalletLabels 
+};
