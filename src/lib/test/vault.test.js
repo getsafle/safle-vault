@@ -49,10 +49,8 @@ describe("generateVault",()=>{
     encrptionKey=bufView
     test('generateVault/valid case' , async()=>{
        
-        console.log("bufView--->",bufView)
-        console.log("Mnemonic--->",Mnemonic)
+
         let result = await  vault.generateVault(bufView,111111,Mnemonic)
-        console.log("result--->",result)
         expect(result).toHaveProperty('response')
     })
 
@@ -82,7 +80,6 @@ describe("generateVault",()=>{
     test('generateVault/empty Mnemonic' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        console.log("bufView--->",bufView.length)
         try{
             let result = await new Vault().generateVault(bufView,1111,null)
         }
@@ -96,7 +93,6 @@ describe("generateVault",()=>{
     test('generateVault/all empty params' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        console.log("bufView--->",bufView.length)
         try{
             let result = await new Vault().generateVault(null,null,null)
         }
@@ -113,7 +109,6 @@ describe("recoverVault",()=>{
     test('recoverVault/valid' , async()=>{
        
         let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-        console.log("recoverVault result--->",result)
         expect(result).toHaveProperty('response')
     })
     test('recoverVault/empty phrase' , async()=>{
@@ -190,7 +185,6 @@ describe("recoverVault",()=>{
     test('recoverVault/invalid marshal key' , async()=>{
         try{
         let result = await vault.recoverVault(phrase,bufView,pin,'efrwfrw')
-        console.log(" recoverVault result--->",result)
 
         }
         catch(e){

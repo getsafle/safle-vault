@@ -21,7 +21,6 @@ const bscRpcUrl = 'https://rpc.ankr.com/bsc';
 beforeAll(async() => {
 
     result = await vault.generateVault(bufView,pin,phrase)
-    console.log("generateVault--->",result)
     vaultAddress=result.response
     await vault.getAccounts(bufView);
         
@@ -158,7 +157,6 @@ describe('exportPrivateKey' , ()=>{
 
     test('exportPrivateKey/valid' , async()=>{  
         let result = await vault.exportPrivateKey(accAddress,pin)
-        console.log("exportPrivateKey--->",result)
         privateKey=result.response
        
         
@@ -216,7 +214,6 @@ describe('importWallet' , ()=>{
 
     test('importWallet/valid address exists already' , async()=>{  
         let result = await vault.importWallet("0x"+privateKey,pin,bufView)
-        console.log("importWallet--->",result)
         expect(result.error).toBe('This address is already present in the vault')
        
         
@@ -303,7 +300,6 @@ describe('restoreKeyringState',()=>{
     })
 
     test('restoreKeyringState/empty vault address' , async()=>{
-        console.log("bufView-->",bufView)
         try{
            let result= await vault.restoreKeyringState(null,pin,bufView)  
 
@@ -749,7 +745,6 @@ describe('getAssets',()=>{
         addressArray.push(accAddress)
        
         let result = await vault.getAssets({addresses:[accAddress],chains:chains,EthRpcUrl:"https://1.com",polygonRpcUrl:polygonRpcUrl,bscRpcUrl:bscRpcUrl})
-        console.log("getAssets result--->",JSON.stringify(result))
         expect(result.response).toHaveProperty(accAddress)
 
         
@@ -763,7 +758,6 @@ describe('getAssets',()=>{
         addressArray.push(accAddress)
        
         let result = await vault.getAssets({addresses:[accAddress],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:null,bscRpcUrl:bscRpcUrl})
-        console.log("getAssets result--->",JSON.stringify(result))
         expect(result.response).toHaveProperty(accAddress)
            
         
@@ -773,7 +767,6 @@ describe('getAssets',()=>{
         addressArray.push(accAddress)
        
         let result = await vault.getAssets({addresses:[accAddress],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:"efwegr",bscRpcUrl:bscRpcUrl})
-        console.log("getAssets result--->",JSON.stringify(result))
         expect(result.response).toHaveProperty(accAddress)
            
         
@@ -783,7 +776,6 @@ describe('getAssets',()=>{
         addressArray.push(accAddress)
        
         let result = await vault.getAssets({addresses:[accAddress],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:null})
-        console.log("getAssets result--->",JSON.stringify(result))
         expect(result.response).toHaveProperty(accAddress)
            
         
@@ -793,7 +785,6 @@ describe('getAssets',()=>{
         addressArray.push(accAddress)
        
         let result = await vault.getAssets({addresses:[accAddress],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:"eafrsgrs"})
-        console.log("getAssets result--->",JSON.stringify(result))
         expect(result.response).toHaveProperty(accAddress)
            
         
@@ -1193,21 +1184,18 @@ describe('getAccounts',()=>{
     test('getAccounts/valid' , async()=>{
 
         let result = await vault.getAccounts(bufView)
-        console.log('getAccounts--->',result)
         expect(result).toHaveProperty('response')
         
     })
     test('getAccounts/empty encryption key ' , async()=>{
 
         let result = await vault.getAccounts(null)
-        console.log('getAccounts--->',result)
         expect(result.error).toBe('Incorrect Encryption Key')
         
     })
     test('getAccounts/invalid encryption key ' , async()=>{
 
         let result = await vault.getAccounts("aefefe")
-        console.log('getAccounts--->',result)
         expect(result.error).toBe('Incorrect Encryption Key')
         
     })
