@@ -439,3 +439,9 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * Added helper method createWalletLabels to create dynamic labels for wallets
 
 
+### 1.26.2 (2023-03-15)
+
+* Updated @getsafle/vault-eth-controller to v1.4.1
+
+
+
