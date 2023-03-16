@@ -255,7 +255,7 @@ class Keyring {
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const msg = await helper.stringToArrayBuffer(data);
 
-            const msgParams = { from: address, data: data };
+            const msgParams = { from: address, data: msg };
             const signedMsg = await this.keyringInstance.signMessage(msgParams);
 
             return { response: signedMsg };
