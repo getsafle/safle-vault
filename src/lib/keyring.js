@@ -419,6 +419,12 @@ class Keyring {
 
         const { response } = await this.validatePin(pin);
 
+        const { error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+
+        if (error) {
+            return { error }
+        }
+
         if(response == false) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
