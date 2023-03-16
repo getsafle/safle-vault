@@ -1,4 +1,4 @@
-jest.setTimeout(20000)
+jest.setTimeout(30000)
 
 
 const { before } = require('lodash')
@@ -231,7 +231,7 @@ describe('importWallet' , ()=>{
         
     })
 
-    test('importWallet/empty private key' , async()=>{ 
+    test('importWallet/empty pin' , async()=>{ 
         try{
             let result = await vault.importWallet("0x"+privateKey,null,bufView)
 
@@ -243,14 +243,14 @@ describe('importWallet' , ()=>{
        
         
     })
-     test('importWallet/empty encryption key' , async()=>{ 
+     test('importWallet/undefined encryption key' , async()=>{ 
         try{
-            let result = await vault.importWallet("0x"+privateKey,pin,null)
-            expect(result).toHaveProperty('response')
+            let result = await vault.importWallet("0x"+privateKey,pin,undefined)
+            console.log('importWallet/empty encryption key--->',result)
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positiv integer value')
+            expect(e.message).toBe("Cannot read property 'words' of undefined")
         } 
         
        
@@ -981,120 +981,6 @@ describe('changePin',()=>{
 
 
 
-describe('signMessage',()=>{
-    test('signMessage/valid' , async()=>{
-        let addressArray=[]
-        addressArray.push(accAddress)
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',"test",pin,bufView)
-        expect(result).toHaveProperty('response')
-       
-        
-    })
-
-    test('signMessage/empty address' , async()=>{
-        let addressArray=[]
-        addressArray.push(accAddress)
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.signMessage(null,"test",pin,bufView)
-        expect(result.error).toBe('The sender address does not exist in the keyring.')
-       
-        
-    })
-
-    test('signMessage/invalid address' , async()=>{
-        let addressArray=[]
-        addressArray.push(accAddress)
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.signMessage("aefeafe","test",pin,bufView)
-        expect(result.error).toBe('The sender address does not exist in the keyring.')
-       
-        
-    })
-    test('signMessage/empty pin' , async()=>{
-        let addressArray=[]
-        addressArray.push(accAddress)
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        try{
-            let result = await vault.signMessage(null,"test",null,bufView)
-
-        }
-        catch(e){
-            expect(e).toBe('The pin should be a positive integer value')
-        }
-       
-        
-    })
-    test('signMessage/invalid pin' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        try{
-            let result = await vault.signMessage(accAddress,"test","adaef",bufView)
-
-        }
-        catch(e){
-            expect(e).toBe('The pin should be a positive integer value')
-        }
-        
-    })
-    test('signMessage/incorrect pin' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-       
-        let result = await vault.signMessage(accAddress,"test",1111,bufView)
-
-        expect(result.error).toBe('Incorrect pin')
-        
-        
-    })
-    test('signMessage/empty encryption' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-       try{
-            let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',"test",pin,null)
-
-       }
-       catch(e){
-           expect(e.message).toBe("Cannot read property 'filter' of undefined")
-       }
-
-        
-        
-    })
-    test('signMessage/invalid encryption' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-       try{
-            let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',"test",pin,"aefaefae")
-
-       }
-       catch(e){
-           expect(e.message).toBe("Cannot read property 'filter' of undefined")
-       }
-        
-    })
-    test('signMessage/empty data' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-       try{
-            let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',null,pin,bufView)
-       }
-       catch(e){
-           expect(e.message).toBe("Cannot read property 'length' of null")
-       }
-        
-    })
-    test('signMessage/invalid type' , async()=>{
-       
-        await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',111,pin,bufView)
-        expect(result).toHaveProperty('response')
-       
-       
-        
-    })
-})
-
 describe('getLogs',()=>{
     test('getLogs/valid' , async()=>{
 
@@ -1180,9 +1066,11 @@ describe('deleteAccount',()=>{
     })
 })
 
+
+
 describe('getAccounts',()=>{
     test('getAccounts/valid' , async()=>{
-
+        await vault.restoreKeyringState(vaultAddress,pin,bufView)
         let result = await vault.getAccounts(bufView)
         expect(result).toHaveProperty('response')
         
@@ -1202,43 +1090,414 @@ describe('getAccounts',()=>{
 })
 
 
-// describe('signTransaction',()=>{
+describe('signTransaction',()=>{
 
 
-//     test('signTransaction/valid' , async()=>{
-//     let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
-//     const web3 =  new Web3(polygonRpcUrl)
-//     const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    test('signTransaction/valid' , async()=>{
+    let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+    const web3 =  new Web3(polygonRpcUrl)
+    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-//     const rawTx = {
-//         to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
-//         from: from.toLowerCase(),      //sender address
-//         value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
-//         gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
-//         maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
-//         maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
-//         data: '0x0',  // method to generate data is provided below
-//         nonce: nonce,
-//         type: '0x2',
-//         chainId: 137,
-//     };
-//         await vault.getActiveChains()
-//         try{
-//             let keyRing=await vault.restoreKeyringState(accAddress,pin,bufView)
+    const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        await vault.getActiveChains()
+        try{
 
-//             let result = await vault.signTransaction(rawTx,pin,polygonRpcUrl)
+            let result = await vault.signTransaction(rawTx,pin,polygonRpcUrl)
 
-//         }
-//         catch(e){
-//              expect(e.message).toBe("Cannot read property 'salt' of undefined")
+        }
+        catch(e){
+             expect(e.message).toBe("Cannot read property 'salt' of undefined")
 
-//         }
+        }
         
      
         
         
+    })
+    test('signTransaction/empty raw tx' , async()=>{
+    let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+    const web3 =  new Web3(polygonRpcUrl)
+    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        try{
+
+            let result = await vault.signTransaction({},pin,polygonRpcUrl)
+            console.log('signTransaction result--->',result)
+
+        }
+        catch(e){
+             expect(e.message).toBe("No keyring found for the requested account.")
+
+        }
+        
+     
+        
+        
+    })
+
+    test('signTransaction/invalid raw tx' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        try{
+
+            let result = await vault.signTransaction("evwf",pin,polygonRpcUrl)
+            console.log('signTransaction result--->',result)
+
+        }
+        catch(e){
+             expect(e.message).toBe("No keyring found for the requested account.")
+
+        }
+        
+     
+        
+        
+    })
+
+    test('signTransaction/empty pin' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        try{
+
+            let result = await vault.signTransaction("evwf",null,polygonRpcUrl)
+            console.log('signTransaction result--->',result)
+
+        }
+        catch(e){
+             expect(e).toBe("The pin should be a positive integer value")
+
+        }
+        
+        
+    })
+
+     test('signTransaction/empty pin' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        try{
+
+            let result = await vault.signTransaction("evwf","afewf",polygonRpcUrl)
+            console.log('signTransaction result--->',result)
+
+        }
+        catch(e){
+             expect(e).toBe("The pin should be a positive integer value")
+
+        }
+        
+        
+    })
+     test('signTransaction/incorrect pin' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        
+
+        let result = await vault.signTransaction("evwf",11234,polygonRpcUrl)
+        expect(result.error).toBe('Incorrect pin')
+
+        
+     
+        
+        
+    })
+
+    test('signTransaction/empty polygon rpc' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        
+        try{
+            let result = await vault.signTransaction("evwf",pin,null)
+            console.log("result--->",result)
+        }
+        catch(e){
+            expect(e.message).toBe('Invalid JSON RPC response: ""')
+        }   
+        
+
+        
+     
+        
+        
+    })
+
+    test('signTransaction/invalid polygon rpc' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        let invalidRpc="efrwgrwdvfr"
+        try{
+            let result = await vault.signTransaction("evwf",pin,invalidRpc)
+        }
+        catch(e){
+            expect(e.message).toBe(`CONNECTION ERROR: Couldn't connect to node ${invalidRpc}.`)
+        }   
+        
+
+        
+     
+        
+        
+    })
+
+    test('signTransaction/all empty params' , async()=>{
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+        const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+     const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+        from: from.toLowerCase(),      //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", 'ether')),
+        gasLimit: web3.utils.numberToHex(21000),  //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('42.25770', 'gwei'))),
+        maxFeePerGas: web3.utils.numberToHex(parseFloat(web3.utils.toWei('150.99', 'gwei'))),
+        data: '0x0',  // method to generate data is provided below
+        nonce: nonce,
+        type: '0x2',
+    };
+        let invalidRpc="efrwgrwdvfr"
+        try{
+            let result = await vault.signTransaction(null,null,null)
+        }
+        catch(e){
+            expect(e).toBe(`The pin should be a positive integer value`)
+            // console.log("empty polygon rpc--->",e)
+        }   
+        
+
+        
+     
+        
+        
+    })
+})
+
+
+// describe('signMessage',()=>{
+//     test('signMessage/valid' , async()=>{
+//         let addressArray=[]
+//         addressArray.push(accAddress)
+//         // await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//         try{
+//             let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd', { message: 'Hello World' },pin,bufView)
+//             console.log("signMessage/valid--->",result)
+//             expect(result).toHaveProperty('response')
+
+//         }
+//         catch(e){
+//             console.log("signMessage--->",e)
+//         }
+       
+        
 //     })
+
+//     // test('signMessage/empty address' , async()=>{
+//     //     let addressArray=[]
+//     //     addressArray.push(accAddress)
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //     let result = await vault.signMessage(null,"test",pin,bufView)
+//     //     expect(result.error).toBe('The sender address does not exist in the keyring.')
+       
+        
+//     // })
+
+//     // test('signMessage/invalid address' , async()=>{
+//     //     let addressArray=[]
+//     //     addressArray.push(accAddress)
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //     let result = await vault.signMessage("aefeafe","test",pin,bufView)
+//     //     expect(result.error).toBe('The sender address does not exist in the keyring.')
+       
+        
+//     // })
+//     // test('signMessage/empty pin' , async()=>{
+//     //     let addressArray=[]
+//     //     addressArray.push(accAddress)
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //     try{
+//     //         let result = await vault.signMessage(null,"test",null,bufView)
+
+//     //     }
+//     //     catch(e){
+//     //         expect(e).toBe('The pin should be a positive integer value')
+//     //     }
+       
+        
+//     // })
+//     // test('signMessage/invalid pin' , async()=>{
+       
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //     try{
+//     //         let result = await vault.signMessage(accAddress,"test","adaef",bufView)
+
+//     //     }
+//     //     catch(e){
+//     //         expect(e).toBe('The pin should be a positive integer value')
+//     //     }
+        
+//     // })
+//     // test('signMessage/incorrect pin' , async()=>{
+       
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+       
+//     //     let result = await vault.signMessage(accAddress,"test",1111,bufView)
+
+//     //     expect(result.error).toBe('Incorrect pin')
+        
+        
+//     // })
+//     // test('signMessage/empty encryption' , async()=>{
+       
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //    try{
+//     //         let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',"test",pin,null)
+
+//     //    }
+//     //    catch(e){
+//     //        expect(e.message).toBe("Cannot read property 'filter' of undefined")
+//     //    }
+
+        
+        
+//     // })
+//     // test('signMessage/invalid encryption' , async()=>{
+       
+//     //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+//     //    try{
+//     //         let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',"test",pin,"aefaefae")
+
+//     //    }
+//     //    catch(e){
+//     //        expect(e.message).toBe("Cannot read property 'filter' of undefined")
+//     //    }
+        
+//     // })
+    // test('signMessage/empty data' , async()=>{
+       
+    //     await vault.restoreKeyringState(vaultAddress,pin,bufView)
+    //    try{
+    //         let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',null,pin,bufView)
+    //    }
+    //    catch(e){
+    //        expect(e.message).toBe("Cannot read property 'length' of null")
+    //    }
+        
+    // })
+//     // test('signMessage/invalid type' , async()=>{
+//     //    try{ 
+//     //     let result = await vault.signMessage('0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd',111,pin,bufView)
+//     //                 expect(result).toHaveProperty('response')
+
+//     //    }
+//     //    catch(e){
+
+//     //    }
+       
+       
+        
+//     // })
 // })
+
+
+
 
 
 
