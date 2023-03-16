@@ -13,4 +13,5 @@ module.exports = {
     SHOULD_BE_AN_ARRAY: 'Addresses and chains should be an array',
     INVALID_NETWORK: 'Invalid network selected',
     INCORRECT_CURRENT_PIN: 'The current pin passed is incorrect',
+    INCORRECT_LABEL_TYPE: 'Label should be a valid string'
 };

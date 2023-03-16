@@ -670,6 +670,17 @@ class Keyring {
     }
 
     async updateLabel(address, encryptionKey, newLabel) {
+
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+
+        if (error) {
+            return { error }
+        }
+
+        if (newLabel === null || newLabel === undefined) {
+            return { error: ERROR_MESSAGE.INCORRECT_LABEL_TYPE };
+        }
+
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;
