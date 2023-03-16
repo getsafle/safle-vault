@@ -287,7 +287,7 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -643,7 +643,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: privateKey } = await this.exportPrivateKey(address, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(address.toLowerCase(), pin);
 
         if (error) {
             return { error };
