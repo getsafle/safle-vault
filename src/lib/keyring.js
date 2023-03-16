@@ -17,8 +17,8 @@ class Keyring {
     }
 
     async exportMnemonic(pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -39,8 +39,8 @@ class Keyring {
     }
 
     async validatePin(pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         let spaceCount;
@@ -127,8 +127,8 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
@@ -170,8 +170,8 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -237,8 +237,8 @@ class Keyring {
     }
 
     async signMessage(address, data, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -269,8 +269,8 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -307,8 +307,8 @@ class Keyring {
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
@@ -367,8 +367,8 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -413,8 +413,8 @@ class Keyring {
     }
 
     async importWallet(privateKey, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -633,8 +633,8 @@ class Keyring {
     }
 
     async sign(data, address, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
