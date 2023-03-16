@@ -17,7 +17,7 @@ class Keyring {
     }
 
     async exportMnemonic(pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -39,7 +39,7 @@ class Keyring {
     }
 
     async validatePin(pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -127,7 +127,7 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -170,7 +170,7 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -237,7 +237,7 @@ class Keyring {
     }
 
     async signMessage(address, data, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -269,7 +269,7 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -307,7 +307,7 @@ class Keyring {
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -367,7 +367,7 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -413,7 +413,7 @@ class Keyring {
     }
 
     async importWallet(privateKey, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -633,7 +633,7 @@ class Keyring {
     }
 
     async sign(data, address, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length) {
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
