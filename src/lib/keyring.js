@@ -248,16 +248,14 @@ class Keyring {
         };
 
         const accounts = await this.getAccounts(encryptionKey);
-        console.log('accounts--->',accounts)
         if(accounts.response.filter(e => e.address === address).length < 1) {
             return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
         }
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
-            // const msg = await helper.stringToArrayBuffer(data);
+            const msg = await helper.stringToArrayBuffer(data);
 
             const msgParams = { from: address, data: data };
-            console.log("msgParams--->",msgParams)
             const signedMsg = await this.keyringInstance.signMessage(msgParams);
 
             return { response: signedMsg };
