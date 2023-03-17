@@ -29,7 +29,7 @@
     "vault",
     "keyring"
   ],
-  "license": "GPL-3.0",
+  "license": "MIT",
   "homepage": "https://github.com/getsafle/safle-vault#readme",
   "dependencies": {
     "@ethereumjs/common": "^2.5.0",
