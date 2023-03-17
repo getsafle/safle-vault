@@ -17,8 +17,8 @@ class Keyring {
     }
 
     async exportMnemonic(pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6 ) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -39,8 +39,8 @@ class Keyring {
     }
 
     async validatePin(pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         let spaceCount;
@@ -127,8 +127,8 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
@@ -170,8 +170,8 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -237,8 +237,8 @@ class Keyring {
     }
 
     async signMessage(address, data, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -269,8 +269,8 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -287,7 +287,7 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -307,8 +307,8 @@ class Keyring {
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
@@ -367,8 +367,8 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -413,11 +413,17 @@ class Keyring {
     }
 
     async importWallet(privateKey, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
+
+        const { error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+
+        if (error) {
+            return { error }
+        }
 
         if(response == false) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
@@ -627,8 +633,8 @@ class Keyring {
     }
 
     async sign(data, address, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin)
@@ -637,7 +643,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: privateKey } = await this.exportPrivateKey(address, pin);
+        const { error, response: privateKey } = await this.exportPrivateKey(address.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -664,6 +670,17 @@ class Keyring {
     }
 
     async updateLabel(address, encryptionKey, newLabel) {
+
+        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+
+        if (error) {
+            return { error }
+        }
+
+        if (newLabel === null || newLabel === undefined) {
+            return { error: ERROR_MESSAGE.INCORRECT_LABEL_TYPE };
+        }
+
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;

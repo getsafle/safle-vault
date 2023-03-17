@@ -57,8 +57,8 @@ class Vault extends Keyring {
     }
 
     async generateVault(encryptionKey, pin, mnemonic) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         if(!encryptionKey || pin === undefined || pin === null) {
@@ -85,8 +85,8 @@ class Vault extends Keyring {
     }
 
     async recoverVault(mnemonic, encryptionKey, pin, unmarshalApiKey) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);

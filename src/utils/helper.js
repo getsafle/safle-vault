@@ -187,7 +187,7 @@ async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEnc
 
         return { decryptedVault };
     } catch(error) {
-        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY };
+        return { error: ERROR_MESSAGE.INCORRECT_ENCRYPTION_KEY_OR_VAULT };
     }
   }
 
