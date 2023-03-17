@@ -1,4 +1,3 @@
-<test>
 # **Safle Vault SDK**
 
 Safle Vault is a non-custodial, flexible and highly available crypto wallet which can be used to access dapps, send/receive crypto and store identity. Vault SDK is used to manage the vault and provide methods to generate vault, add new accounts, update the state and also enable the user to perform several vault related operations.  
@@ -255,5 +254,3 @@ This method is used to restore the deleted account from the vault.
 This method retrieves all the logs of all the vault changes.
 
  `const logs = await vault.getLogs();`
- 
- 
