@@ -443,5 +443,16 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Updated @getsafle/vault-eth-controller to v1.4.1
 
+### 1.26.3 (2023-03-16)
+
+* Implemented validateEncryptionKey method for importWallet
+* Implement checksum addresses for validateMnemonic
+* Implemented check for null accepted as a valid wallet label
+* Implemented validateEncryptionKey method for UpdateLabel
+* Updated error message from validateEncryptionKey
+* Fxied issue with signTransaction method accepts from address in lowercase
+* Add length validation for pin
+
+
 
 
