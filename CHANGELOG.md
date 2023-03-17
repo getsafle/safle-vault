@@ -63,7 +63,7 @@
 ##### Updated BSC controller package
 
 * Updated the bsc controller package.
-Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@getsafle/vault-bsc-controller`.
+  Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@getsafle/vault-bsc-controller`.
 
 ### 1.2.2 (2021-12-30)
 
@@ -426,18 +426,18 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 ##### Fixed bug with recover vault
 
 ### 1.24.4 (2023-02-03)
+
 ##### Backward compatiblity for updateLabel
 
 * Implemented backward compatiblity for update label method for wallets created on versions before 1.24.1
 
 ### 1.26.0 (2023-02-17)
 
-* Stable release 1.26.0 
+* Stable release 1.26.0
 
 ### 1.26.1 (2023-03-10)
 
 * Added helper method createWalletLabels to create dynamic labels for wallets
-
 
 ### 1.26.2 (2023-03-15)
 
@@ -454,5 +454,6 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * Add length validation for pin
 
 
+### 1.26.4 (2023-03-17)
 
-
+* Added testcases for vault sdk
