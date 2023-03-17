@@ -57,22 +57,23 @@ describe("generateVault",()=>{
     test('generateVault/empty pin' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        try{
-            let result = await new Vault().generateVault(bufView,null,Mnemonic)
+       
+        let result = await new Vault().generateVault(bufView,null,Mnemonic)
+        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
 
-        }
-        catch(e){
-            expect(e).toBe('The pin should be a positive integer value')
-        }
-
-        
-    
     })
 
     test('generateVault/empty encrption key' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
         let result = await new Vault().generateVault(null,1111,Mnemonic)
+        expect(result.error).toBe('The pin should be a positive integer valueof 6 digits')
+    
+    })
+    test('generateVault/empty encrption key' , async()=>{
+        const buf = new ArrayBuffer(32);
+        const bufView = new Uint8Array(buf);
+        let result = await new Vault().generateVault(null,111111,Mnemonic)
         expect(result.error).toBe('Please enter both encryptionKey and pin')
     
     })
@@ -93,13 +94,11 @@ describe("generateVault",()=>{
     test('generateVault/all empty params' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        try{
-            let result = await new Vault().generateVault(null,null,null)
-        }
-        catch(e){
-            expect(e).toBe('The pin should be a positive integer value')
-
-        }        
+      
+        let result = await new Vault().generateVault(null,null,null)
+        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+    
+              
     
     })
 })
@@ -150,25 +149,18 @@ describe("recoverVault",()=>{
       
     })
     test('recoverVault/empty pin' , async()=>{
-        try{
+       
         let result = await vault.recoverVault(phrase,bufView,null,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-
-        }
-        catch(e){
-        expect(e).toBe('The pin should be a positive integer value')
-
-        }
+        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        
+       
       
     })
     test('recoverVault/invalid pin' , async()=>{
-        try{
+       
         let result = await vault.recoverVault(phrase,bufView,"aefew",'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-
-        }
-        catch(e){
-        expect(e).toBe('The pin should be a positive integer value')
-
-        }
+        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        
       
     })
     test('recoverVault/empty marshal key' , async()=>{
@@ -194,14 +186,11 @@ describe("recoverVault",()=>{
       
     })
     test('recoverVault/all empty params' , async()=>{
-        try{
+       
         let result = await vault.recoverVault(null,null,null,null)
-
-        }
-        catch(e){
-         expect(e).toBe('The pin should be a positive integer value')
-
-        }
+        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        
+       
       
     })
 })
