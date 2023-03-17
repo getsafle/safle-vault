@@ -248,16 +248,10 @@ describe('importWallet' , ()=>{
        
         
     })
-    test('importWallet/undefined encryption key' , async()=>{ 
-        try{
-            let result = await vault.importWallet("0x"+privateKey,pin,undefined)
-
-        }
-        catch(e){
-            expect(e.message).toBe("Cannot read property 'words' of undefined")
-        } 
-        
+    test('importWallet/empty encryption key' , async()=>{ 
        
+        let result = await vault.importWallet("0x"+privateKey,pin,null)
+        expect(result.error).toBe("Incorrect Encryption Key or vault string")
         
     })
 
@@ -601,23 +595,19 @@ describe('updateLabel',()=>{
         
     })
     test('updateLabel/invalid encryption key' , async()=>{
-        try{
-            let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd","afers","Wallet 1")
-
-        }
-        catch(e){
-            expect(e.message).toBe('chainName is not defined')
-        }
+        
+        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd","afers","Wallet 1")
+        expect(result.error).toBe('Incorrect Encryption Key or vault string')
+        
+       
         
     })
     test('updateLabel/empty encryption key' , async()=>{
-        try{
-            let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",null,"Wallet 1")
-
-        }
-        catch(e){
-            expect(e.message).toBe('chainName is not defined')
-        }
+     
+        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",null,"Wallet 1")
+        expect(result.error).toBe('Incorrect Encryption Key or vault string')
+        
+      
         
         
         
