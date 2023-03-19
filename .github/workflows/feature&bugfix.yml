@@ -35,9 +35,9 @@ jobs:
     - name: Running tests
       run: npm run test
         
-    - name: Merge pull request
+    - name: automerge PR
       if: success()
-      uses: peter-evans/auto-merge@v2
+      uses: pascalgn/automerge-action@v0.15.6
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         merge-method: squash
