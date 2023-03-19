@@ -10,8 +10,9 @@ on:
       - bugfix-*
   pull_request:
     branches:
-      - feature-*
-      - bugfix-*
+        - main
+#       - feature-*
+#       - bugfix-*
     paths:
       - package.json
       - CHANGELOG
@@ -20,9 +21,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14
-      - run: npm ci
-      - run: npm run test
+    - name: Code checkout
+      uses: actions/checkout@v2
+
+    - name: Setting up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Installing dependencies 
+      run: npm ci
+      
+    - name: Running tests
+      run: npm run test
+        
+    - name: Merge pull request
+      if: success()
+      uses: peter-evans/auto-merge@v2
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        merge-method: squash
+        delete-branch: false
