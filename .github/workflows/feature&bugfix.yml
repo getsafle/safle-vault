@@ -8,10 +8,10 @@ on:
     branches:
       - feature-*
       - bugfix-*
-      - bugfix-devops1
   pull_request:
     branches:
         - devops-test
+        - bugfix-devops1
 #         - main
     paths:
       - package.json
