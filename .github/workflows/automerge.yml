@@ -5,10 +5,11 @@ on:
 #     branches:
 #       - feature-*
 #       - bugfix-*
-#   pull_request:
-#     branches:
+  pull_request:
+    branches:
 #         - feature-*
 #         - bugfix-*
+        - devops-test
 #     paths:
 #       - package.json
 #       - CHANGELOG 
@@ -30,14 +31,14 @@ on:
 #   status: {}
 
 jobs:
-  call-feature&bugfix:
+  call-feature_bugfix:
     uses: ./.github/workflows/feature&bugfix.yml
   automerge:
     runs-on: ubuntu-latest
     steps:
       - id: automerge
-          name: automerge
-          uses: "pascalgn/automerge-action@v0.15.6"
-          env:
-            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-            MERGE_LABELS: "automerge"
+        name: automerge
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: "automerge"
