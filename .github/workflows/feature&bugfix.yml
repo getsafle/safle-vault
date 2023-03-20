@@ -8,12 +8,12 @@ on:
     branches:
       - feature-*
       - bugfix-*
-      - main
+#       - main
   pull_request:
     branches:
         - devops-test
-        - bugfix-devops1
-        - main
+#         - bugfix-devops1
+#         - main
     paths:
       - package.json
       - CHANGELOG      
@@ -21,12 +21,12 @@ on:
 #       - synchronize
 #       - ready_for_review
 #       - reopened
-  pull_request_review:
-    types:
-      - submitted
-  check_suite:
-    types:
-      - completed
+#   pull_request_review:
+#     types:
+#       - submitted
+#   check_suite:
+#     types:
+#       - completed
 #   status: {}
 
 jobs:
