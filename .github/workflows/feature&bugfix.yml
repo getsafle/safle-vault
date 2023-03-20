@@ -10,12 +10,22 @@ on:
       - bugfix-*
   pull_request:
     branches:
-        - main
-#       - feature-*
-#       - bugfix-*
+        - devops-test
+#         - main
     paths:
       - package.json
-      - CHANGELOG
+      - CHANGELOG      
+#     types:
+#       - synchronize
+#       - ready_for_review
+#       - reopened
+  pull_request_review:
+    types:
+      - submitted
+  check_suite:
+    types:
+      - completed
+#   status: {}
 
 jobs:
   build:
@@ -39,6 +49,6 @@ jobs:
       if: success()
       uses: pascalgn/automerge-action@v0.15.6
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        merge-method: squash
+        repo-token: ${{ secrets.DEVOPS_TOKEN }}
+        merge-method: merge
         delete-branch: false
