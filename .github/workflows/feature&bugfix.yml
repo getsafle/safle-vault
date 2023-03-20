@@ -8,11 +8,12 @@ on:
     branches:
       - feature-*
       - bugfix-*
+      - main
   pull_request:
     branches:
         - devops-test
         - bugfix-devops1
-#         - main
+        - main
     paths:
       - package.json
       - CHANGELOG      
