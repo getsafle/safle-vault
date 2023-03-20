@@ -4,6 +4,7 @@
 name: Feature/Bugfix branch
 
 on:
+  workflow_call:
   push:
     branches:
       - feature-*
