@@ -48,7 +48,9 @@ jobs:
     - name: automerge PR
       if: success()
       uses: pascalgn/automerge-action@v0.15.6
+      env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       with:
-        repo-token: ${{ secrets.DEVOPS_TOKEN }}
+#         repo-token: ${{ secrets.DEVOPS_TOKEN }}
         merge-method: merge
         delete-branch: false
