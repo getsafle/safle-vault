@@ -4,7 +4,7 @@
 name: Feature/Bugfix branch
 
 on:
-  workflow_call:
+#   workflow_call:
   push:
     branches:
       - feature-*
@@ -35,7 +35,11 @@ jobs:
       
     - name: Running tests
       run: npm run test
-        
+      
+  automerge:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
     - name: automerge PR
       if: success()
       uses: pascalgn/automerge-action@v0.15.6
