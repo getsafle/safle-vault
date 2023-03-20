@@ -11,8 +11,9 @@ on:
 #       - main
   pull_request:
     branches:
+        - feature-*
+        - bugfix-*
         - devops-test
-#         - bugfix-devops1
 #         - main
     paths:
       - package.json
@@ -47,12 +48,12 @@ jobs:
     - name: Running tests
       run: npm run test
         
-#     - name: automerge PR
-#       if: success()
-#       uses: pascalgn/automerge-action@v0.15.6
-#       env:
-#           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-#       with:
-# #         repo-token: ${{ secrets.DEVOPS_TOKEN }}
-#         merge-method: merge
-#         delete-branch: false
+    - name: automerge PR
+      if: success()
+      uses: pascalgn/automerge-action@v0.15.6
+      env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      with:
+#         repo-token: ${{ secrets.DEVOPS_TOKEN }}
+        merge-method: merge
+        delete-branch: false
