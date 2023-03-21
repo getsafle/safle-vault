@@ -53,6 +53,21 @@ jobs:
     - name: Running tests
       run: npm run test
       
+    - name: Jest Coverage Comment
+      uses: MishaKav/jest-coverage-comment@main
+      with:
+        coverage-summary-path: ./coverage/coverage-summary.json
+        title: My Jest Coverage Comment
+        summary-title: My Summary Title
+        badge-title: Coverage
+        hide-comment: false
+        create-new-comment: false
+        hide-summary: false
+        junitxml-title: My JUnit Title
+        junitxml-path: ./coverage/junit.xml
+        coverage-title: My Coverage Title
+        coverage-path: ./coverage.txt
+      
   automerge:
     runs-on: ubuntu-latest
     needs: build
