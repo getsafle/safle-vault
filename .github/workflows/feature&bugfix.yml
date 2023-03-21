@@ -51,34 +51,15 @@ jobs:
       run: npm ci
       
     - name: Running tests
-      run: npm run test
+#       run: npm run test
       
+#     - name: Run tests
+      run: |
+       npm run test
+       npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+
     - name: Jest Coverage Comment
       uses: MishaKav/jest-coverage-comment@main
       with:
-        coverage-summary-path: ./coverage/coverage-summary.json
-        title: My Jest Coverage Comment
-        summary-title: My Summary Title
-        badge-title: Coverage
-        hide-comment: false
-        create-new-comment: false
-        hide-summary: false
-        junitxml-title: My JUnit Title
-        junitxml-path: ./coverage/junit.xml
-        coverage-title: My Coverage Title
         coverage-path: ./coverage.txt
-      
-  automerge:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - name: automerge PR
-      if: success()
-      uses: pascalgn/automerge-action@v0.15.6
-      env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-#       with:
-#         repo-token: ${{ secrets.DEVOPS_TOKEN }}
-#         merge-method: merge
-#         delete-branch: false
-#         MERGE_LABELS: ""
+        
