@@ -50,14 +50,16 @@ jobs:
       run: npm ci
       
     - name: Run Tests
-      run: npm run test:coverage | tee ./coverage.txt
+      run: |
+        npm run test
+        npx jest --coverage | tee ./coverage/coverage.txt && exit ${PIPESTATUS[0]}
 
     - name: Jest Coverage Comment
       id: coverageComment
       uses: MishaKav/jest-coverage-comment@main
       with:
         hide-comment: true
-        coverage-path: ./coverage.txt
+        coverage-path: ./coverage/coverage.txt
         junitxml-path: ./coverage/junit.xml
 
     - name: Check the output coverage
