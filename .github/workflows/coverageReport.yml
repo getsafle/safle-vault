@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - bugfix-devops1
 jobs:
   update-coverage-in-readme:
     runs-on: ubuntu-latest
