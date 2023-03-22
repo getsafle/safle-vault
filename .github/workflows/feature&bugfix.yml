@@ -49,33 +49,48 @@ jobs:
     - name: Installing dependencies 
       run: npm ci
       
-    - name: Running tests
+    - name: Run Tests
+      run: npm run test:coverage | tee ./coverage.txt
+
+    - name: Jest Coverage Comment
+      id: coverageComment
+      uses: MishaKav/jest-coverage-comment@main
+      with:
+        hide-comment: true
+        coverage-path: ./coverage.txt
+        junitxml-path: ./coverage/junit.xml
+
+    - name: Check the output coverage
       run: |
-       npm run test
-       npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+        echo "Summary Report"
+        echo "Coverage Percentage - ${{ steps.coverageComment.outputs.coverage }}"
+        echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
+        echo "Summary Html - ${{ steps.coverageComment.outputs.summaryHtml }}"
 
-#   update-coverage-in-readme:
-#     needs: build
-#     runs-on: ubuntu-latest
-#     steps:
-    
-#       - name: Jest Coverage Comment
-#         if: github.ref == 'refs/heads/main'
-#         id: coverageComment
-#         uses: MishaKav/jest-coverage-comment@main
-#         with:
-#           hide-summary: false
-#           coverage-summary-path: ./coverage/coverage-summary.json
+        echo "JUnit Report"
+        echo "tests - ${{ steps.coverageComment.outputs.tests }}"
+        echo "skipped - ${{ steps.coverageComment.outputs.skipped }}"
+        echo "failures - ${{ steps.coverageComment.outputs.failures }}"
+        echo "errors - ${{ steps.coverageComment.outputs.errors }}"
+        echo "time - ${{ steps.coverageComment.outputs.time }}"
 
-#       - name: Update README with Coverage HTML
-#         if: github.ref == 'refs/heads/bugfix-devops1'
-#         run: |
-#           sed -i '/<!-- Jest Coverage Comment:Begin -->/,/<!-- Jest Coverage Comment:End -->/c\<!-- Jest Coverage Comment:Begin -->\n\${{ steps.coverageComment.outputs.summaryHtml }}\n<!-- Jest Coverage Comment:End -->' ./README.md
+        echo "Coverage Report"
+        echo "lines - ${{ steps.coverageComment.outputs.lines }}"
+        echo "branches - ${{ steps.coverageComment.outputs.branches }}"
+        echo "functions - ${{ steps.coverageComment.outputs.functions }}"
+        echo "statements - ${{ steps.coverageComment.outputs.statements }}"
+        echo "coverage - ${{ steps.coverageComment.outputs.coverage }}"
+        echo "color - ${{ steps.coverageComment.outputs.color }}"
+        echo "Coverage Html - ${{ steps.coverageComment.outputs.coverageHtml }}"
 
-#       - name: Commit & Push changes in README
-#         if: github.ref == 'refs/heads/bugfix-devops1'
-#         uses: actions-js/push@master
-#         with:
-#           message: Update coverage in README
-#           github_token: ${{ secrets.GITHUB_TOKEN }}       
-        
+#     - name: Create the badge
+#       if: github.ref == 'refs/heads/main'
+#       uses: schneegans/dynamic-badges-action@v1.6.0
+#       with:
+#         auth: ${{ secrets.JEST_COVERAGE_COMMENT }}
+#         gistID: 5e90d640f8c212ab7bbac38f72323f80
+#         filename: jest-coverage-comment__main.json
+#         label: coverage
+#         message: ${{ steps.coverageComment.outputs.coverage }}%
+#         color: ${{ steps.coverageComment.outputs.color }}
+#         namedLogo: javascript
