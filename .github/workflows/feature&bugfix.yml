@@ -1,28 +1,61 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# # This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
 # For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
 
 name: Feature/Bugfix branch
 
 on:
+#   workflow_call:
   push:
     branches:
       - feature-*
       - bugfix-*
   pull_request:
     branches:
-      - feature-*
-      - bugfix-*
+        - feature-*
+        - bugfix-*
     paths:
       - package.json
-      - CHANGELOG
+      - CHANGELOG 
+#     types:
+#       - labeled
+#       - unlabeled
+#       - synchronize
+#       - opened
+#       - edited
+#       - ready_for_review
+#       - reopened
+#       - unlocked
+#   pull_request_review:
+#     types:
+#       - submitted
+#   check_suite:
+#     types:
+#       - completed
+#   status: {}  
+      
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm ci
-      # - run: npm run test
+    - name: Code checkout
+      uses: actions/checkout@v2
+
+    - name: Setting up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Installing dependencies 
+      run: npm ci
+      
+    - name: Run tests
+      run: |
+        npm run test
+        npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+
+    - name: Jest Coverage Comment
+      uses: MishaKav/jest-coverage-comment@main
+      with:
+        coverage-path: ./coverage.txt
+        

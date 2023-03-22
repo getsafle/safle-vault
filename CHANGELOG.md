@@ -458,6 +458,11 @@
 
 * Added testcases for vault sdk
 
-### 1.26.5 (2023-03-17)
+### 1.26.5 (2023-03-22)
+
+* Added coverage report
+* Implemented test cases and fixed CI for the same
+
+### 1.26.6 (2023-03-17)
 
 * Updated Readme
