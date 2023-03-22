@@ -52,30 +52,30 @@ jobs:
     - name: Running tests
       run: |
        npm run test
-      # npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+       npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
-  update-coverage-in-readme:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
+#   update-coverage-in-readme:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
     
-      - name: Jest Coverage Comment
-        if: github.ref == 'refs/heads/main'
-        id: coverageComment
-        uses: MishaKav/jest-coverage-comment@main
-        with:
-          hide-summary: false
-          coverage-summary-path: ./coverage/coverage-summary.json
+#       - name: Jest Coverage Comment
+#         if: github.ref == 'refs/heads/main'
+#         id: coverageComment
+#         uses: MishaKav/jest-coverage-comment@main
+#         with:
+#           hide-summary: false
+#           coverage-summary-path: ./coverage/coverage-summary.json
 
-      - name: Update README with Coverage HTML
-        if: github.ref == 'refs/heads/bugfix-devops1'
-        run: |
-          sed -i '/<!-- Jest Coverage Comment:Begin -->/,/<!-- Jest Coverage Comment:End -->/c\<!-- Jest Coverage Comment:Begin -->\n\${{ steps.coverageComment.outputs.summaryHtml }}\n<!-- Jest Coverage Comment:End -->' ./README.md
+#       - name: Update README with Coverage HTML
+#         if: github.ref == 'refs/heads/bugfix-devops1'
+#         run: |
+#           sed -i '/<!-- Jest Coverage Comment:Begin -->/,/<!-- Jest Coverage Comment:End -->/c\<!-- Jest Coverage Comment:Begin -->\n\${{ steps.coverageComment.outputs.summaryHtml }}\n<!-- Jest Coverage Comment:End -->' ./README.md
 
-      - name: Commit & Push changes in README
-        if: github.ref == 'refs/heads/bugfix-devops1'
-        uses: actions-js/push@master
-        with:
-          message: Update coverage in README
-          github_token: ${{ secrets.GITHUB_TOKEN }}       
+#       - name: Commit & Push changes in README
+#         if: github.ref == 'refs/heads/bugfix-devops1'
+#         uses: actions-js/push@master
+#         with:
+#           message: Update coverage in README
+#           github_token: ${{ secrets.GITHUB_TOKEN }}       
         
