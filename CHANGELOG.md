@@ -434,3 +434,12 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 
 * Updated the network name in the transaction controller parameter.
 * [Breaking change] - `recoverVault()` parameters are updated. rpcURL not required to pass. Etherscan, Polygonscan and BSCscan keys are replaced with unmarshal api key .
+
+
+### 1.25.2 (2023-05-03)
+
+##### Skipped empty wallets in recover vault flow
+
+* Updated recover vault to skip wallets with no transactions
+* Updated @getsafle/transaction-controller version
+
