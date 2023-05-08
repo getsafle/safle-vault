@@ -466,3 +466,7 @@
 ### 1.26.6 (2023-03-17)
 
 * Updated Readme
+
+### 1.26.7 (2023-05-08)
+
+* Updated error message for incorrect PIN type entry
