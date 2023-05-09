@@ -30,7 +30,7 @@ describe('exportMnemonic' , ()=>{
     test('Valid exportMnemonic/invalid pin' , async()=>{
         
         let result = await new KeyRing().exportMnemonic(1111)
-        expect(result.error).toBe('The pin should be a positive integer valueof 6 digits')
+        expect(result.error).toBe('Wrong pin type, format or length')
     })
     test('Valid exportMnemonic/INCORRECT_PIN' , async()=>{
         
@@ -46,7 +46,7 @@ describe('exportMnemonic' , ()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
     })
@@ -77,7 +77,7 @@ describe('validatePin' , ()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
     })
@@ -90,7 +90,7 @@ describe('validatePin' , ()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
     })
@@ -128,7 +128,7 @@ describe('addAccount' , ()=>{
     test('addAccount/empty pin' , async()=>{  
     
         let result = await vault.addAccount(bufView,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
         
@@ -138,7 +138,7 @@ describe('addAccount' , ()=>{
     test('addAccount/invalid pin' , async()=>{  
         
         let result = await vault.addAccount(bufView,"123333")
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
         
         
         
@@ -154,7 +154,7 @@ describe('addAccount' , ()=>{
     test('addAccount/both param empty' , async()=>{  
        
         let result = await vault.addAccount("","")
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
         
@@ -187,14 +187,14 @@ describe('exportPrivateKey' , ()=>{
     test('exportPrivateKey/empty pin' , async()=>{ 
       
         let result = await vault.exportPrivateKey(accAddress,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
         
     })
 
     test('exportPrivateKey/both empty' , async()=>{ 
         
         let result = await vault.exportPrivateKey(null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
         
     })
     test('exportPrivateKey/incorrect pin' , async()=>{ 
@@ -237,7 +237,7 @@ describe('importWallet' , ()=>{
     test('importWallet/empty pin' , async()=>{ 
        
         let result = await vault.importWallet("0x"+privateKey,null,bufView)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
        
         
     })
@@ -258,7 +258,7 @@ describe('importWallet' , ()=>{
     test('importWallet/empty all params' , async()=>{ 
       
         let result = await vault.importWallet(null,null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
         
@@ -319,7 +319,7 @@ describe('restoreKeyringState',()=>{
     test('restoreKeyringState/empty pin' , async()=>{    
         
         let result= await vault.restoreKeyringState(vaultAddress,null,bufView)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
        
@@ -330,7 +330,7 @@ describe('restoreKeyringState',()=>{
     test('restoreKeyringState/invalid pin' , async()=>{    
         
         let result= await vault.restoreKeyringState(vaultAddress,"avevr",bufView)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
            
@@ -359,7 +359,7 @@ describe('restoreKeyringState',()=>{
     test('restoreKeyringState/all params empty' , async()=>{    
         
         let result= await vault.restoreKeyringState(null,null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
         
@@ -514,7 +514,7 @@ describe('sign',()=>{
         let data="hello world"
         
         let result = await vault.sign(data,"abc",null,ethUrl)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")    
+        expect(result.error).toBe("Wrong pin type, format or length")    
         
     })
     test('sign/icorrect pin' , async()=>{
@@ -529,7 +529,7 @@ describe('sign',()=>{
         
         let data="hello world"
         let result = await vault.sign(data,accAddress,"abc",ethUrl)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
     })
 
@@ -558,7 +558,7 @@ describe('sign',()=>{
         let data="hello world"
        
         let result = await vault.sign(null,null,null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
         
         
     })
@@ -887,7 +887,7 @@ describe('changePin',()=>{
 
        }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
        
@@ -900,7 +900,7 @@ describe('changePin',()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
         
@@ -912,7 +912,7 @@ describe('changePin',()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
         
@@ -924,7 +924,7 @@ describe('changePin',()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
         
@@ -955,7 +955,7 @@ describe('changePin',()=>{
 
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
         }
         
         
@@ -1016,7 +1016,7 @@ describe('deleteAccount',()=>{
     test('deleteAccount/empty pin' , async()=>{
        
         let result = await vault.deleteAccount(bufView,accAddress,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
 
         
        
@@ -1026,7 +1026,7 @@ describe('deleteAccount',()=>{
     test('deleteAccount/invalid pin' , async()=>{
       
         let result = await vault.deleteAccount(bufView,accAddress,"efwe")
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+        expect(result.error).toBe("Wrong pin type, format or length")
        
         
     })
@@ -1042,7 +1042,7 @@ describe('deleteAccount',()=>{
             let result = await vault.deleteAccount(null,null,null)
         }
         catch(e){
-            expect(e).toBe('The pin should be a positive integer valueof 6 digits')
+            expect(e).toBe('Wrong pin type, format or length')
 
         }
        
@@ -1190,7 +1190,7 @@ describe('signTransaction',()=>{
        
 
         let result = await vault.signTransaction("evwf",null,polygonRpcUrl)
-        expect(result.error).toBe('The pin should be a positive integer valueof 6 digits')
+        expect(result.error).toBe('Wrong pin type, format or length')
         
        
         
@@ -1216,7 +1216,7 @@ describe('signTransaction',()=>{
     
 
         let result = await vault.signTransaction("evwf","afewf",polygonRpcUrl)
-        expect(result.error).toBe('The pin should be a positive integer valueof 6 digits')
+        expect(result.error).toBe('Wrong pin type, format or length')
 
         
         
@@ -1331,7 +1331,7 @@ describe('signTransaction',()=>{
         let invalidRpc="efrwgrwdvfr"
         
             let result = await vault.signTransaction(null,null,null)
-            expect(result.error).toBe("The pin should be a positive integer valueof 6 digits")
+            expect(result.error).toBe("Wrong pin type, format or length")
 
         
        

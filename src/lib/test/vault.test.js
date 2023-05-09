@@ -59,7 +59,7 @@ describe("generateVault",()=>{
         const bufView = new Uint8Array(buf);
        
         let result = await new Vault().generateVault(bufView,null,Mnemonic)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
 
     })
 
@@ -67,7 +67,7 @@ describe("generateVault",()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
         let result = await new Vault().generateVault(null,1111,Mnemonic)
-        expect(result.error).toBe('The pin should be a positive integer valueof 6 digits')
+        expect(result.error).toBe('Wrong pin type, format or length')
     
     })
     test('generateVault/empty encrption key' , async()=>{
@@ -96,7 +96,7 @@ describe("generateVault",()=>{
         const bufView = new Uint8Array(buf);
       
         let result = await new Vault().generateVault(null,null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
     
               
     
@@ -151,7 +151,7 @@ describe("recoverVault",()=>{
     test('recoverVault/empty pin' , async()=>{
        
         let result = await vault.recoverVault(phrase,bufView,null,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
        
       
@@ -159,7 +159,7 @@ describe("recoverVault",()=>{
     test('recoverVault/invalid pin' , async()=>{
        
         let result = await vault.recoverVault(phrase,bufView,"aefew",'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
       
     })
@@ -188,7 +188,7 @@ describe("recoverVault",()=>{
     test('recoverVault/all empty params' , async()=>{
        
         let result = await vault.recoverVault(null,null,null,null)
-        expect(result.error).toBe("The pin should be a positive integer valueof 6 digits") 
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
        
       
