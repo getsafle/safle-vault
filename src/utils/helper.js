@@ -59,10 +59,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
   return accountsArray;
 }
 
-async function getETHTransactions(address, network, etherscanAPIKey) {
+async function getETHTransactions(address, network, unmarshalApiKey) {
   const transactionController = new safleTransactionController.TransactionController();
 
-  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: etherscanAPIKey });
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: unmarshalApiKey });
 
   if (transactions.length > 0) {
     return true;
@@ -71,10 +71,10 @@ async function getETHTransactions(address, network, etherscanAPIKey) {
   return false;
 }
 
-async function getPolygonTransactions(address, network, polygonscanAPIKey) {
+async function getPolygonTransactions(address, network, unmarshalApiKey) {
   const transactionController = new safleTransactionController.TransactionController();
 
-  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: polygonscanAPIKey });
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: unmarshalApiKey });
 
   if (transactions.length > 0) {
     return true;
@@ -83,10 +83,10 @@ async function getPolygonTransactions(address, network, polygonscanAPIKey) {
   return false;
 }
 
-async function getBSCTransactions(address, network, bscscanApiKey) {
+async function getBSCTransactions(address, network, unmarshalApiKey) {
   const transactionController = new safleTransactionController.TransactionController();
 
-  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: bscscanApiKey });
+  const transactions = await transactionController.getTransactions({ address, fromBlock: 0, network, apiKey: unmarshalApiKey });
 
   if (transactions.length > 0) {
     return true;
