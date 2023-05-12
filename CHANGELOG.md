@@ -470,3 +470,7 @@
 ### 1.26.7 (2023-05-08)
 
 * Updated error message for incorrect PIN type entry
+
+### 1.26.8 (2023-05-11)
+
+* Updated outdated dependencies and removed unused package dependencies
