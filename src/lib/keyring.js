@@ -1,5 +1,5 @@
 const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
-const { ethers } = require("ethers");
+const { utils } = require('ethers');
 const ObservableStore = require('obs-store');
 const Web3 = require('web3');
 const _ = require('lodash');
@@ -80,6 +80,7 @@ class Keyring {
         }
     }
 
+
     async validateMnemonic(mnemonic, safleID, network, polygonRpcUrl) {
         if (network !== 'mainnet' && network !== 'testnet') {
             throw ERROR_MESSAGE.INVALID_NETWORK;
@@ -90,8 +91,8 @@ class Keyring {
         let address;
 
         try {
-            const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-
+            const wallet = utils.HDNode.fromMnemonic(mnemonic);
+            
             address = wallet.address;
         } catch (e) {
             return { response: false };
