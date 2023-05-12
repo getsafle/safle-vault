@@ -72,6 +72,7 @@ class Keyring {
 
         try {
             const wallet = utils.HDNode.fromMnemonic(mnemonic);
+            
             address = wallet.address;
         } catch (e) {
             return { response: false };
