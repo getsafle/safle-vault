@@ -4,9 +4,17 @@ const ObservableStore = require('obs-store');
 const Web3 = require('web3');
 const _ = require('lodash');
 
+const { RateLimiter } = require("limiter");
 const helper = require('../utils/helper');
 const ERROR_MESSAGE = require('../constants/responses');
 const Chains = require('../chains');
+const Config = require('../config')
+
+const limiter = new RateLimiter({
+    tokensPerInterval: Config.TOKEN_COUNT,
+    interval: Config.TOKEN_WINDOW,
+    fireImmediately: true
+  });
 
 class Keyring {
 
@@ -14,6 +22,7 @@ class Keyring {
         this.logs = new ObservableStore({
             logs: [],
         });
+        this.timeout = 0;
     }
 
     async exportMnemonic(pin) {
@@ -39,25 +48,36 @@ class Keyring {
     }
 
     async validatePin(pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+   
+           if(this.timeout>Date.now()){
+            return{ error: `${ERROR_MESSAGE.REQUEST_BLOCKED} for ${((this.timeout-Date.now())/60000).toFixed(0)} minutes`  }
         }
+        const remainingRequests =  await limiter.removeTokens(1);
 
-        let spaceCount;
-
-        try {
-            const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        if (remainingRequests <= 0) {
+             this.timeout = Date.now() + Config.REQUEST_BLOCKED_TIMEOUT;
+            return { error: ERROR_MESSAGE.REQUEST_LIMIT_EXCEEDED };
+        } else {
+            if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+                return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+            }
     
-            spaceCount = mnemonic.split(" ").length - 1;
-        } catch (error) {
-            return { response: false };
+            let spaceCount;
+    
+            try {
+                const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        
+                spaceCount = mnemonic.split(" ").length - 1;
+            } catch (error) {
+                return { response: false };
+            }
+    
+            if(spaceCount !== 11) {
+                return { response: false };
+            }
+    
+            return { response: true };
         }
-
-        if(spaceCount !== 11) {
-            return { response: false };
-        }
-
-        return { response: true };
     }
 
 

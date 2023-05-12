@@ -13,5 +13,7 @@ module.exports = {
     SHOULD_BE_AN_ARRAY: 'Addresses and chains should be an array',
     INVALID_NETWORK: 'Invalid network selected',
     INCORRECT_CURRENT_PIN: 'The current pin passed is incorrect',
-    INCORRECT_LABEL_TYPE: 'Label should be a valid string'
+    INCORRECT_LABEL_TYPE: 'Label should be a valid string',
+    REQUEST_LIMIT_EXCEEDED: 'Request limit exceeded. Please retry later',
+    REQUEST_BLOCKED: 'Requests to method blocked'
 };

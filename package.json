@@ -50,6 +50,7 @@
     "ethers": "^5.7.2",
     "get-random-values": "^1.2.2",
     "jest": "^29.4.3",
+    "limiter": "^2.1.0",
     "lodash": "^4.17.21",
     "loglevel": "^1.7.1",
     "obs-store": "^4.0.3",
