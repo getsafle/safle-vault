@@ -120,7 +120,7 @@ describe('addAccount' , ()=>{
             let result = await vault.addAccount(null,pin)
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of undefined")
+            expect(e.message).toBe("Cannot read properties of undefined (reading 'length')")
         }
         
     })
@@ -302,7 +302,7 @@ describe('restoreKeyringState',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'salt' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'salt')")
         }
        
         
@@ -443,7 +443,7 @@ describe('getBalance',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe(`Invalid JSON RPC response: ""`)
+            expect(e.message).toBe(`CONNECTION ERROR: Couldn't connect to node http://localhost:8545.`)
         }
         
         
@@ -494,7 +494,7 @@ describe('sign',()=>{
             let result = await vault.sign(data,null,pin,ethUrl)
 
         }catch(e){
-            expect(e.message).toBe("Cannot read property 'toLowerCase' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'toLowerCase')")
         }
        
         
@@ -517,7 +517,7 @@ describe('sign',()=>{
         expect(result.error).toBe("Wrong pin type, format or length")    
         
     })
-    test('sign/icorrect pin' , async()=>{
+    test('sign/incorrect pin' , async()=>{
         
         let data="hello world"
         
@@ -654,7 +654,7 @@ describe('getAssets',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -667,7 +667,7 @@ describe('getAssets',()=>{
             let result = await vault.getAssets({addresses:["afqaefwef"],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:bscRpcUrl})
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -680,7 +680,7 @@ describe('getAssets',()=>{
             let result = await vault.getAssets({addresses:[accAddress],chains:null,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:bscRpcUrl})
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -1271,7 +1271,7 @@ describe('signTransaction',()=>{
             let result = await vault.signTransaction("evwf",pin,null)
         }
         catch(e){
-            expect(e.message).toBe('Invalid JSON RPC response: ""')
+            expect(e.message).toBe("CONNECTION ERROR: Couldn't connect to node http://localhost:8545.")
         }   
         
 
