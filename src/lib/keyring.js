@@ -30,9 +30,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if (response == false) {
+        if (response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
@@ -165,9 +165,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if (response == false) {
+        if (response.response == false || response.error)  {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -195,9 +195,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -262,9 +262,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -294,9 +294,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
@@ -392,9 +392,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -438,7 +438,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
         const { error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
@@ -446,7 +446,7 @@ class Keyring {
             return { error }
         }
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -658,9 +658,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
