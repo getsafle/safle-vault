@@ -443,3 +443,8 @@ Deprecated package was `@getsafle/bsc-wallet-controller` and updated one is `@ge
 * Updated recover vault to skip wallets with no transactions
 * Updated @getsafle/transaction-controller version
 
+### 1.25.3 (2023-05-17)
+
+##### Private Key slicing update
+
+* Updated Privatekey to be sliced to resolve import wallet pKey buffer issue

@@ -283,7 +283,7 @@ class Keyring {
             const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
             const signedTx = await this.keyringInstance.signTransaction(rawTx, web3);
-
+            
             return { response: signedTx };
         }
 
@@ -422,6 +422,10 @@ class Keyring {
         if(response == false) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
+
+        if (privateKey.startsWith('0x')) {
+            privateKey = privateKey.slice(2)
+        }
 
         const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption');
 
