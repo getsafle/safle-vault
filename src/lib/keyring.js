@@ -98,11 +98,11 @@ class Keyring {
             return { response: false };
         }
 
-        // const safleId = await safle.getSafleId(address);
+        const safleId = await safle.getSafleId(address);
 
-        // if (safleId === '' || safleId != safleID) {
-        //     return { response: false };
-        // }
+        if (safleId === '' || safleId != safleID) {
+            return { response: false };
+        }
 
         return { response: true };
     }
