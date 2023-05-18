@@ -1,5 +1,5 @@
 const SafleId = require('@getsafle/safle-identity-wallet').SafleID;
-const { utils } = require('ethers');
+const { ethers } = require("ethers");
 const ObservableStore = require('obs-store');
 const Web3 = require('web3');
 const _ = require('lodash');
@@ -91,18 +91,18 @@ class Keyring {
         let address;
 
         try {
-            const wallet = utils.HDNode.fromMnemonic(mnemonic);
+            const wallet = ethers.Wallet.fromMnemonic(mnemonic);
             
             address = wallet.address;
         } catch (e) {
             return { response: false };
         }
 
-        const safleId = await safle.getSafleId(address);
+        // const safleId = await safle.getSafleId(address);
 
-        if (safleId === '' || safleId != safleID) {
-            return { response: false };
-        }
+        // if (safleId === '' || safleId != safleID) {
+        //     return { response: false };
+        // }
 
         return { response: true };
     }
