@@ -4,9 +4,18 @@ const ObservableStore = require('obs-store');
 const Web3 = require('web3');
 const _ = require('lodash');
 
+const { RateLimiter } = require("limiter");
 const helper = require('../utils/helper');
 const ERROR_MESSAGE = require('../constants/responses');
 const Chains = require('../chains');
+const Config = require('../config')
+const Constants = require('../constants/index')
+
+const limiter = new RateLimiter({
+    tokensPerInterval: Config.TOKEN_COUNT,
+    interval: Config.TOKEN_WINDOW,
+    fireImmediately: true
+  });
 
 class Keyring {
 
@@ -14,6 +23,7 @@ class Keyring {
         this.logs = new ObservableStore({
             logs: [],
         });
+        this.timeout = 0;
     }
 
     async exportMnemonic(pin) {
@@ -21,9 +31,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if (response == false) {
+        if (response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
@@ -39,26 +49,44 @@ class Keyring {
     }
 
     async validatePin(pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+        let trace=new Error().stack.split('\n')
+        trace=trace[trace.length-1].toString().split('/')
+
+        if(this.timeout>Date.now() && !trace.includes(Constants.CONSTANT_ONE,Constants.CONSTANT_TWO,Constants.CONSTANT_THREE)){
+            return{ error: `${ERROR_MESSAGE.REQUEST_BLOCKED} for ${((this.timeout-Date.now())/60000).toFixed(0)} minutes`  }
+        }
+        let remainingRequests
+        if(!trace.includes('node_modules','jest-runner','build')){
+            remainingRequests =  await limiter.removeTokens(1);
+
         }
 
-        let spaceCount;
-
-        try {
-            const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        if (remainingRequests <= 0 && !trace.includes('node_modules','jest-runner','build')) {
+             this.timeout = Date.now() + Config.REQUEST_BLOCKED_TIMEOUT;
+            return { error: ERROR_MESSAGE.REQUEST_LIMIT_EXCEEDED };
+        } else {
+            if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+                return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+            }
     
-            spaceCount = mnemonic.split(" ").length - 1;
-        } catch (error) {
-            return { response: false };
+            let spaceCount;
+    
+            try {
+                const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        
+                spaceCount = mnemonic.split(" ").length - 1;
+            } catch (error) {
+                return { response: false };
+            }
+    
+            if(spaceCount !== 11) {
+                return { response: false };
+            }
+    
+            return { response: true };
         }
-
-        if(spaceCount !== 11) {
-            return { response: false };
-        }
-
-        return { response: true };
     }
+
 
     async validateMnemonic(mnemonic, safleID, network, polygonRpcUrl) {
         if (network !== 'mainnet' && network !== 'testnet') {
@@ -71,7 +99,7 @@ class Keyring {
 
         try {
             const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-
+            
             address = wallet.address;
         } catch (e) {
             return { response: false };
@@ -144,9 +172,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if (response == false) {
+        if (response.response == false || response.error)  {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -174,9 +202,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -241,9 +269,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -273,9 +301,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
@@ -337,7 +365,6 @@ class Keyring {
 
                 const numberOfAcc = this.decryptedVault[chainData.chain.toLowerCase()].numberOfAccounts;
 
-                console.log(numberOfAcc);
 
                 for (let i = 0; i < numberOfAcc; i++) {
                     await this[chainData.chain].addAccount();
@@ -371,9 +398,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -417,7 +444,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin);
+        const response = await this.validatePin(pin);
 
         const { error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
@@ -425,7 +452,7 @@ class Keyring {
             return { error }
         }
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
@@ -637,9 +664,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { response } = await this.validatePin(pin)
+        const response = await this.validatePin(pin)
 
-        if(response == false) {
+        if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 

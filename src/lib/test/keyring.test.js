@@ -120,7 +120,7 @@ describe('addAccount' , ()=>{
             let result = await vault.addAccount(null,pin)
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of undefined")
+            expect(e.message).toBe("Cannot read properties of undefined (reading 'length')")
         }
         
     })
@@ -302,7 +302,7 @@ describe('restoreKeyringState',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'salt' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'salt')")
         }
        
         
@@ -443,7 +443,7 @@ describe('getBalance',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe(`Invalid JSON RPC response: ""`)
+            expect(e.message).toBe(`CONNECTION ERROR: Couldn't connect to node http://localhost:8545.`)
         }
         
         
@@ -469,107 +469,7 @@ describe('getBalance',()=>{
 
 
 
-describe('sign',()=>{
 
-    test('sign/invalid url' , async()=>{
-        let data="hello world"
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
-       expect(result.response).toHaveProperty('signature')
-        
-    })
-
-    test('sign/empty data' , async()=>{
-        
-        let data="hello world"
-        let result = await vault.sign("","0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
-        expect(result.response).toHaveProperty('signature')
-        
-    })
-
-
-    test('sign/empty address' , async()=>{
-        
-        let data="hello world"
-        try{
-            let result = await vault.sign(data,null,pin,ethUrl)
-
-        }catch(e){
-            expect(e.message).toBe("Cannot read property 'toLowerCase' of null")
-        }
-       
-        
-    })
-    test('sign/invalid address' , async()=>{
-        
-        let data="hello world"
-       
-        let result = await vault.sign(data,"abc",pin,ethUrl)
-        expect(result.error).toBe('This address is not present in the vault')
-
-        
-        
-    })
-    test('sign/empty pin' , async()=>{
-        
-        let data="hello world"
-        
-        let result = await vault.sign(data,"abc",null,ethUrl)
-        expect(result.error).toBe("Wrong pin type, format or length")    
-        
-    })
-    test('sign/icorrect pin' , async()=>{
-        
-        let data="hello world"
-        
-        let result = await vault.sign(data,"abc",111111,ethUrl)
-        expect(result.error).toBe("Incorrect pin")    
-        
-    })
-    test('sign/invalid pin' , async()=>{
-        
-        let data="hello world"
-        let result = await vault.sign(data,accAddress,"abc",ethUrl)
-        expect(result.error).toBe("Wrong pin type, format or length")
-
-    })
-
-    test('sign/empty url' , async()=>{
-        
-        let data="hello world"
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,null)
-        expect(result.response).toHaveProperty('signature')
-
-       
-
-        
-        
-    })
-
-    test('sign/invalid url' , async()=>{
-        
-        let data="hello world"
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,"abc")
-        expect(result.response).toHaveProperty('signature')
-        
-    })
-
-    test('sign/all params empty' , async()=>{
-        
-        let data="hello world"
-       
-        let result = await vault.sign(null,null,null,null)
-        expect(result.error).toBe("Wrong pin type, format or length")
-        
-        
-    })
-
-
-    
-
-    
-
-
-})
 
 
 describe('updateLabel',()=>{
@@ -635,6 +535,113 @@ describe('updateLabel',()=>{
 })
 
 
+describe('sign',()=>{
+
+    test('sign/valid' , async()=>{
+        let data="hello world"
+        console.log("sign/valid--->",pin,ethUrl)
+                await vault.restoreKeyringState(vault,pin,bufView)
+
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",696969,ethUrl)
+        console.log("sign/valid--->",result)
+       expect(result.response).toHaveProperty('signature')
+        
+    })
+
+    test('sign/empty data' , async()=>{
+        
+        let data="hello world"
+        let result = await vault.sign("","0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
+        expect(result.response).toHaveProperty('signature')
+        
+    })
+
+
+    test('sign/empty address' , async()=>{
+        
+        let data="hello world"
+        try{
+            let result = await vault.sign(data,null,pin,ethUrl)
+
+        }catch(e){
+            expect(e.message).toBe("Cannot read properties of null (reading 'toLowerCase')")
+        }
+       
+        
+    })
+    test('sign/invalid address' , async()=>{
+        
+        let data="hello world"
+       
+        let result = await vault.sign(data,"abc",pin,ethUrl)
+        expect(result.error).toBe('This address is not present in the vault')
+
+        
+        
+    })
+    test('sign/empty pin' , async()=>{
+        
+        let data="hello world"
+        
+        let result = await vault.sign(data,"abc",null,ethUrl)
+        expect(result.error).toBe("Wrong pin type, format or length")    
+        
+    })
+    test('sign/incorrect pin' , async()=>{
+        
+        let data="hello world"
+        
+        let result = await vault.sign(data,"abc",111111,ethUrl)
+        expect(result.error).toBe("Incorrect pin")    
+        
+    })
+    test('sign/invalid pin' , async()=>{
+        
+        let data="hello world"
+        let result = await vault.sign(data,accAddress,"abc",ethUrl)
+        expect(result.error).toBe("Wrong pin type, format or length")
+
+    })
+
+    test('sign/empty url' , async()=>{
+        
+        let data="hello world"
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,null)
+        expect(result.response).toHaveProperty('signature')
+
+       
+
+        
+        
+    })
+
+    test('sign/invalid url' , async()=>{
+        
+        let data="hello world"
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,"abc")
+        expect(result.response).toHaveProperty('signature')
+        
+    })
+
+    test('sign/all params empty' , async()=>{
+        
+        let data="hello world"
+       
+        let result = await vault.sign(null,null,null,null)
+        expect(result.error).toBe("Wrong pin type, format or length")
+        
+        
+    })
+
+
+    
+
+    
+
+
+})
+
+
 describe('getAssets',()=>{
 
     test('getAssets/valid' , async()=>{
@@ -654,7 +661,7 @@ describe('getAssets',()=>{
 
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -667,7 +674,7 @@ describe('getAssets',()=>{
             let result = await vault.getAssets({addresses:["afqaefwef"],chains:chains,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:bscRpcUrl})
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -680,7 +687,7 @@ describe('getAssets',()=>{
             let result = await vault.getAssets({addresses:[accAddress],chains:null,EthRpcUrl:ethUrl,polygonRpcUrl:polygonRpcUrl,bscRpcUrl:bscRpcUrl})
         }
         catch(e){
-            expect(e.message).toBe("Cannot read property 'length' of null")
+            expect(e.message).toBe("Cannot read properties of null (reading 'length')")
         }       
        
         
@@ -1271,7 +1278,7 @@ describe('signTransaction',()=>{
             let result = await vault.signTransaction("evwf",pin,null)
         }
         catch(e){
-            expect(e.message).toBe('Invalid JSON RPC response: ""')
+            expect(e.message).toBe("CONNECTION ERROR: Couldn't connect to node http://localhost:8545.")
         }   
         
 

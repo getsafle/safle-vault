@@ -470,3 +470,9 @@
 ### 1.26.7 (2023-05-08)
 
 * Updated error message for incorrect PIN type entry
+
+### 1.27.0 (2023-05-22)
+
+* Updated outdated dependencies and removed unused package dependencies
+* Added throttling on validate Pin
+
