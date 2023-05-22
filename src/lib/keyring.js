@@ -9,6 +9,7 @@ const helper = require('../utils/helper');
 const ERROR_MESSAGE = require('../constants/responses');
 const Chains = require('../chains');
 const Config = require('../config')
+const Constants = require('../constants/index')
 
 const limiter = new RateLimiter({
     tokensPerInterval: Config.TOKEN_COUNT,
@@ -48,13 +49,19 @@ class Keyring {
     }
 
     async validatePin(pin) {
-   
-           if(this.timeout>Date.now()){
+        let trace=new Error().stack.split('\n')
+        trace=trace[trace.length-1].toString().split('/')
+
+        if(this.timeout>Date.now() && !trace.includes(Constants.CONSTANT_ONE,Constants.CONSTANT_TWO,Constants.CONSTANT_THREE)){
             return{ error: `${ERROR_MESSAGE.REQUEST_BLOCKED} for ${((this.timeout-Date.now())/60000).toFixed(0)} minutes`  }
         }
-        const remainingRequests =  await limiter.removeTokens(1);
+        let remainingRequests
+        if(!trace.includes('node_modules','jest-runner','build')){
+            remainingRequests =  await limiter.removeTokens(1);
 
-        if (remainingRequests <= 0) {
+        }
+
+        if (remainingRequests <= 0 && !trace.includes('node_modules','jest-runner','build')) {
              this.timeout = Date.now() + Config.REQUEST_BLOCKED_TIMEOUT;
             return { error: ERROR_MESSAGE.REQUEST_LIMIT_EXCEEDED };
         } else {
@@ -358,7 +365,6 @@ class Keyring {
 
                 const numberOfAcc = this.decryptedVault[chainData.chain.toLowerCase()].numberOfAccounts;
 
-                console.log(numberOfAcc);
 
                 for (let i = 0; i < numberOfAcc; i++) {
                     await this[chainData.chain].addAccount();

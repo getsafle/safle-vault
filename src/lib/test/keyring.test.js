@@ -469,11 +469,81 @@ describe('getBalance',()=>{
 
 
 
+
+
+
+describe('updateLabel',()=>{
+
+    test('updateLabel/valid' , async()=>{
+        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",bufView,"Wallet 1")
+        expect(result).toHaveProperty('response')
+        
+        
+    })
+
+    test('updateLabel/invalid address' , async()=>{
+        let result = await vault.updateLabel("adeded",bufView,"Wallet 1")
+        expect(result.error).toBe('This address is not present in the vault')
+        
+        
+    })
+
+    test('updateLabel/empty address' , async()=>{
+        let result = await vault.updateLabel(null,bufView,"Wallet 1")
+        expect(result.error).toBe('This address is not present in the vault')
+        
+        
+    })
+    test('updateLabel/invalid encryption key' , async()=>{
+        
+        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd","afers","Wallet 1")
+        expect(result.error).toBe('Incorrect Encryption Key or vault string')
+        
+       
+        
+    })
+    test('updateLabel/empty encryption key' , async()=>{
+     
+        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",null,"Wallet 1")
+        expect(result.error).toBe('Incorrect Encryption Key or vault string')
+        
+      
+        
+        
+        
+    })
+    test('updateLabel/empty label' , async()=>{
+        try{
+            let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",bufView,null)
+        }
+        catch(e){
+            expect(e.message).toBe('chainName is not defined')
+        }
+                
+        
+        
+    })
+    test('updateLabel/all empty params' , async()=>{
+        
+        let result = await vault.updateLabel(null,null,null)
+        expect(result.error).toBe('Incorrect Encryption Key or vault string')
+        
+        
+        
+    })
+
+})
+
+
 describe('sign',()=>{
 
-    test('sign/invalid url' , async()=>{
+    test('sign/valid' , async()=>{
         let data="hello world"
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
+        console.log("sign/valid--->",pin,ethUrl)
+                await vault.restoreKeyringState(vault,pin,bufView)
+
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",696969,ethUrl)
+        console.log("sign/valid--->",result)
        expect(result.response).toHaveProperty('signature')
         
     })
@@ -568,69 +638,6 @@ describe('sign',()=>{
 
     
 
-
-})
-
-
-describe('updateLabel',()=>{
-
-    test('updateLabel/valid' , async()=>{
-        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",bufView,"Wallet 1")
-        expect(result).toHaveProperty('response')
-        
-        
-    })
-
-    test('updateLabel/invalid address' , async()=>{
-        let result = await vault.updateLabel("adeded",bufView,"Wallet 1")
-        expect(result.error).toBe('This address is not present in the vault')
-        
-        
-    })
-
-    test('updateLabel/empty address' , async()=>{
-        let result = await vault.updateLabel(null,bufView,"Wallet 1")
-        expect(result.error).toBe('This address is not present in the vault')
-        
-        
-    })
-    test('updateLabel/invalid encryption key' , async()=>{
-        
-        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd","afers","Wallet 1")
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-       
-        
-    })
-    test('updateLabel/empty encryption key' , async()=>{
-     
-        let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",null,"Wallet 1")
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-      
-        
-        
-        
-    })
-    test('updateLabel/empty label' , async()=>{
-        try{
-            let result = await vault.updateLabel("0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",bufView,null)
-        }
-        catch(e){
-            expect(e.message).toBe('chainName is not defined')
-        }
-                
-        
-        
-    })
-    test('updateLabel/all empty params' , async()=>{
-        
-        let result = await vault.updateLabel(null,null,null)
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-        
-        
-    })
 
 })
 
