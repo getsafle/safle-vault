@@ -242,3 +242,4 @@ Get Logs:
 This method retrieves all the logs of all the vault changes.
 
  `const logs = await vault.getLogs();`
+ 
