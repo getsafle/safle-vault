@@ -475,4 +475,3 @@
 
 * Updated outdated dependencies and removed unused package dependencies
 * Added throttling on validate Pin
-
