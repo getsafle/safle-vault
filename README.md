@@ -139,7 +139,7 @@ This method is used to sign a message.
  `const signedMessage = await vault.signMessage(address, data, pin, encryptionKey)`
 
 * `address` - The address to sign the message from.
-* `data` - The data to be signed.
+* `data` - The hash string of the data to be signed.
 * `pin` - The pin to access the vault's private functions.
 *  `encryptionKey` - The encryption key used to decrypt the vault.
 

@@ -475,3 +475,7 @@
 
 * Updated outdated dependencies and removed unused package dependencies
 * Added throttling on validate Pin
+
+### 1.27.1 (2023-06-07)
+
+* Removed buffer creation for sign message
