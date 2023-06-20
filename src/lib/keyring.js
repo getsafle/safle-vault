@@ -183,18 +183,18 @@ class Keyring {
 
             const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
 
-            return { response: decryptedPrivKey };
+            return { response: { privateKey: decryptedPrivKey, isImported : isImportedAddress}}
         }
 
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
 
-            return { response: privateKey }
+            return { response: {privateKey, isImported : isImportedAddress}  }
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
 
-        return { response: privateKey };
+        return { response: {privateKey, isImported : isImportedAddress}  };
     }
 
     async addAccount(encryptionKey, pin) {
@@ -274,25 +274,50 @@ class Keyring {
         if(response.response == false || response.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
+        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(address, pin);
 
-        const accounts = await this.getAccounts(encryptionKey);
+        if (isImported) {
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
-        if(accounts.response.filter(e => e.address === address).length < 1) {
-            return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+            if (this.chain === 'ethereum') {
+
+                const signedMessage = await this.keyringInstance.sign(data, privateKey, web3);
+
+                return { response: signedMessage };
+            }
+
+            if (Chains.evmChains.hasOwnProperty(this.chain)) {
+                const keyringInstance = await helper.getCoinInstance(this.chain);
+
+                const signedMessage = await keyringInstance.sign(data, privateKey, web3);
+
+                return { response: signedMessage.message };
+            }
+
+            return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
+            
         }
+        else{
+            const accounts = await this.getAccounts(encryptionKey);
 
-        if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
+            if(accounts.response.filter(e => e.address === address).length < 1) {
+                return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+            }
 
-            const msgParams = { from: address, data: data };
+            if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
 
-            const signedMsg = await this.keyringInstance.signMessage(msgParams);
+                const msgParams = { from: address, data: data };
 
-            return { response: signedMsg };
+                const signedMsg = await this.keyringInstance.signMessage(msgParams);
+
+                return { response: signedMsg };
+            }
+
+            const { signedMessage } = await this[this.chain].signMessage(data, address);
+
+            return { response: signedMessage };
         }
-
-        const { signedMessage } = await this[this.chain].signMessage(data, address);
-
-        return { response: signedMessage };
+        
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
@@ -314,7 +339,7 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: privateKey } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
+        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -669,7 +694,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: privateKey } = await this.exportPrivateKey(address.toLowerCase(), pin);
+        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(address.toLowerCase(), pin);
 
         if (error) {
             return { error };
