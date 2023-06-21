@@ -479,3 +479,7 @@
 ### 1.27.1 (2023-06-07)
 
 * Removed buffer creation for sign message
+
+### 1.28.0 (2023-06-21)
+
+* Updated sign message for imported wallets
