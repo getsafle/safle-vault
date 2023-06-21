@@ -264,17 +264,24 @@ class Keyring {
         return { response: { vault: encryptedVault, address: newAddress }};
     }
 
-    async signMessage(address, data, pin, encryptionKey) {
+    async signMessage(address, data, pin, encryptionKey, rpcUrl = '') {
         if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const response = await this.validatePin(pin)
+        const res = await this.validatePin(pin)
 
-        if(response.response == false || response.error) {
+        if(res.response == false || res.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
-        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(address, pin);
+        const { error, response } = await this.exportPrivateKey(address, pin);
+
+        if (error) {
+            return { error };
+        }
+        
+        const {privateKey, isImported} = response
+        
 
         if (isImported) {
             const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
@@ -325,9 +332,9 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const response = await this.validatePin(pin)
+        const res = await this.validatePin(pin)
 
-        if(response.response == false || response.error) {
+        if(res.response == false || res.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
@@ -339,12 +346,14 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
+        const { error, response } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
         }
-
+        
+        const {privateKey, isImported} = response
+        
         if (Chains.evmChains.hasOwnProperty(this.chain)) {
             const keyringInstance = await helper.getCoinInstance(this.chain);
 
@@ -688,17 +697,19 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const response = await this.validatePin(pin)
+        const res = await this.validatePin(pin)
 
-        if(response.response == false || response.error) {
+        if(res.response == false || res.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response: {privateKey, isImported} } = await this.exportPrivateKey(address.toLowerCase(), pin);
+        const { error, response } = await this.exportPrivateKey(address.toLowerCase(), pin);
 
         if (error) {
             return { error };
         }
+        
+        const {privateKey, isImported} = response
 
         const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
