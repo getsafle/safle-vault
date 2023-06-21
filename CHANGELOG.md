@@ -483,3 +483,7 @@
 ### 1.28.0 (2023-06-21)
 
 * Updated sign message for imported wallets
+
+### 1.28.1 (2023-06-21)
+
+* update keyring to redirect to correct chain controller while importing wallet
