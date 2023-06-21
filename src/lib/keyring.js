@@ -489,6 +489,10 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
+        if (privateKey.startsWith('0x')) {
+            privateKey = privateKey.slice(2)
+        }
+
         const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption');
 
         let address;

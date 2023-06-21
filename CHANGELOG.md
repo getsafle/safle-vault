@@ -487,3 +487,7 @@
 ### 1.28.1 (2023-06-21)
 
 * update keyring to redirect to correct chain controller while importing wallet
+
+### 1.28.2 (2023-06-21)
+
+* update keyring to slice incoming private key if it has '0x' prefixed for it to be imported
