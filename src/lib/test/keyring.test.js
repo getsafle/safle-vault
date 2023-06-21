@@ -170,7 +170,7 @@ describe('exportPrivateKey' , ()=>{
 
     test('exportPrivateKey/valid' , async()=>{  
         let result = await vault.exportPrivateKey(accAddress,pin)
-        privateKey=result.response
+        privateKey=result.response.privateKey
        
         
     })
