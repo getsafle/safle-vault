@@ -45,7 +45,7 @@
     "@getsafle/transaction-controller": "^1.9.3",
     "@getsafle/vault-bitcoin-controller": "^1.2.3",
     "@getsafle/vault-bsc-controller": "^1.2.0",
-    "@getsafle/vault-eth-controller": "^1.4.2",
+    "@getsafle/vault-eth-controller": "^1.4.1",
     "@getsafle/vault-polygon-controller": "^1.2.3",
     "bip39": "^3.1.0",
     "crypto-js": "^4.1.1",
