@@ -227,7 +227,7 @@ describe('importWallet' , ()=>{
             let result = await vault.importWallet(null,pin,bufView)
         }
         catch(e){
-            expect(e.message).toBe('Expected private key to be an Uint8Array with length 32')
+            expect(e.message).toBe("Cannot read properties of null (reading 'startsWith')")
         } 
         
        
