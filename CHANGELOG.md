@@ -491,3 +491,7 @@
 ### 1.28.2 (2023-06-21)
 
 * update keyring to slice incoming private key if it has '0x' prefixed for it to be imported
+
+### 1.28.3 (2023-06-22)
+
+* Enabling sign transaction for an imported wallet on ETH chain

@@ -338,14 +338,6 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
-        if (this.chain === 'ethereum') {
-            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
-
-            const signedTx = await this.keyringInstance.signTransaction(rawTx, web3);
-
-            return { response: signedTx };
-        }
-
         const { error, response } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
@@ -353,6 +345,18 @@ class Keyring {
         }
         
         const {privateKey, isImported} = response
+ 
+        if (this.chain === 'ethereum') {
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+            if(isImported) {
+                const signedTransaction = await this.keyringInstance.signTransaction(rawTx, web3, privateKey);
+                return { response: signedTransaction };
+            }
+            else {
+                const signedTx = await this.keyringInstance.signTransaction(rawTx, web3);
+                return { response: signedTx };
+            }
+        }
         
         if (Chains.evmChains.hasOwnProperty(this.chain)) {
             const keyringInstance = await helper.getCoinInstance(this.chain);
