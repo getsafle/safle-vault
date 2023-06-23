@@ -503,7 +503,10 @@ class Keyring {
         }
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
-            address = await this.keyringInstance.importWallet(privateKey);
+            
+            const keyringInstance = await helper.getCoinInstance(this.chain);
+
+            address = await keyringInstance.importWallet(privateKey);
 
             if (!accounts.error) {
                 numOfAcc = accounts.response.length;
