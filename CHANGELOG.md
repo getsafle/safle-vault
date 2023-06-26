@@ -495,3 +495,7 @@
 ### 1.28.3 (2023-06-22)
 
 * Enabling sign transaction for an imported wallet on ETH chain
+
+### 1.28.4 (2023-06-26)
+
+* Upgrade ETH, polygon and BSC controller, adding new controllers Optimism and Arbitrum
