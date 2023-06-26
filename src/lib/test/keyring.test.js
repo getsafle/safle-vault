@@ -280,7 +280,9 @@ describe('getActiveChains',()=>{
       response: [
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
-        { chain: 'polygon', symbol: 'MATIC' }
+        { chain: 'polygon', symbol: 'MATIC' },
+        { chain: 'optimism', symbol: 'OP' },
+        { chain: 'arbitrum', symbol: 'ARB' }
       ]
     }).toMatchObject(result)
         
