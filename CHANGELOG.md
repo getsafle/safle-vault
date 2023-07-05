@@ -499,3 +499,9 @@
 ### 1.29.0 (2023-06-26)
 
 * Upgrade ETH, polygon and BSC controller, adding new controllers Optimism and Arbitrum
+
+### 1.29.1 (2023-07-05)
+
+* Updated CI with added branches
+* Updated node version in CI
+* cleaned package structure

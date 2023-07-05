@@ -9,30 +9,17 @@ on:
     branches:
       - feature-*
       - bugfix-*
+      - dev
+      - test
   pull_request:
     branches:
         - feature-*
         - bugfix-*
+        - dev
+        - test
     paths:
       - package.json
       - CHANGELOG 
-#     types:
-#       - labeled
-#       - unlabeled
-#       - synchronize
-#       - opened
-#       - edited
-#       - ready_for_review
-#       - reopened
-#       - unlocked
-#   pull_request_review:
-#     types:
-#       - submitted
-#   check_suite:
-#     types:
-#       - completed
-#   status: {}  
-      
 
 jobs:
   build:
@@ -44,7 +31,7 @@ jobs:
     - name: Setting up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16.x'
+        node-version: '18.x'
 
     - name: Installing dependencies 
       run: npm ci
