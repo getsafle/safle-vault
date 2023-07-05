@@ -53,3 +53,5 @@ Thumbs.db
 test.js
 test2.js
 vault_test.js
+coverage
+.coverage
