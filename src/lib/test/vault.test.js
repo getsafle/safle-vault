@@ -104,96 +104,96 @@ describe("generateVault",()=>{
 })
 
 
-// describe("recoverVault",()=>{
-//     test('recoverVault/valid' , async()=>{
+describe("recoverVault",()=>{
+    test('recoverVault/valid' , async()=>{
        
-//         let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//         expect(result).toHaveProperty('response')
-//     })
-//     test('recoverVault/empty phrase' , async()=>{
-//        try{
-//             let result = await vault.recoverVault(null,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+        let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+        expect(result).toHaveProperty('response')
+    })
+    test('recoverVault/empty phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault(null,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
 
-//        }
-//        catch(e){
-//            expect(e.message).toBe('Seed phrase is invalid.')
-//        }
-//     })
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
 
-//     test('recoverVault/invalid phrase' , async()=>{
-//        try{
-//             let result = await vault.recoverVault("eafe",bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+    test('recoverVault/invalid phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault("eafe",bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
 
-//        }
-//        catch(e){
-//            expect(e.message).toBe('Seed phrase is invalid.')
-//        }
-//     })
-//     test('recoverVault/invalid phrase' , async()=>{
-//        try{
-//             let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
+    test('recoverVault/invalid phrase' , async()=>{
+       try{
+            let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
 
-//        }
-//        catch(e){
-//            expect(e.message).toBe('Seed phrase is invalid.')
-//        }
-//     })
-//     test('recoverVault/empty encryption key' , async()=>{
-//            let result = await vault.recoverVault(phrase,null,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//             expect(result).toHaveProperty('response')
+       }
+       catch(e){
+           expect(e.message).toBe('Seed phrase is invalid.')
+       }
+    })
+    test('recoverVault/empty encryption key' , async()=>{
+           let result = await vault.recoverVault(phrase,null,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+            expect(result).toHaveProperty('response')
       
-//     })
-//      test('recoverVault/invalid encryption key' , async()=>{
-//            let result = await vault.recoverVault(phrase,"fwefe",pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//             expect(result).toHaveProperty('response')
+    })
+     test('recoverVault/invalid encryption key' , async()=>{
+           let result = await vault.recoverVault(phrase,"fwefe",pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+            expect(result).toHaveProperty('response')
       
-//     })
-//     test('recoverVault/empty pin' , async()=>{
+    })
+    test('recoverVault/empty pin' , async()=>{
        
-//         let result = await vault.recoverVault(phrase,bufView,null,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//         expect(result.error).toBe("Wrong pin type, format or length") 
+        let result = await vault.recoverVault(phrase,bufView,null,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
        
       
-//     })
-//     test('recoverVault/invalid pin' , async()=>{
+    })
+    test('recoverVault/invalid pin' , async()=>{
        
-//         let result = await vault.recoverVault(phrase,bufView,"aefew",'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-//         expect(result.error).toBe("Wrong pin type, format or length") 
+        let result = await vault.recoverVault(phrase,bufView,"aefew",'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
       
-//     })
-//     test('recoverVault/empty marshal key' , async()=>{
-//         try{
-//         let result = await vault.recoverVault(phrase,bufView,pin,null)
+    })
+    test('recoverVault/empty marshal key' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,pin,null)
 
-//         }
-//         catch(e){
-//         expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
+        }
+        catch(e){
+        expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
 
-//         }
+        }
       
-//     })
-//     test('recoverVault/invalid marshal key' , async()=>{
-//         try{
-//         let result = await vault.recoverVault(phrase,bufView,pin,'efrwfrw')
+    })
+    test('recoverVault/invalid marshal key' , async()=>{
+        try{
+        let result = await vault.recoverVault(phrase,bufView,pin,'efrwfrw')
 
-//         }
-//         catch(e){
-//         expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
+        }
+        catch(e){
+        expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
 
-//         }
+        }
       
-//     })
-//     test('recoverVault/all empty params' , async()=>{
+    })
+    test('recoverVault/all empty params' , async()=>{
        
-//         let result = await vault.recoverVault(null,null,null,null)
-//         expect(result.error).toBe("Wrong pin type, format or length") 
+        let result = await vault.recoverVault(null,null,null,null)
+        expect(result.error).toBe("Wrong pin type, format or length") 
         
        
       
-//     })
-// })
+    })
+})
 
 
 
