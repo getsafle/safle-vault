@@ -290,7 +290,7 @@ class Keyring {
 
                 const signedMessage = await this.keyringInstance.sign(data, privateKey, web3);
 
-                return { response: signedMessage };
+                return { response: signedMessage.message };
             }
 
             if (Chains.evmChains.hasOwnProperty(this.chain)) {

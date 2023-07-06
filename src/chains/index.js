@@ -4,8 +4,10 @@ const polygon = require('@getsafle/vault-polygon-controller');
 const bitcoin = require('@getsafle/vault-bitcoin-controller');
 const optimism = require('@getsafle/vault-optimism-controller');
 const arbitrum = require('@getsafle/vault-arbitrum-controller');
+const mantle = require('@getsafle/vault-mantle-controller');
+const velas = require('@getsafle/vault-velas-controller');
 
-const evmChains = { 'ethereum': 'ETH', 'bsc': 'BSC', 'polygon': 'MATIC', 'optimism': 'OP' ,'arbitrum': 'ARB' };
+const evmChains = { 'ethereum': 'ETH', 'bsc': 'BSC', 'polygon': 'MATIC', 'optimism': 'OP' ,'arbitrum': 'ARB', 'mantle': 'MNT', 'velas': 'VLX' };
 const nonEvmChains = { 'bitcoin': 'BTC' };
 
 module.exports = {
@@ -15,6 +17,8 @@ module.exports = {
     bitcoin,
     optimism,
     arbitrum,
+    mantle,
+    velas,
     evmChains,
     nonEvmChains,
 }

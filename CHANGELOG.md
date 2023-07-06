@@ -505,3 +505,10 @@
 * Updated CI with added branches
 * Updated node version in CI
 * cleaned package structure
+
+### 1.30.0 (2023-07-06)
+
+* Updated all ethereum based controllers
+* Added new controllers for Mantle and Velas chain
+* Updated test cases according to new chain integrated
+* Updated sign message for ethereum chain to filter message hash
