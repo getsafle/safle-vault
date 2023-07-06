@@ -282,7 +282,9 @@ describe('getActiveChains',()=>{
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },
         { chain: 'optimism', symbol: 'OP' },
-        { chain: 'arbitrum', symbol: 'ARB' }
+        { chain: 'arbitrum', symbol: 'ARB' },
+        { chain: 'mantle', symbol: 'MNT' },
+        { chain: 'velas', symbol: 'VLX' }
       ]
     }).toMatchObject(result)
         
