@@ -512,3 +512,8 @@
 * Added new controllers for Mantle and Velas chain
 * Updated test cases according to new chain integrated
 * Updated sign message for ethereum chain to filter message hash
+
+### 1.30.01 (2023-07-8) Nightly version : only for experimental use
+
+* Updated vault state with decryptedVault
+* Updated rate limiting for pin validation, upto 10

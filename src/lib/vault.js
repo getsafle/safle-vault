@@ -10,11 +10,23 @@ const ERROR_MESSAGE = require('../constants/responses');
 
 class Vault extends Keyring {
 
-    constructor(vault) {
+    constructor({vault, encryptionKey}) {
         super();
         this.chain = 'ethereum';
         this.vault = vault;
-        this.initializeKeyringController()
+        this.initializeKeyringController();
+        if (vault && encryptionKey) {
+            this.initializeDecryptedVault(vault, encryptionKey);
+        }   
+    }
+
+    initializeDecryptedVault(vault, encryptionKey) {
+        const { decryptedVault, error }  = helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
+        if (error) {
+            return { error }
+        }
+        this.decryptedVault = decryptedVault;
+
     }
 
     initializeKeyringController() {
@@ -74,6 +86,8 @@ class Vault extends Keyring {
         const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 } }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
+
+        this.initializeDecryptedVault({vault, encryptionKey});
 
         this.vault = vault;
 

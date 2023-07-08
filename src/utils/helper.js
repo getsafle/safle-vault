@@ -176,7 +176,7 @@ async function cryptography(data, key, action) {
   return output;
 }
 
-async function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEncryptor) {
+function validateEncryptionKey(data, encryptionKey, encryptor, isCustomEncryptor) {
 
     const bytes = cryptojs.AES.decrypt(data, encryptionKey);
 

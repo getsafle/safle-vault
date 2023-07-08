@@ -115,13 +115,7 @@ class Keyring {
     }
 
     async getAccounts(encryptionKey) {
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
-
-        if (error) {
-            return { error }
-        }
-
-        this.decryptedVault = decryptedVault;
+        const decryptedVault = this.decryptedVault;
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
@@ -376,7 +370,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
-        const { decryptedVault, error } = await helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
+        const { decryptedVault, error } = helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
 
         if (error) {
             return { error }
@@ -483,7 +477,7 @@ class Keyring {
 
         const response = await this.validatePin(pin);
 
-        const { error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
         if (error) {
             return { error }
@@ -629,13 +623,7 @@ class Keyring {
     }
 
     async getVaultDetails(encryptionKey) {
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
-
-        if (error) {
-            return { error }
-        }
-
-        this.decryptedVault = decryptedVault;
+        const decryptedVault = this.decryptedVault;
 
         let accounts = { evm: { } };
 
@@ -742,9 +730,7 @@ class Keyring {
         return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
     }
 
-    async updateLabel(address, encryptionKey, newLabel) {
-
-        const { decryptedVault, error } = await helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+    async updateLabel(address, encryptionKey, newLabel, chainName) {
 
         if (error) {
             return { error }
