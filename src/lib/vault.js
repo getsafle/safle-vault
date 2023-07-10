@@ -87,7 +87,7 @@ class Vault extends Keyring {
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
-        this.initializeDecryptedVault({vault, encryptionKey});
+        this.initializeDecryptedVault(vault, encryptionKey);
 
         this.vault = vault;
 
