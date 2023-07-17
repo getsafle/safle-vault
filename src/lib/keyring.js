@@ -732,10 +732,6 @@ class Keyring {
 
     async updateLabel(address, encryptionKey, newLabel, chainName) {
 
-        if (error) {
-            return { error }
-        }
-
         if (newLabel === null || newLabel === undefined) {
             return { error: ERROR_MESSAGE.INCORRECT_LABEL_TYPE };
         }
