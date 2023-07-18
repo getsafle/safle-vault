@@ -518,7 +518,7 @@
 * Updated vault state with decryptedVault
 * Updated rate limiting for pin validation, upto 10
 
-### 1.30.0.2 (2023-07-17) Nightly version : only for experimental use
+### 1.30.02 (2023-07-17) Nightly version : only for experimental use
 
 * pakage dependency updates
 * update lable correction
