@@ -175,7 +175,11 @@ class Keyring {
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
-            const decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
+            let decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
+
+            if (decryptedPrivKey.startsWith('0x')) {
+                decryptedPrivKey = decryptedPrivKey.slice(2)
+            }
 
             return { response: { privateKey: decryptedPrivKey, isImported : isImportedAddress}}
         }
