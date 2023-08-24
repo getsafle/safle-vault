@@ -469,7 +469,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, address: address });
 
         return { response: vault };
     }
@@ -779,7 +779,7 @@ class Keyring {
 
         this.vault = vault;
 
-        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain });
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'update-label', vault: this.vault, chain: this.chain, address: address });
 
         return { response: vault };
     }
