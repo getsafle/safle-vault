@@ -388,6 +388,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
+        const res = await this.validatePin(pin)
+
+        if(res.response == false || res.error) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const { decryptedVault, error } = helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
 
         if (error) {
