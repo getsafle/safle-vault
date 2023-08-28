@@ -459,6 +459,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;

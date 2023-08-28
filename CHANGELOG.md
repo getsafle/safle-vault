@@ -532,4 +532,4 @@
 * Updated the logs for label update & delete account
 * Removed unused encryption key parameter in get accounts
 * Added validation for pin parameter in export private key, restore keyring state
-* Added validation for encryption key in add account, sign message
+* Added validation for encryption key in add account, sign message, delete account
