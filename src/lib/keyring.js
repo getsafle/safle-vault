@@ -154,6 +154,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
+        const response = await this.validatePin(pin);
+
+        if (response.response == false || response.error)  {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;
 
@@ -166,12 +172,6 @@ class Keyring {
         } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
-
-        const response = await this.validatePin(pin);
-
-        if (response.response == false || response.error)  {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN };
-        };
 
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;

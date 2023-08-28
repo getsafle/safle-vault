@@ -530,3 +530,5 @@
 ### 1.30.04 (2023-08-28) Nightly version : only for experimental use
 
 * Updated the logs for label update & delete account
+* Removed unused encryption key parameter in get accounts
+* Added validation for pin parameter in export private key
