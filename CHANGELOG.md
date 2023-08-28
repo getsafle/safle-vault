@@ -532,5 +532,5 @@
 * Updated the logs for label update & delete account
 * Removed unused encryption key parameter in get accounts
 * Added validation for pin parameter in export private key, restore keyring state
-* Added validation for encryption key in add account, sign message, delete account
+* Added validation for encryption key in add account, sign message, delete account, get vault details
 * Sync the pin validation steps with other methods in import wallet

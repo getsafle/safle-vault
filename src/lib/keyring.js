@@ -653,6 +653,13 @@ class Keyring {
     }
 
     async getVaultDetails(encryptionKey) {
+
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
         const decryptedVault = this.decryptedVault;
 
         let accounts = { evm: { } };
