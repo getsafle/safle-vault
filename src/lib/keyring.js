@@ -114,7 +114,8 @@ class Keyring {
         return { response: true };
     }
 
-    async getAccounts(encryptionKey) {
+    async getAccounts() {
+
         const decryptedVault = this.decryptedVault;
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
@@ -206,7 +207,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const acc = await this.getAccounts(encryptionKey);
+        const acc = await this.getAccounts();
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
@@ -303,7 +304,7 @@ class Keyring {
             
         }
         else{
-            const accounts = await this.getAccounts(encryptionKey);
+            const accounts = await this.getAccounts();
 
             if(accounts.response.filter(e => e.address === address).length < 1) {
                 return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
@@ -502,7 +503,7 @@ class Keyring {
         let isDuplicateAddress;
         let numOfAcc;
 
-        accounts = await this.getAccounts(encryptionKey);
+        accounts = await this.getAccounts();
 
         if (accounts.error) {
             numOfAcc = 0;
