@@ -507,15 +507,15 @@ class Keyring {
 
         const response = await this.validatePin(pin);
 
+        if(response.response == false || response.error) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
         if (error) {
             return { error }
         }
-
-        if(response.response == false || response.error) {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN };
-        };
 
         if (privateKey.startsWith('0x')) {
             privateKey = privateKey.slice(2)
