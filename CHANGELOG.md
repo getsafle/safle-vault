@@ -526,3 +526,7 @@
 ### 1.30.03 (2023-08-17) Nightly version : only for experimental use
 
 * Updated keyring to slice exported private key if it has '0x' prefixed to add backward campatability for imported wallets
+
+### 1.30.04 (2023-08-28) Nightly version : only for experimental use
+
+* Updated the logs for label update & delete account
