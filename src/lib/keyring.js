@@ -824,6 +824,7 @@ class Keyring {
     }
 
     async changePin(currentPin, newPin, encryptionKey) {
+        
         if (!Number.isInteger(currentPin) || currentPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -831,6 +832,18 @@ class Keyring {
         if (!Number.isInteger(newPin) || newPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
+
+        const response = await this.validatePin(currentPin);
+
+        if (response.response == false || response.error)  {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
+        const err = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (err.error) {
+            return { error : err.error }
+        }    
 
         const { error, response: mnemonic }= await this.exportMnemonic(currentPin);
 
