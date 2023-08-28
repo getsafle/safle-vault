@@ -279,6 +279,13 @@ class Keyring {
         if(res.response == false || res.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
+
+        const err = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (err.error) {
+            return { error : err.error }
+        }
+
         const { error, response } = await this.exportPrivateKey(address, pin);
 
         if (error) {
