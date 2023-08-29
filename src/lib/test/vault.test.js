@@ -8,6 +8,70 @@ let phrase="fun rough treat scan glimpse region century purpose expire video rem
 let pin=696969
 let vault =new Vault({})
 
+const logs = [
+    {
+        "action": "add-account",
+        "timestamp": 1000000000001,
+        "platform": "web",
+        "address": "0xF8919220F674a553F0F0F6e86481612A2bEd44EB",
+        "storage": [
+            "mobile"
+        ],
+        "_id": "64e881b05b04774ca85aee51"
+    },
+    {
+        "action": "add-account",
+        "timestamp": 1000000000002,
+        "platform": "web",
+        "address": "0x627437E29e7363C0F53896e84467EF6F8f9D0247",
+        "storage": [
+            "mobile"
+        ],
+        "_id": "64e881e3bae0e048dfaefc46"
+    },
+    {
+        "action": "add-account",
+        "timestamp": 1000000000003,
+        "platform": "web",
+        "address": "0xa1F77e4D8306000639D1d44a6013ad53b992182E",
+        "storage": [
+            "mobile"
+        ],
+        "_id": "64ec3339a58abcbf66a9b34a"
+    },
+    {
+        "action": "add-account",
+        "timestamp": 1000000000004,
+        "platform": "web",
+        "address": "0x9e6627384a3E6453b9EC061e4DaeD4cE0223bbdc",
+        "storage": [
+            "mobile"
+        ],
+        "_id": "64ec333ca58abcbf66a9b354"
+    },
+    {
+      "action": "add-account",
+      "timestamp": 1000000000005,
+      "platform": "mobile",
+      "address": "0xCccbD31ea19acE5688731148a4f63907F273BEe0",
+      "storage": [
+          "mobile"
+      ],
+      "_id": "64e87e9e72e00ccf96bce1fc"
+  },
+  {
+    "action": "delete-account",
+    "timestamp": 1000000000006,
+    "platform": "web",
+    "address": "0x9e6627384a3E6453b9EC061e4DaeD4cE0223bbdc",
+    "storage": [
+        "mobile"
+    ],
+    "_id": "64ec3339a58abcbf66a9b34a"
+  },
+  ]
+
+
 describe('getSupportedChains' , ()=>{
 
     test('getSupportedChains' , async()=>{
@@ -105,11 +169,24 @@ describe("generateVault",()=>{
 
 
 describe("recoverVault",()=>{
-    test('recoverVault/valid' , async()=>{
+    test('recoverVault/transaction valid' , async()=>{
        
         let result = await vault.recoverVault(phrase,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
         expect(result).toHaveProperty('response')
     })
+
+    test('recoverVault/logs valid' , async()=>{
+       
+        let result = await vault.recoverVault(phrase,bufView,pin,null,'logs', logs)
+        expect(result).toHaveProperty('response')
+    })
+
+    test('recoverVault/logs empty logs valid' , async()=>{
+       
+        let result = await vault.recoverVault(phrase,bufView,pin,null,'logs')
+        expect(result).toHaveProperty('response')
+    })
+
     test('recoverVault/empty phrase' , async()=>{
        try{
             let result = await vault.recoverVault(null,bufView,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
@@ -140,7 +217,8 @@ describe("recoverVault",()=>{
     })
     test('recoverVault/empty encryption key' , async()=>{
            let result = await vault.recoverVault(phrase,null,pin,'BgoGMHvB5R7iMNhZ2BoJd470aSZNEz9t2N8PBOWD')
-            expect(result).toHaveProperty('response')
+            expect(result.error).toBe("Please enter both encryptionKey and pin") 
+            
       
     })
      test('recoverVault/invalid encryption key' , async()=>{
@@ -164,14 +242,10 @@ describe("recoverVault",()=>{
       
     })
     test('recoverVault/empty marshal key' , async()=>{
-        try{
+
         let result = await vault.recoverVault(phrase,bufView,pin,null)
+        expect(result.error).toBe("Invalid API key passed") 
 
-        }
-        catch(e){
-        expect(e.message).toBe("Cannot destructure property 'transactions' of 'response' as it is undefined.")
-
-        }
       
     })
     test('recoverVault/invalid marshal key' , async()=>{
