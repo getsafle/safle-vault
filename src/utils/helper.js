@@ -74,7 +74,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
     }
   
     while (zeroCounter < 5 )
-
+  }
   return accountsArray;
 }
 
