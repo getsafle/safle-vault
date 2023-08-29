@@ -27,34 +27,53 @@ async function generatePrivData(mnemonic, pin) {
   return priv;
 }
 
-async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, unmarshalApiKey) {
+
+async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, unmarshalApiKey, recoverMechanism, logs) {
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
   let accountsArray = [];
   accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
-  do {
-    zeroCounter = 0;
-    for(let i=0; i < 5; i++) {
-      const vaultState = await keyringInstance.addNewAccount(keyring[0]);
-
-      const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'ethereum', unmarshalApiKey);
-      const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon', unmarshalApiKey);
-      const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc', unmarshalApiKey);
-      const label = this.createWalletLabels('all', i+2);
-
-      if (!ethActivity && !polygonActivity && !bscActivity) {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label, isExported: false });
-        zeroCounter++;
-      } else {
-        accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label, isExported: false });
-        zeroCounter = 0;
+  if( recoverMechanism === 'logs'){
+    for(let i=0; i < logs.length; i++){
+      if (logs[i].action === 'add-account'){
+        const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+        const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
+        const label = this.createWalletLabels('all', i+2);
+        if (Web3.utils.toChecksumAddress(logs[i].address) === newAccountAddr) {
+          accountsArray.push({ address: newAccountAddr, isDeleted: false, isImported: false, label, isExported: false });
+        }
+        
+      }
+      if(logs[i].action === 'delete-account') {
+        let ind = accountsArray.findIndex((acc) => acc.address === Web3.utils.toChecksumAddress(logs[i].address))
+        accountsArray[ind].isDeleted = ind ? true : accountsArray[ind].isDeleted;
       }
     }
-  }
 
-  while (zeroCounter < 5 )
+  } else if( recoverMechanism === 'transactions'){
+    do {
+      zeroCounter = 0;
+      for(let i=0; i < 5; i++) {
+        const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+  
+        const ethActivity = await getETHTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'ethereum', unmarshalApiKey);
+        const polygonActivity = await getPolygonTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'polygon', unmarshalApiKey);
+        const bscActivity = await getBSCTransactions(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], 'bsc', unmarshalApiKey);
+        const label = this.createWalletLabels('all', i+2);
+  
+        if (!ethActivity && !polygonActivity && !bscActivity) {
+          accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: true, isImported: false, label, isExported: false });
+          zeroCounter++;
+        } else {
+          accountsArray.push({ address: vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1], isDeleted: false, isImported: false, label, isExported: false });
+          zeroCounter = 0;
+        }
+      }
+    }
+  
+    while (zeroCounter < 5 )
 
   return accountsArray;
 }
