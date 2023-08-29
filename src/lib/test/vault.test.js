@@ -12,7 +12,7 @@ describe('getSupportedChains' , ()=>{
 
     test('getSupportedChains' , async()=>{
         
-        let result = await new Vault().getSupportedChains()
+        let result = await new Vault({}).getSupportedChains()
         expect({
         evmChains: { ethereum: 'ETH', bsc: 'BSC', polygon: 'MATIC', optimism: 'OP', arbitrum: 'ARB', mantle: 'MNT', velas: 'VLX' },
         nonEvmChains: { bitcoin: 'BTC' }
@@ -28,7 +28,7 @@ describe('generateMnemonic' , ()=>{
 
     test('generateMnemonic' , async()=>{
         
-        let result = await new Vault().generateMnemonic()
+        let result = await new Vault({}).generateMnemonic()
         Mnemonic=result
         expect(typeof(result)).toBe("string")
    
@@ -58,7 +58,7 @@ describe("generateVault",()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
        
-        let result = await new Vault().generateVault(bufView,null,Mnemonic)
+        let result = await new Vault({}).generateVault(bufView,null,Mnemonic)
         expect(result.error).toBe("Wrong pin type, format or length") 
 
     })
@@ -66,14 +66,14 @@ describe("generateVault",()=>{
     test('generateVault/empty encrption key' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        let result = await new Vault().generateVault(null,1111,Mnemonic)
+        let result = await new Vault({}).generateVault(null,1111,Mnemonic)
         expect(result.error).toBe('Wrong pin type, format or length')
     
     })
     test('generateVault/empty encrption key' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        let result = await new Vault().generateVault(null,111111,Mnemonic)
+        let result = await new Vault({}).generateVault(null,111111,Mnemonic)
         expect(result.error).toBe('Please enter both encryptionKey and pin')
     
     })
@@ -82,7 +82,7 @@ describe("generateVault",()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
         try{
-            let result = await new Vault().generateVault(bufView,1111,null)
+            let result = await new Vault({}).generateVault(bufView,1111,null)
         }
         catch(e){
             expect(e.message).toBe('Seed phrase is invalid.')
@@ -95,7 +95,7 @@ describe("generateVault",()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
       
-        let result = await new Vault().generateVault(null,null,null)
+        let result = await new Vault({}).generateVault(null,null,null)
         expect(result.error).toBe("Wrong pin type, format or length") 
     
               

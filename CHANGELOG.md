@@ -530,3 +530,8 @@
 ### 1.30.04 (2023-08-28) Nightly version : only for experimental use
 
 * Updated the logs for label update & delete account
+* Removed unused encryption key parameter in get accounts
+* Added validation for pin parameter in export private key, restore keyring state & current pin parameter in change pin
+* Added validation for encryption key in add account, sign message, delete account, get vault details & update label
+* Sync the pin validation steps with other methods in import wallet
+* Updated tests wrt changes in vault generation and parameter validations

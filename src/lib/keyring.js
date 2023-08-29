@@ -114,7 +114,8 @@ class Keyring {
         return { response: true };
     }
 
-    async getAccounts(encryptionKey) {
+    async getAccounts() {
+
         const decryptedVault = this.decryptedVault;
 
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
@@ -153,6 +154,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
+        const response = await this.validatePin(pin);
+
+        if (response.response == false || response.error)  {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;
 
@@ -165,12 +172,6 @@ class Keyring {
         } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
         }
-
-        const response = await this.validatePin(pin);
-
-        if (response.response == false || response.error)  {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN };
-        };
 
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
@@ -206,7 +207,13 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const acc = await this.getAccounts(encryptionKey);
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
+        const acc = await this.getAccounts();
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
             const accounts = await this.keyringInstance.getAccounts();
@@ -272,6 +279,13 @@ class Keyring {
         if(res.response == false || res.error) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
+
+        const err = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (err.error) {
+            return { error : err.error }
+        }
+
         const { error, response } = await this.exportPrivateKey(address, pin);
 
         if (error) {
@@ -303,7 +317,7 @@ class Keyring {
             
         }
         else{
-            const accounts = await this.getAccounts(encryptionKey);
+            const accounts = await this.getAccounts();
 
             if(accounts.response.filter(e => e.address === address).length < 1) {
                 return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
@@ -374,6 +388,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
+        const res = await this.validatePin(pin)
+
+        if(res.response == false || res.error) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const { decryptedVault, error } = helper.validateEncryptionKey(vault, JSON.stringify(encryptionKey));
 
         if (error) {
@@ -439,6 +459,12 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
         let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
 
         const importedChain = (chain === 'eth') ? 'evmChains' : chain;
@@ -481,15 +507,15 @@ class Keyring {
 
         const response = await this.validatePin(pin);
 
+        if(response.response == false || response.error) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
         const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
 
         if (error) {
             return { error }
         }
-
-        if(response.response == false || response.error) {
-            return { error: ERROR_MESSAGE.INCORRECT_PIN };
-        };
 
         if (privateKey.startsWith('0x')) {
             privateKey = privateKey.slice(2)
@@ -502,7 +528,7 @@ class Keyring {
         let isDuplicateAddress;
         let numOfAcc;
 
-        accounts = await this.getAccounts(encryptionKey);
+        accounts = await this.getAccounts();
 
         if (accounts.error) {
             numOfAcc = 0;
@@ -627,6 +653,13 @@ class Keyring {
     }
 
     async getVaultDetails(encryptionKey) {
+
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
         const decryptedVault = this.decryptedVault;
 
         let accounts = { evm: { } };
@@ -736,6 +769,12 @@ class Keyring {
 
     async updateLabel(address, encryptionKey, newLabel, chainName) {
 
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
         if (newLabel === null || newLabel === undefined) {
             return { error: ERROR_MESSAGE.INCORRECT_LABEL_TYPE };
         }
@@ -785,6 +824,7 @@ class Keyring {
     }
 
     async changePin(currentPin, newPin, encryptionKey) {
+        
         if (!Number.isInteger(currentPin) || currentPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
@@ -792,6 +832,18 @@ class Keyring {
         if (!Number.isInteger(newPin) || newPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
+
+        const response = await this.validatePin(currentPin);
+
+        if (response.response == false || response.error)  {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
+        const err = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (err.error) {
+            return { error : err.error }
+        }    
 
         const { error, response: mnemonic }= await this.exportMnemonic(currentPin);
 

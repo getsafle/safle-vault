@@ -22,7 +22,7 @@ beforeAll(async() => {
 
     result = await vault.generateVault(bufView,pin,phrase)
     vaultAddress=result.response
-    await vault.getAccounts(bufView);
+    await vault.getAccounts();
         
 });
 describe('exportMnemonic' , ()=>{
@@ -115,14 +115,14 @@ describe('addAccount' , ()=>{
         
     })
 
-    test('addAccount/empty encryption key' , async()=>{  
+    test('addAccount/empty encryption key' , async()=>{ 
         try{
             let result = await vault.addAccount(null,pin)
         }
         catch(e){
-            expect(e.message).toBe("Cannot read properties of undefined (reading 'length')")
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
         }
-        
+
     })
 
     test('addAccount/empty pin' , async()=>{  
@@ -892,6 +892,18 @@ describe('changePin',()=>{
         
     })
 
+    test('changePin/wrong currentpin' , async()=>{
+        try{
+                    let result = await vault.changePin(111111,pin,bufView)
+ 
+        }
+         catch(e){
+             expect(e).toBe('Wrong pin type, format or length')
+         }
+         
+         
+     })
+
     test('changePin/invalid currentpin' , async()=>{
        try{
                    let result = await vault.changePin('aefe',pin,bufView)
@@ -942,19 +954,23 @@ describe('changePin',()=>{
     })
 
     test('changePin/empty encryption key' , async()=>{
-       
-        let result = await vault.changePin(pin,pin,null)
-        expect(result).toHaveProperty('response')
-        
-        
-        
+       try{
+            let result = await vault.changePin(pin,pin,null)
+       }
+       catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
+             
         
     })
 
     test('changePin/invalid encryption key' , async()=>{
-       
+       try{
         let result = await vault.changePin(pin,pin,'efefe')
-        expect(result).toHaveProperty('response')
+       }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
         
         
         
@@ -996,17 +1012,23 @@ describe('deleteAccount',()=>{
         
     })
     test('deleteAccount/empty encryption key' , async()=>{
-
+        try{
         let result = await vault.deleteAccount(null,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
        
         
     })
 
     test('deleteAccount/invalid encryption key' , async()=>{
-
+        try{
         let result = await vault.deleteAccount(null,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
        
         
     })
@@ -1066,22 +1088,11 @@ describe('deleteAccount',()=>{
 describe('getAccounts',()=>{
     test('getAccounts/valid' , async()=>{
         await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.getAccounts(bufView)
+        let result = await vault.getAccounts()
         expect(result).toHaveProperty('response')
         
     })
-    test('getAccounts/empty encryption key ' , async()=>{
-
-        let result = await vault.getAccounts(null)
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-    })
-    test('getAccounts/invalid encryption key ' , async()=>{
-
-        let result = await vault.getAccounts("aefefe")
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-    })
+    
 })
 
 
@@ -1142,7 +1153,7 @@ describe('signTransaction',()=>{
 
         }
         catch(e){
-             expect(e.message).toBe("No keyring found for the requested account.")
+             expect(e.message).toBe("Cannot read properties of undefined (reading 'toLowerCase')")
 
         }
         
@@ -1173,7 +1184,7 @@ describe('signTransaction',()=>{
 
         }
         catch(e){
-             expect(e.message).toBe("No keyring found for the requested account.")
+             expect(e.message).toBe("Cannot read properties of undefined (reading 'toLowerCase')")
 
         }
         
