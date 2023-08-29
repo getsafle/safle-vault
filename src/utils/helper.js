@@ -48,7 +48,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       }
       if(logs[i].action === 'delete-account') {
         let ind = accountsArray.findIndex((acc) => acc.address === Web3.utils.toChecksumAddress(logs[i].address))
-        accountsArray[ind].isDeleted = ind ? true : accountsArray[ind].isDeleted;
+        ind >= 0 ? accountsArray[ind].isDeleted = true : false;
       }
     }
 
