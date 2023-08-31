@@ -98,20 +98,31 @@ class Vault extends Keyring {
         return { response: vault };
     }
 
-    async recoverVault(mnemonic, encryptionKey, pin, unmarshalApiKey) {
+    async recoverVault(mnemonic, encryptionKey, pin, unmarshalApiKey, recoverMechanism = 'transactions', logs = {}) {
+
         if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+        }
+        
+        if (!encryptionKey) {
+            return { error : ERROR_MESSAGE.ENTER_CREDS }
+        } 
+
+        if(recoverMechanism === 'transactions' && !unmarshalApiKey) { 
+            return { error: ERROR_MESSAGE.INVALID_API_KEY };
         }
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, unmarshalApiKey);
+        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, unmarshalApiKey, recoverMechanism, logs);
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
         const numberOfAccounts = accountsArray.length;
 
         const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+
+        this.decryptedVault = rawVault
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 

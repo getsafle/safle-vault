@@ -526,3 +526,13 @@
 ### 1.30.03 (2023-08-17) Nightly version : only for experimental use
 
 * Updated keyring to slice exported private key if it has '0x' prefixed to add backward campatability for imported wallets
+
+### 1.30.04 (2023-08-28) Nightly version : only for experimental use
+
+* Updated the logs for label update & delete account
+* Removed unused encryption key parameter in get accounts
+* Added validation for pin parameter in export private key, restore keyring state & current pin parameter in change pin
+* Added validation for encryption key in add account, sign message, delete account, get vault details & update label
+* Sync the pin validation steps with other methods in import wallet
+* Updated tests wrt changes in vault generation and parameter validations
+* Implemented vault recovery using logs and updated tests
