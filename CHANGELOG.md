@@ -536,3 +536,8 @@
 * Sync the pin validation steps with other methods in import wallet
 * Updated tests wrt changes in vault generation and parameter validations
 * Implemented vault recovery using logs and updated tests
+
+### 1.30.05 (2023-09-08) Nightly version : only for experimental use
+
+* Implemented account recovery in case of deleted accounts, both generated and imported
+* Added test cases for account recovery
