@@ -45,6 +45,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-mnemonic', vault: this.vault, chain: this.chain });
+
         return { response: mnemonic }
     }
 
