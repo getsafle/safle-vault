@@ -184,17 +184,20 @@ class Keyring {
                 decryptedPrivKey = decryptedPrivKey.slice(2)
             }
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: { privateKey: decryptedPrivKey, isImported : isImportedAddress}}
         }
 
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: {privateKey, isImported : isImportedAddress}  }
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
         return { response: {privateKey, isImported : isImportedAddress}  };
     }
 
