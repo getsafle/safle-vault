@@ -29,15 +29,19 @@ async function generatePrivData(mnemonic, pin) {
 
 
 async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, unmarshalApiKey, recoverMechanism, logs) {
+  
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
   let accountsArray = [];
-  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
+  
+  indexAddress ? accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' }) : null
+  
+  // accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
 
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
-      if (logs[i].action === 'add-account'){
+      if (logs[i].action === 'add-account' && logs[i].chain === "ethereum"){
         const vaultState = await keyringInstance.addNewAccount(keyring[0]);
         const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
         const label = this.createWalletLabels('all', i+2);
@@ -74,6 +78,30 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
     }
   
     while (zeroCounter < 5 )
+  }
+  return accountsArray;
+}
+
+async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs) {
+  
+  let accountsArray = [];
+  if( recoverMechanism === 'logs'){
+    for(let i=0; i < logs.length; i++){
+      if (logs[i].action === 'add-account' && logs[i].chain === "bitcoin"){
+        const {address} = await keyringInstance.addAccount();
+        // const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
+        const label = this.createWalletLabels('all', i+2);
+        if (logs[i].address === address) {
+          accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
+        }
+        
+      }
+      if(logs[i].action === 'delete-account') {
+        let ind = accountsArray.findIndex((acc) => acc.address === logs[i].address)
+        ind >= 0 ? accountsArray[ind].isDeleted = true : false;
+      }
+    }
+
   }
   return accountsArray;
 }
@@ -121,7 +149,8 @@ async function getCoinInstance(chain, mnemonic) {
     return keyringInstance;
   }
 
-  const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
+  // const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
+  const keyringInstance = new Chains[chain].KeyringController({mnemonic: mnemonic, network: 'TESTNET'});
   
   return keyringInstance;
 }
@@ -233,6 +262,7 @@ module.exports = {
   stringToArrayBuffer,
   generatePrivData,
   removeEmptyAccounts,
+  getAccountsFromLogs,
   getCoinInstance,
   getAssetDetails,
   cryptography,

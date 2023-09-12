@@ -1,5 +1,6 @@
 const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
+const BitcoinKeyringController= require('@getsafle/vault-bitcoin-controller').KeyringController ;
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -49,6 +50,13 @@ class Vault extends Keyring {
         this.keyringInstance = keyringController;
     }
 
+    // initializeBitcoinKeyringController(mnemonic) {
+    //     // const mnemonic = "example install inhale chronic quick kangaroo tonight awful vast resist best very";
+    //     const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
+    //     // this.bitcoinKeyringInstance = keyringController;
+    //     this["bitcoin"] = keyringController;
+    // }
+
     async generateMnemonic(entropy) {
         var mnemonic;
 
@@ -83,13 +91,21 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 } }
+        // this.initializeBitcoinKeyringController(mnemonic);
+
+        // const {address: addedAcc } = await this.bitcoinKeyringInstance.addAccount();
+
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 },}
+                        //    bitcoin : { public: [ { address: addedAcc, isDeleted: false, isImported: false, label: 'Bitcoin Wallet 1' } ], numberOfAccounts: 1 } }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
         this.initializeDecryptedVault(vault, encryptionKey);
 
         this.vault = vault;
+
+        console.log("decyypted vault = = ", this.decryptedVault);
+        console.log("this = ", this);
 
         this.logs.updateState({
             logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault }],
@@ -120,7 +136,34 @@ class Vault extends Keyring {
 
         const numberOfAccounts = accountsArray.length;
 
-        const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+        let rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+
+
+        const activeChains = await this.getActiveChains();
+
+        const evmChainList = Object.keys(Chains.evmChains);
+
+        const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
+
+        //generate other chain's keyring instance and get accounts from logs
+        if (filteredChains.length > 0) {
+            filteredChains.forEach(async (chainData) => {
+                const { response: mnemonic } = await this.exportMnemonic(pin);
+
+                const keyringInstance = await helper.getCoinInstance(chainData.chain.toLowerCase(), mnemonic);
+
+                const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
+                const numberOfAcc = accArray.length;
+
+
+                rawVault = { chainData: { public: accountsArray, numberOfAcc } }
+                // for (let i = 0; i < numberOfAcc; i++) {
+                //     await this[chainData.chain].addAccount();
+                // }
+            })
+        }
+
+        
 
         this.decryptedVault = rawVault
 

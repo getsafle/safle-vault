@@ -350,7 +350,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
  
-        const { error, response } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
+        const { error, response } = await this.exportPrivateKey(rawTx.from, pin);
+        // const { error, response } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -406,10 +407,11 @@ class Keyring {
 
         const activeChains = await this.getActiveChains();
 
-        const valuesToRemove = Object.keys(Chains.evmChains);
+        const evmChainList = Object.keys(Chains.evmChains);
 
-        const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
+        const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
 
+        //generate other chain's keyring instance and add accounts to it as per decrypted vault
         if (filteredChains.length > 0) {
             filteredChains.forEach(async (chainData) => {
                 const { response: mnemonic } = await this.exportMnemonic(pin);
@@ -431,6 +433,7 @@ class Keyring {
 
         const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
 
+        // clearing vault state and adding new accounts as per decrypted vault
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
         const numberOfAcc = this.decryptedVault.eth.numberOfAccounts;
@@ -718,7 +721,7 @@ class Keyring {
 
         const activeChains = await this.getActiveChains();
 
-        const valuesToRemove = Object.keys(Chains.evmChains);
+        const evmChainList = Object.keys(Chains.evmChains);
 
         accounts.evm.generatedWallets = ({ ...decryptedVault.eth.public })
 
@@ -728,7 +731,7 @@ class Keyring {
             accounts.evm.importedWallets = ({ ...decryptedVault.importedWallets.evmChains.data });
         }
 
-        const filteredChains = activeChains.response.filter(activeChains => !valuesToRemove.includes(activeChains.chain));
+        const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
 
         let nonEvmAccs = [];
 
@@ -738,18 +741,21 @@ class Keyring {
 
             if (containsGenerated) {
                 nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
-
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
-
-                accounts[chain] = { generatedWallets: [ ...result ] };
+                
+                // Comment - It is filtering is-deleted and is-imported data
+                // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
+                
+                // accounts[chain] = { generatedWallets: [ ...result ] };
+                accounts[chain] = { generatedWallets: [ ...decryptedVault[chain].public ] };
             }
             
             if (containsImported) {
                 nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
+                // Comment - It is filtering is-deleted and is-imported data
+                // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
 
-                let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
-
-                (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
+                // (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
+               (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...decryptedVault.importedWallets[chain].data ] } : accounts[chain].importedWallets = [ ...decryptedVault.importedWallets[chain].data ];
             }
         });
 
@@ -791,7 +797,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        const { error, response } = await this.exportPrivateKey(address.toLowerCase(), pin);
+        // const { error, response } = await this.exportPrivateKey(address.toLowerCase(), pin);
+        const { error, response } = await this.exportPrivateKey(address, pin);
 
         if (error) {
             return { error };
@@ -854,12 +861,17 @@ class Keyring {
                 return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
             }
             if (typeof this.decryptedVault[chain].public[objIndex].label === 'string' || this.decryptedVault[chain].public[objIndex].label instanceof String){
-                const chains = Object.keys(Chains.evmChains);
-                let obj = chains.reduce(function(acc, curr) {
-                    acc[curr] = newLabel;
-                    return acc;
-                  }, {});
+                if(chain === 'eth') {
+                    const chains = Object.keys(Chains.evmChains);
+                    let obj = chains.reduce(function(acc, curr) {
+                        acc[curr] = newLabel;
+                        return acc;
+                    }, {});
                   this.decryptedVault[chain].public[objIndex].label = obj;
+                }
+                else {
+                    this.decryptedVault[chain].public[objIndex].label = newLabel;
+                }             
             }
             else{
             (chain === 'eth') ? this.decryptedVault[chain].public[objIndex].label[chainName] = newLabel : this.decryptedVault[chain].public[objIndex].label = newLabel;
