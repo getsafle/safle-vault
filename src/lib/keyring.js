@@ -880,6 +880,23 @@ class Keyring {
         return { response: vault };
     }
 
+    async resetAllImportedWallets(currentPin, newPin) {
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
+            return null;
+        } 
+
+        let data = this.decryptedVault.importedWallets[importedChain].data
+        for(let i = 0; i < data.length; i++) {
+            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
+            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
+            this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
+        }
+}
+
+
     async changePin(currentPin, newPin, encryptionKey) {
         
         if (!Number.isInteger(currentPin) || currentPin < 0) {
@@ -911,6 +928,8 @@ class Keyring {
         const privData = await helper.generatePrivData(mnemonic, newPin);
 
         this.decryptedVault.eth.private = privData;
+
+        await this.resetAllImportedWallets(currentPin, newPin);
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
