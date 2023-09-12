@@ -541,3 +541,4 @@
 
 * Implemented account recovery in case of deleted accounts, both generated and imported
 * Added test cases for account recovery
+* Added logs for export mnemonic
