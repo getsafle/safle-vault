@@ -56,3 +56,4 @@ vault_test.js
 coverage
 .coverage
 safle-vault.code-workspace
+vault_test.json
