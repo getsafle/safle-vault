@@ -45,6 +45,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-mnemonic', vault: this.vault, chain: this.chain });
+
         return { response: mnemonic }
     }
 
@@ -182,17 +184,20 @@ class Keyring {
                 decryptedPrivKey = decryptedPrivKey.slice(2)
             }
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: { privateKey: decryptedPrivKey, isImported : isImportedAddress}}
         }
 
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: {privateKey, isImported : isImportedAddress}  }
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
         return { response: {privateKey, isImported : isImportedAddress}  };
     }
 
@@ -496,6 +501,58 @@ class Keyring {
         this.vault = vault;
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'delete-account', vault: this.vault, chain: this.chain, address: address });
+
+        return { response: vault };
+    }
+
+    async restoreAccount(encryptionKey, address, pin) {
+        if (!Number.isInteger(pin) || pin < 0) {
+            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        }
+
+        const { response } = await this.validatePin(pin);
+
+        if(response == false) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN };
+        };
+
+        const { error } = helper.validateEncryptionKey(this.vault, JSON.stringify(encryptionKey));
+        
+        if (error) {
+            return { error }
+        }
+
+        let chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        let objIndex;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
+
+            objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
+                obj.address === address
+            ));
+
+            this.decryptedVault.importedWallets[importedChain].data[objIndex].isDeleted = false;
+        } else {
+
+            objIndex = this.decryptedVault[chain].public.findIndex((obj => 
+                obj.address === address
+            ));
+
+            if(objIndex < 0) {
+                return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
+            }
+
+            this.decryptedVault[chain].public[objIndex].isDeleted = false;
+        }
+
+        const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption', this.encryptor, this.isCustomEncryptor);
+
+        this.vault = vault;
+
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-account', vault: this.vault, chain: this.chain, address, platform: this.platform });
 
         return { response: vault };
     }
@@ -823,6 +880,23 @@ class Keyring {
         return { response: vault };
     }
 
+    async resetAllImportedWallets(currentPin, newPin) {
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
+            return null;
+        } 
+
+        let data = this.decryptedVault.importedWallets[importedChain].data
+        for(let i = 0; i < data.length; i++) {
+            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
+            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
+            this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
+        }
+}
+
+
     async changePin(currentPin, newPin, encryptionKey) {
         
         if (!Number.isInteger(currentPin) || currentPin < 0) {
@@ -854,6 +928,8 @@ class Keyring {
         const privData = await helper.generatePrivData(mnemonic, newPin);
 
         this.decryptedVault.eth.private = privData;
+
+        await this.resetAllImportedWallets(currentPin, newPin);
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 
