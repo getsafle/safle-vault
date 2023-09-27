@@ -779,7 +779,7 @@ describe('sign',()=>{
             let result = await vault.sign(data,"abc",pin,ethUrl)
         }
         catch(e){
-            expect(e.message).toBe('Given address "null" is not a valid Ethereum address.')
+            expect(e.message).toBe('Given address "abc" is not a valid Ethereum address.')
         }
         
 
