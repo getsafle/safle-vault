@@ -167,7 +167,7 @@ class Keyring {
 
         let isImportedAddress;
 
-        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
         } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
             isImportedAddress = false;
@@ -176,7 +176,7 @@ class Keyring {
         }
 
         if (isImportedAddress) {
-            const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)).privateKey;
+            const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
             let decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
 
@@ -324,7 +324,7 @@ class Keyring {
         else{
             const accounts = await this.getAccounts();
 
-            if(accounts.response.filter(e => Web3.utils.toChecksumAddress(e.address) === Web3.utils.toChecksumAddress(address)).length < 1) {
+            if(accounts.response.filter(e => e.address === address).length < 1) {
                 return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
             }
 
@@ -476,17 +476,17 @@ class Keyring {
 
         let objIndex;
 
-        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
 
             objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             this.decryptedVault.importedWallets[importedChain].data[objIndex].isDeleted = true;
         } else {
 
             objIndex = this.decryptedVault[chain].public.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             if(objIndex < 0) {
@@ -528,17 +528,17 @@ class Keyring {
 
         let objIndex;
 
-        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
 
             objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             this.decryptedVault.importedWallets[importedChain].data[objIndex].isDeleted = false;
         } else {
 
             objIndex = this.decryptedVault[chain].public.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             if(objIndex < 0) {
@@ -601,7 +601,7 @@ class Keyring {
                 numOfAcc = accounts.response.length;
 
                 accounts.response.forEach(element => { 
-                    if (Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) {
+                    if (element.address === address) {
                         isDuplicateAddress = true;
                     }
                 });
@@ -635,7 +635,7 @@ class Keyring {
                 accounts.response.forEach(element => { 
                     numOfAcc = accounts.response.length;
 
-                    if (Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) {
+                    if (element.address === address) {
                         isDuplicateAddress = true;
                     }
                 });
@@ -842,17 +842,17 @@ class Keyring {
 
         let objIndex;
 
-        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
 
             objIndex = this.decryptedVault.importedWallets[importedChain].data.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             this.decryptedVault.importedWallets[importedChain].data[objIndex].label = newLabel;
         } else {
 
             objIndex = this.decryptedVault[chain].public.findIndex((obj => 
-                Web3.utils.toChecksumAddress(obj.address) === Web3.utils.toChecksumAddress(address)
+                obj.address === address
             ));
 
             if(objIndex < 0) {

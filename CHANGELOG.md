@@ -547,4 +547,6 @@
 
 ### 1.30.06 (2023-09-27) Nightly version : only for experimental use
 
-* Added checksum for every address comparison in vault
+* Added checksum for address comparison in export private key
+* Updated label creation according to logs
+* Updated test cases according to checksum address comparison in export private key

@@ -180,10 +180,13 @@ describe('exportPrivateKey' , ()=>{
 
     test('exportPrivateKey/empty accAddress' , async()=>{ 
         
-        let result = await vault.exportPrivateKey(null,pin)
-        expect(result.error).toBe('This address is not present in the vault')        
-       
-       
+        try{
+            let result = await vault.exportPrivateKey(null,pin)
+        }
+        catch(e){
+            expect(e.message).toBe('Given address "null" is not a valid Ethereum address.')
+        }
+            
         
     })
 
@@ -772,9 +775,13 @@ describe('sign',()=>{
     test('sign/invalid address' , async()=>{
         
         let data="hello world"
-       
-        let result = await vault.sign(data,"abc",pin,ethUrl)
-        expect(result.error).toBe('This address is not present in the vault')
+        try{
+            let result = await vault.sign(data,"abc",pin,ethUrl)
+        }
+        catch(e){
+            expect(e.message).toBe('Given address "null" is not a valid Ethereum address.')
+        }
+        
 
         
         
