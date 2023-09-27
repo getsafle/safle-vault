@@ -169,7 +169,7 @@ class Keyring {
 
         if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address === address) == true) {
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
             isImportedAddress = false;
         } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };

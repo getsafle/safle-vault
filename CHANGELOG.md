@@ -544,3 +544,9 @@
 * Added logs for export mnemonic
 * Added logs for export private key(for generated and imported accounts)
 * Re-encrypted the private key of imported wallets and updated vault state after change pin
+
+### 1.30.06 (2023-09-27) Nightly version : only for experimental use
+
+* Added checksum for address comparison in export private key
+* Updated label creation according to logs
+* Updated test cases according to checksum address comparison in export private key
