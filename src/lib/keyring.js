@@ -45,6 +45,8 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-mnemonic', vault: this.vault, chain: this.chain });
+
         return { response: mnemonic }
     }
 
@@ -167,7 +169,7 @@ class Keyring {
 
         if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address === address) == true) {
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
             isImportedAddress = false;
         } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
@@ -182,17 +184,20 @@ class Keyring {
                 decryptedPrivKey = decryptedPrivKey.slice(2)
             }
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: { privateKey: decryptedPrivKey, isImported : isImportedAddress}}
         }
 
         if (chain === 'eth') {
             const privateKey = await this.keyringInstance.exportAccount(address)
 
+            this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
             return { response: {privateKey, isImported : isImportedAddress}  }
         }
 
         const { privateKey } = await this[chain].exportPrivateKey(address);
 
+        this.logs.getState().logs.push({ timestamp: Date.now(), action: 'export-private-key', vault: this.vault, chain: this.chain, address: address, isImportedAddress: isImportedAddress });
         return { response: {privateKey, isImported : isImportedAddress}  };
     }
 
@@ -887,6 +892,23 @@ class Keyring {
         return { response: vault };
     }
 
+    async resetAllImportedWallets(currentPin, newPin) {
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
+            return null;
+        } 
+
+        let data = this.decryptedVault.importedWallets[importedChain].data
+        for(let i = 0; i < data.length; i++) {
+            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
+            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
+            this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
+        }
+}
+
+
     async changePin(currentPin, newPin, encryptionKey) {
         
         if (!Number.isInteger(currentPin) || currentPin < 0) {
@@ -918,6 +940,8 @@ class Keyring {
         const privData = await helper.generatePrivData(mnemonic, newPin);
 
         this.decryptedVault.eth.private = privData;
+
+        await this.resetAllImportedWallets(currentPin, newPin);
 
         const vault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
 

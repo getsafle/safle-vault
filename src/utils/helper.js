@@ -44,9 +44,10 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       if (logs[i].action === 'add-account' && logs[i].chain === "ethereum"){
         const vaultState = await keyringInstance.addNewAccount(keyring[0]);
         const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
-        const label = this.createWalletLabels('all', i+2);
         if (Web3.utils.toChecksumAddress(logs[i].address) === newAccountAddr) {
+          const label = this.createWalletLabels('all', labelCounter);
           accountsArray.push({ address: newAccountAddr, isDeleted: false, isImported: false, label, isExported: false });
+          labelCounter++;
         }
         
       }
