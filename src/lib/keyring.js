@@ -169,7 +169,8 @@ class Keyring {
 
         if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        // } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address.toLowerCase() === address.toLowerCase()) == true) {
             isImportedAddress = false;
         } else {
             return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
@@ -318,6 +319,12 @@ class Keyring {
                 return { response: signedMessage.message };
             }
 
+            if (Chains?.[this.chain]){
+                    const { signedMessage } = await this[this.chain].signMessage(data, address, privateKey);
+                    return { response: signedMessage };
+                
+            }
+
             return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY }
             
         }
@@ -384,7 +391,15 @@ class Keyring {
             return { response: signedTx };
         }
 
-        const { signedTransaction } = await this[this.chain].signTransaction(rawTx, privateKey);
+        if(isImported) {
+            const { signedTransaction } = await this[this.chain].signTransaction(rawTx, privateKey);
+            return { response: signedTransaction };
+        }
+        else{
+            const { signedTransaction } = await this[this.chain].signTransaction(rawTx);
+            return { response: signedTransaction };
+        }
+        
 
         return { response: signedTransaction };
     }
@@ -751,7 +766,7 @@ class Keyring {
                 // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
                 
                 // accounts[chain] = { generatedWallets: [ ...result ] };
-                accounts[chain] = { generatedWallets: [ ...decryptedVault[chain].public ] };
+                accounts[chain] = { generatedWallets: { ...decryptedVault[chain].public } };
             }
             
             if (containsImported) {
@@ -760,7 +775,7 @@ class Keyring {
                 // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
 
                 // (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
-               (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...decryptedVault.importedWallets[chain].data ] } : accounts[chain].importedWallets = [ ...decryptedVault.importedWallets[chain].data ];
+               (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: { ...decryptedVault.importedWallets[chain].data } } : accounts[chain].importedWallets = { ...decryptedVault.importedWallets[chain].data };
             }
         });
 
@@ -786,7 +801,7 @@ class Keyring {
             return { response: balance };
         }
 
-        const balance = await Chains[this.chain].getBalance(address, rpcUrl);
+        const balance = await Chains[this.chain].getBalance(address);
 
         return { response: balance }; 
     }
@@ -893,19 +908,38 @@ class Keyring {
     }
 
     async resetAllImportedWallets(currentPin, newPin) {
-        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
-        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
 
-        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
+        // const evmChainList = Object.keys(Chains.evmChains);
+
+        // const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
+
+
+        
+        // const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        // const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        // if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
+        //     return null;
+        // } 
+
+        if (_.get(this.decryptedVault, `importedWallets`) === undefined) {
             return null;
         } 
 
-        let data = this.decryptedVault.importedWallets[importedChain].data
-        for(let i = 0; i < data.length; i++) {
-            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
-            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
-            this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
+        let importedChains  = Object.keys(this.decryptedVault.importedWallets)
+        
+        for (let importedChain of importedChains)
+        {
+            let data = this.decryptedVault.importedWallets[importedChain].data
+            for(let i = 0; i < data.length; i++) {
+                let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
+                let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
+                this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
+            // 'U2FsdGVkX18FMr+3tQmbjTmKwadj5fPPqrExRP8mUUXxT9chK9fkt+Dl8GtC7hJNfiazLnQEubTILDten238/cVqH6UAZduAXnrEEDmOUBBzhS/xAT7LvB17tycrGDXy'
+
+            }
         }
+        
 }
 
 

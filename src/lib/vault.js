@@ -50,13 +50,6 @@ class Vault extends Keyring {
         this.keyringInstance = keyringController;
     }
 
-    // initializeBitcoinKeyringController(mnemonic) {
-    //     // const mnemonic = "example install inhale chronic quick kangaroo tonight awful vast resist best very";
-    //     const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
-    //     // this.bitcoinKeyringInstance = keyringController;
-    //     this["bitcoin"] = keyringController;
-    // }
-
     async generateMnemonic(entropy) {
         var mnemonic;
 
