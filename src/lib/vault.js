@@ -146,8 +146,9 @@ class Vault extends Keyring {
         const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
 
         //generate other chain's keyring instance and get accounts from logs
+        let obj = {}
         if (filteredChains.length > 0) {
-            filteredChains.forEach(async (chainData) => {
+            for ( let chainData of filteredChains ) {
                 const { response: mnemonic } = await this.exportMnemonic(pin);
 
                 const keyringInstance = await helper.getCoinInstance(chainData.chain.toLowerCase(), mnemonic);
@@ -155,15 +156,12 @@ class Vault extends Keyring {
                 const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
                 const numberOfAcc = accArray.length;
 
+                rawVault[chainData.chain.toLowerCase()] = { public: accArray, numberOfAcc } 
+                console.log("rawVault = ", rawVault);
 
-                rawVault = { chainData: { public: accountsArray, numberOfAcc } }
-                // for (let i = 0; i < numberOfAcc; i++) {
-                //     await this[chainData.chain].addAccount();
-                // }
-            })
+            }
+            
         }
-
-        
 
         this.decryptedVault = rawVault
 

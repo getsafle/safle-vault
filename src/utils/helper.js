@@ -34,10 +34,8 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
 
   let zeroCounter = 0;
   let accountsArray = [];
-  
-  indexAddress ? accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' }) : null
-  
-  // accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
+  accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
+  let labelCounter = 2;  // as an initial wallet is already created above with label 'Wallet 1'
 
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
@@ -86,14 +84,16 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
 async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs) {
   
   let accountsArray = [];
+  let labelCounter = 1;
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && logs[i].chain === "bitcoin"){
         const {address} = await keyringInstance.addAccount();
         // const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
-        const label = this.createWalletLabels('all', i+2);
         if (logs[i].address === address) {
+          const label = this.createWalletLabels('bitcoin', labelCounter);
           accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
+          labelCounter ++;
         }
         
       }
@@ -150,8 +150,8 @@ async function getCoinInstance(chain, mnemonic) {
     return keyringInstance;
   }
 
-  // const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
-  const keyringInstance = new Chains[chain].KeyringController({mnemonic: mnemonic, network: 'TESTNET'});
+  const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
+  // const keyringInstance = new Chains[chain].KeyringController({mnemonic: mnemonic, network: 'TESTNET'});
   
   return keyringInstance;
 }
@@ -248,7 +248,11 @@ function createWalletLabels(labelObj = 'all', walletIndex = 1) {
   
   if (labelObj === 'all') {
     chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
-  } else {
+  } 
+  else if (labelObj === 'bitcoin') {
+    labels = `${labelObj.charAt(0).toUpperCase() + labelObj.substr(1).toLowerCase()} Wallet ${walletIndex}`;
+  }
+  else {
     chains.forEach(chain => {
       if (labels[chain] !== undefined) {
         labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
