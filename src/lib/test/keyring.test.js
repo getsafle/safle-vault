@@ -7,7 +7,7 @@ let Vault = require('../vault')
 const Web3 = require('web3')
 const bufView = [48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87, 35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167, 105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233, 152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36];
 let phrase="fun rough treat scan glimpse region century purpose expire video remind second"
-let pin=696969
+let pin="696969"
 let result 
 let vault =new Vault({})
 let vaultAddress
@@ -37,7 +37,7 @@ describe('exportMnemonic' , ()=>{
     })
     test('Valid exportMnemonic/INCORRECT_PIN' , async()=>{
         
-        let result = await new KeyRing().exportMnemonic(111111)
+        let result = await new KeyRing().exportMnemonic("111111")
         expect(result.error).toBe('Incorrect pin')
     })
 
@@ -140,7 +140,7 @@ describe('addAccount' , ()=>{
     })
     test('addAccount/invalid pin' , async()=>{  
         
-        let result = await vault.addAccount(bufView,"123333")
+        let result = await vault.addAccount(bufView,123333)
         expect(result.error).toBe("Wrong pin type, format or length")
         
         
@@ -148,7 +148,7 @@ describe('addAccount' , ()=>{
     })
     test('addAccount/incorrect pin' , async()=>{  
         
-        let result = await vault.addAccount(bufView,123333)
+        let result = await vault.addAccount(bufView,"123333")
         expect(result.error).toBe("Incorrect pin")
         
         
@@ -205,7 +205,7 @@ describe('exportPrivateKey' , ()=>{
     })
     test('exportPrivateKey/incorrect pin' , async()=>{ 
         
-        let result = await vault.exportPrivateKey(accAddress,111111)
+        let result = await vault.exportPrivateKey(accAddress,"111111")
         expect(result.error).toBe("Incorrect pin")
         
     })
@@ -256,7 +256,7 @@ describe('importWallet' , ()=>{
     })
     test('importWallet/incorrect pin' , async()=>{ 
        
-        let result = await vault.importWallet("0x"+privateKey,111111,bufView)
+        let result = await vault.importWallet("0x"+privateKey,"111111",bufView)
         expect(result.error).toBe("Incorrect pin") 
        
         
@@ -374,7 +374,7 @@ describe('deleteAccount',()=>{
     })
     test('deleteAccount/incorrect pin' , async()=>{
       
-        let result = await vault.deleteAccount(bufView,accAddress,111111)
+        let result = await vault.deleteAccount(bufView,accAddress,"111111")
         expect(result.error).toBe("Incorrect pin")
        
         
@@ -469,7 +469,7 @@ describe('restoreAccount', ()=> {
     })
     test('restoreAccount/incorrect pin' , async()=>{
       
-        let result = await vault.restoreAccount(bufView,accAddress,111111)
+        let result = await vault.restoreAccount(bufView,accAddress,"111111")
         expect(result.error).toBe("Incorrect pin")
        
         
@@ -745,7 +745,7 @@ describe('sign',()=>{
         console.log("sign/valid--->",pin,ethUrl)
                 await vault.restoreKeyringState(vault,pin,bufView)
 
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",696969,ethUrl)
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
         console.log("sign/valid--->",result)
        expect(result.response).toHaveProperty('signature')
         
@@ -798,7 +798,7 @@ describe('sign',()=>{
         
         let data="hello world"
         
-        let result = await vault.sign(data,"abc",111111,ethUrl)
+        let result = await vault.sign(data,"abc","111111",ethUrl)
         expect(result.error).toBe("Incorrect pin")    
         
     })
@@ -1097,7 +1097,7 @@ describe('changePin',()=>{
 
     test('changePin/wrong currentpin' , async()=>{
         try{
-                    let result = await vault.changePin(111111,pin,bufView)
+                    let result = await vault.changePin("111111",pin,bufView)
  
         }
          catch(e){
@@ -1384,7 +1384,7 @@ describe('signTransaction',()=>{
     };
         
 
-        let result = await vault.signTransaction("evwf",112344,polygonRpcUrl)
+        let result = await vault.signTransaction("evwf","112344",polygonRpcUrl)
         expect(result.error).toBe('Incorrect pin')
 
         

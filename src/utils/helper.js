@@ -20,7 +20,7 @@ async function stringToArrayBuffer(str) {
 async function generatePrivData(mnemonic, pin) {
   var priv = {};
 
-  const encryptedMnemonic = cryptojs.AES.encrypt(mnemonic, pin.toString()).toString();
+  const encryptedMnemonic = cryptojs.AES.encrypt(mnemonic, pin).toString();
 
   priv.encryptedMnemonic = encryptedMnemonic;
 

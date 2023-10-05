@@ -550,3 +550,8 @@
 * Added checksum for address comparison in export private key
 * Updated label creation according to logs
 * Updated test cases according to checksum address comparison in export private key
+
+### 1.30.07 (2023-10-05) Nightly version : only for experimental use
+
+* Updated pin format from number to string
+* updated test cases according to pin format changes
