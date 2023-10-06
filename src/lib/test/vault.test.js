@@ -5,7 +5,7 @@ const crypto = require('crypto');
 let Vault = require('../vault')
 const bufView = [48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87, 35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167, 105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233, 152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36];
 let phrase="fun rough treat scan glimpse region century purpose expire video remind second"
-let pin=696969
+let pin="696969"
 let vault =new Vault({})
 
 const logs = [
@@ -114,7 +114,7 @@ describe("generateVault",()=>{
     test('generateVault/valid case' , async()=>{
        
 
-        let result = await  vault.generateVault(bufView,111111,Mnemonic)
+        let result = await  vault.generateVault(bufView,"111111",Mnemonic)
         expect(result).toHaveProperty('response')
     })
 
@@ -130,14 +130,14 @@ describe("generateVault",()=>{
     test('generateVault/empty encrption key' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        let result = await new Vault({}).generateVault(null,1111,Mnemonic)
+        let result = await new Vault({}).generateVault(null,"1111",Mnemonic)
         expect(result.error).toBe('Wrong pin type, format or length')
     
     })
     test('generateVault/empty encrption key' , async()=>{
         const buf = new ArrayBuffer(32);
         const bufView = new Uint8Array(buf);
-        let result = await new Vault({}).generateVault(null,111111,Mnemonic)
+        let result = await new Vault({}).generateVault(null,"111111",Mnemonic)
         expect(result.error).toBe('Please enter both encryptionKey and pin')
     
     })

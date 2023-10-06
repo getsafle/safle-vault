@@ -69,7 +69,8 @@ class Vault extends Keyring {
     }
 
     async generateVault(encryptionKey, pin, mnemonic) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+    
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -100,7 +101,7 @@ class Vault extends Keyring {
 
     async recoverVault(mnemonic, encryptionKey, pin, unmarshalApiKey, recoverMechanism = 'transactions', logs = {}) {
 
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
         
