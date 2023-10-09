@@ -909,19 +909,6 @@ class Keyring {
 
     async resetAllImportedWallets(currentPin, newPin) {
 
-        // const evmChainList = Object.keys(Chains.evmChains);
-
-        // const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
-
-
-        
-        // const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
-        // const importedChain = (chain === 'eth') ? 'evmChains' : chain;
-
-        // if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) === undefined) {
-        //     return null;
-        // } 
-
         if (_.get(this.decryptedVault, `importedWallets`) === undefined) {
             return null;
         } 
@@ -935,7 +922,6 @@ class Keyring {
                 let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
                 let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
                 this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
-            // 'U2FsdGVkX18FMr+3tQmbjTmKwadj5fPPqrExRP8mUUXxT9chK9fkt+Dl8GtC7hJNfiazLnQEubTILDten238/cVqH6UAZduAXnrEEDmOUBBzhS/xAT7LvB17tycrGDXy'
 
             }
         }

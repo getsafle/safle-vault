@@ -48,7 +48,7 @@
     "@getsafle/safle-identity-wallet": "^1.3.0",
     "@getsafle/transaction-controller": "^1.9.3",
     "@getsafle/vault-arbitrum-controller": "^1.0.7",
-    "@getsafle/vault-bitcoin-controller": "^2.0.0",
+    "@getsafle/vault-bitcoin-controller": "^2.0.1",
     "@getsafle/vault-bsc-controller": "^1.2.2",
     "@getsafle/vault-eth-controller": "^1.4.5",
     "@getsafle/vault-mantle-controller": "^1.0.0",
