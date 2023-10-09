@@ -555,3 +555,7 @@
 
 * Updated pin format from number to string
 * updated test cases according to pin format changes
+
+### 1.30.08 (2023-10-09) Nightly version : only for experimental use
+
+* Updated pin while resetting imported wallets

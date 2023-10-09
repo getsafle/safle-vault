@@ -890,8 +890,8 @@ class Keyring {
 
         let data = this.decryptedVault.importedWallets[importedChain].data
         for(let i = 0; i < data.length; i++) {
-            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentpin, 'decryption');
-            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newpin, 'encryption');
+            let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin, 'decryption');
+            let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin, 'encryption');
             this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
         }
 }
