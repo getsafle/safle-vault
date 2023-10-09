@@ -169,7 +169,6 @@ class Keyring {
 
         if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
             isImportedAddress = true;
-        // } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => Web3.utils.toChecksumAddress(element.address) === Web3.utils.toChecksumAddress(address)) == true) {
         } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address.toLowerCase() === address.toLowerCase()) == true) {
             isImportedAddress = false;
         } else {
@@ -363,7 +362,6 @@ class Keyring {
         };
  
         const { error, response } = await this.exportPrivateKey(rawTx.from, pin);
-        // const { error, response } = await this.exportPrivateKey(rawTx.from.toLowerCase(), pin);
 
         if (error) {
             return { error };
@@ -761,20 +759,11 @@ class Keyring {
 
             if (containsGenerated) {
                 nonEvmAccs = decryptedVault[chain].public.filter((address) => address.isDeleted === false);
-                
-                // Comment - It is filtering is-deleted and is-imported data
-                // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
-                
-                // accounts[chain] = { generatedWallets: [ ...result ] };
                 accounts[chain] = { generatedWallets: { ...decryptedVault[chain].public } };
             }
             
             if (containsImported) {
                 nonEvmAccs = decryptedVault.importedWallets[chain].data.filter((address) => address.isDeleted === false);
-                // Comment - It is filtering is-deleted and is-imported data
-                // let result = nonEvmAccs.map(a => { return { address: a.address, label: a.label }});
-
-                // (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: [ ...result ] } : accounts[chain].importedWallets = [ ...result ];
                (accounts[chain] === undefined) ? accounts[chain] = { importedWallets: { ...decryptedVault.importedWallets[chain].data } } : accounts[chain].importedWallets = { ...decryptedVault.importedWallets[chain].data };
             }
         });
@@ -817,7 +806,6 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         };
 
-        // const { error, response } = await this.exportPrivateKey(address.toLowerCase(), pin);
         const { error, response } = await this.exportPrivateKey(address, pin);
 
         if (error) {
@@ -919,8 +907,8 @@ class Keyring {
         {
             let data = this.decryptedVault.importedWallets[importedChain].data
             for(let i = 0; i < data.length; i++) {
-                let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin.toString(), 'decryption');
-                let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin.toString(), 'encryption');
+                let decryptedPrivKey = await helper.cryptography(data[i].privateKey, currentPin, 'decryption');
+                let encryptedPrivKey = await helper.cryptography(decryptedPrivKey, newPin, 'encryption');
                 this.decryptedVault.importedWallets[importedChain].data[i].privateKey = encryptedPrivKey
 
             }

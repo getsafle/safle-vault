@@ -89,7 +89,6 @@ async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanis
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && logs[i].chain === "bitcoin"){
         const {address} = await keyringInstance.addAccount();
-        // const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
         if (logs[i].address === address) {
           const label = this.createWalletLabels('bitcoin', labelCounter);
           accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
@@ -151,7 +150,6 @@ async function getCoinInstance(chain, mnemonic) {
   }
 
   const keyringInstance = new Chains[chain].KeyringController({ mnemonic });
-  // const keyringInstance = new Chains[chain].KeyringController({mnemonic: mnemonic, network: 'TESTNET'});
   
   return keyringInstance;
 }

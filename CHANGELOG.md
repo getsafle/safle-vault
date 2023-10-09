@@ -559,3 +559,7 @@
 ### 1.30.08 (2023-10-09) Nightly version : only for experimental use
 
 * Updated pin while resetting imported wallets
+
+### 1.31.0 (2023-10-09) Nightly version : only for experimental use
+
+* Integrated upgraded bitcoin controller into vault
