@@ -27,7 +27,7 @@ class Keyring {
     }
 
     async exportMnemonic(pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6 ) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -37,7 +37,7 @@ class Keyring {
             return { error: ERROR_MESSAGE.INCORRECT_PIN };
         }
 
-        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin, 'decryption');
 
         const spaceCount = mnemonic.split(" ").length - 1;
 
@@ -67,14 +67,14 @@ class Keyring {
              this.timeout = Date.now() + Config.REQUEST_BLOCKED_TIMEOUT;
             return { error: ERROR_MESSAGE.REQUEST_LIMIT_EXCEEDED };
         } else {
-            if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+            if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
                 return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
             }
     
             let spaceCount;
     
             try {
-                const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+                const mnemonic = await helper.cryptography(this.decryptedVault.eth.private.encryptedMnemonic, pin, 'decryption');
         
                 spaceCount = mnemonic.split(" ").length - 1;
             } catch (error) {
@@ -152,7 +152,7 @@ class Keyring {
     }
 
     async exportPrivateKey(address, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -179,7 +179,7 @@ class Keyring {
         if (isImportedAddress) {
             const privateKey = (chain === 'eth') ? this.decryptedVault.importedWallets.evmChains.data.find(element => element.address === address).privateKey : this.decryptedVault.importedWallets[chain].data.find(element => element.address === address).privateKey;
 
-            let decryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'decryption');
+            let decryptedPrivKey = await helper.cryptography(privateKey, pin, 'decryption');
 
             if (decryptedPrivKey.startsWith('0x')) {
                 decryptedPrivKey = decryptedPrivKey.slice(2)
@@ -203,7 +203,7 @@ class Keyring {
     }
 
     async addAccount(encryptionKey, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -276,7 +276,7 @@ class Keyring {
     }
 
     async signMessage(address, data, pin, encryptionKey, rpcUrl = '') {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -352,7 +352,7 @@ class Keyring {
     }
 
     async signTransaction(rawTx, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -405,7 +405,7 @@ class Keyring {
     }
 
     async restoreKeyringState(vault, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -451,7 +451,7 @@ class Keyring {
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
 
-        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin.toString(), 'decryption');
+        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin, 'decryption');
 
         // clearing vault state and adding new accounts as per decrypted vault
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
@@ -472,7 +472,7 @@ class Keyring {
     }
 
     async deleteAccount(encryptionKey, address, pin) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -524,8 +524,8 @@ class Keyring {
     }
 
     async restoreAccount(encryptionKey, address, pin) {
-        if (!Number.isInteger(pin) || pin < 0) {
-            throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
+            return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
         const { response } = await this.validatePin(pin);
@@ -576,7 +576,7 @@ class Keyring {
     }
 
     async importWallet(privateKey, pin, encryptionKey) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -596,7 +596,7 @@ class Keyring {
             privateKey = privateKey.slice(2)
         }
 
-        const encryptedPrivKey = await helper.cryptography(privateKey, pin.toString(), 'encryption');
+        const encryptedPrivKey = await helper.cryptography(privateKey, pin, 'encryption');
 
         let address;
         let accounts;
@@ -807,7 +807,7 @@ class Keyring {
     }
 
     async sign(data, address, pin, rpcUrl) {
-        if (!Number.isInteger(pin) || pin < 0 || pin.toString().length !=6) {
+        if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
         }
 
@@ -945,11 +945,11 @@ class Keyring {
 
     async changePin(currentPin, newPin, encryptionKey) {
         
-        if (!Number.isInteger(currentPin) || currentPin < 0) {
+        if (typeof(currentPin) != 'string' || currentPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
-        if (!Number.isInteger(newPin) || newPin < 0) {
+        if (typeof(newPin) != 'string' || newPin < 0) {
             throw ERROR_MESSAGE.INCORRECT_PIN_TYPE
         }
 
