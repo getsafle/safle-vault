@@ -93,9 +93,6 @@ class Vault extends Keyring {
 
         this.vault = vault;
 
-        console.log("decyypted vault = = ", this.decryptedVault);
-        console.log("this = ", this);
-
         this.logs.updateState({
             logs: [{ timestamp: Date.now(), action: 'vault-generation', vault: this.vault }],
         });
@@ -146,7 +143,6 @@ class Vault extends Keyring {
                 const numberOfAcc = accArray.length;
 
                 rawVault[chainData.chain.toLowerCase()] = { public: accArray, numberOfAcc } 
-                console.log("rawVault = ", rawVault);
 
             }
             

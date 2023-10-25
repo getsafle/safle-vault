@@ -563,3 +563,4 @@
 ### 1.31.0 (2023-10-09) Nightly version : only for experimental use
 
 * Integrated upgraded bitcoin controller into vault
+* Enable backward compatibility in vault recovery for evm chains for undefined chain parameter in logs
