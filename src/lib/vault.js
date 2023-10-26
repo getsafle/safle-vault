@@ -50,6 +50,11 @@ class Vault extends Keyring {
         this.keyringInstance = keyringController;
     }
 
+    initializeSupportedChainKeyringController(mnemonic) {
+        const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
+        this["bitcoin"] = keyringController;
+    }
+
     async generateMnemonic(entropy) {
         var mnemonic;
 
@@ -85,7 +90,15 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 },}
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 }}
+
+        this.initializeSupportedChainKeyringController(mnemonic);
+
+        for (const chain of Object.keys(Chains.nonEvmChains)) {
+            const {address: addedAcc } = await this[chain].addAccount();
+            let label = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet 1`
+            rawVault[chain] = { public: [ { address: addedAcc, isDeleted: false, isImported: false, label: label } ], numberOfAccounts: 1 }
+        }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 

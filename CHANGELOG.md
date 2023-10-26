@@ -564,3 +564,4 @@
 
 * Integrated upgraded bitcoin controller into vault
 * Enable backward compatibility in vault recovery for evm chains for undefined chain parameter in logs
+* Generate a default wallet for every chain when generating vault
