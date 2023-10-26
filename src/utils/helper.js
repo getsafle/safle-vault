@@ -43,7 +43,7 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
       if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
         const vaultState = await keyringInstance.addNewAccount(keyring[0]);
         const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
-        if (Web3.utils.toChecksumAddress(logs[i].address) === newAccountAddr) {
+        if (logs[i].address.toLowerCase() === newAccountAddr.toLowerCase()) {
           const label = this.createWalletLabels('all', labelCounter);
           accountsArray.push({ address: newAccountAddr, isDeleted: false, isImported: false, label, isExported: false });
           labelCounter++;
@@ -83,17 +83,25 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
 }
 
 async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs) {
+
+  //if mech = transaction - generate one acc for bitcoin
   
   let accountsArray = [];
-  let labelCounter = 1;
+  let {address} = await keyringInstance.addAccount();
+  const label = this.createWalletLabels('bitcoin', 1);
+  accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
+  let labelCounter = 2;
+  const chains = Object.keys(Chains.nonEvmChains);
+
   if( recoverMechanism === 'logs'){
+    let {address} = await keyringInstance.addAccount();
     for(let i=0; i < logs.length; i++){
-      if (logs[i].action === 'add-account' && logs[i].chain === "bitcoin"){
-        const {address} = await keyringInstance.addAccount();
+      if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
         if (logs[i].address === address) {
           const label = this.createWalletLabels('bitcoin', labelCounter);
           accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
           labelCounter ++;
+          address = (await keyringInstance.addAccount()).address;
         }
         
       }
@@ -103,7 +111,7 @@ async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanis
       }
     }
 
-  }
+  } 
   return accountsArray;
 }
 
