@@ -41,16 +41,16 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
-        const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+        let vaultState = await keyringInstance.addNewAccount(keyring[0]);
         const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
         if (logs[i].address.toLowerCase() === newAccountAddr.toLowerCase()) {
           const label = this.createWalletLabels('all', labelCounter);
-          accountsArray.push({ address: newAccountAddr, isDeleted: false, isImported: false, label, isExported: false });
+          accountsArray.push({ address: newAccountAddr.toLowerCase(), isDeleted: false, isImported: false, label, isExported: false });
           labelCounter++;
         }
         
       }
-      if(logs[i].action === 'delete-account') {
+      if(logs[i].action === 'delete-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)) {
         let ind = accountsArray.findIndex((acc) => acc.address === Web3.utils.toChecksumAddress(logs[i].address))
         ind >= 0 ? accountsArray[ind].isDeleted = true : false;
       }
@@ -96,17 +96,17 @@ async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanis
   if( recoverMechanism === 'logs'){
     let {address} = await keyringInstance.addAccount();
     for(let i=0; i < logs.length; i++){
-      if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
-        if (logs[i].address === address) {
+      if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain))){
+        if (logs[i].address.toLowerCase() === address.toLowerCase()) {
           const label = this.createWalletLabels('bitcoin', labelCounter);
-          accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
+          accountsArray.push({ address: address.toLowerCase(), isDeleted: false, isImported: false, label, isExported: false });
           labelCounter ++;
           address = (await keyringInstance.addAccount()).address;
         }
         
       }
-      if(logs[i].action === 'delete-account') {
-        let ind = accountsArray.findIndex((acc) => acc.address === logs[i].address)
+      if(logs[i].action === 'delete-account' && (chains.includes(logs[i].chain))) {
+        let ind = accountsArray.findIndex((acc) => acc.address.toLowerCase() === logs[i].address.toLowerCase())
         ind >= 0 ? accountsArray[ind].isDeleted = true : false;
       }
     }

@@ -566,3 +566,4 @@
 * Enable backward compatibility in vault recovery for evm chains for undefined chain parameter in logs
 * Generate a default wallet for every chain when generating vault
 * Add fallback for recover vault - the default address to be recovered for every chain
+* Updated recover vault to create default wallet address for bitcoin for preexisting vaults

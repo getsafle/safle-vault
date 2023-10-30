@@ -137,28 +137,20 @@ class Vault extends Keyring {
 
         let rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
 
-
-        const activeChains = await this.getActiveChains();
-
-        const evmChainList = Object.keys(Chains.evmChains);
-
-        const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
+        const nonEvmChainList = Object.keys(Chains.nonEvmChains);
 
         //generate other chain's keyring instance and get accounts from logs
         let obj = {}
-        if (filteredChains.length > 0) {
-            for ( let chainData of filteredChains ) {
-                const { response: mnemonic } = await this.exportMnemonic(pin);
+        for ( let chainData of nonEvmChainList) {
+            const { response: mnemonic } = await this.exportMnemonic(pin);
 
-                const keyringInstance = await helper.getCoinInstance(chainData.chain.toLowerCase(), mnemonic);
+            const keyringInstance = await helper.getCoinInstance(chainData.toLowerCase(), mnemonic);
 
-                const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
-                const numberOfAcc = accArray.length;
+            const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
+            const numberOfAcc = accArray.length;
 
-                rawVault[chainData.chain.toLowerCase()] = { public: accArray, numberOfAcc } 
+            rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAcc } 
 
-            }
-            
         }
 
         this.decryptedVault = rawVault
