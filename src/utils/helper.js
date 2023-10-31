@@ -29,26 +29,28 @@ async function generatePrivData(mnemonic, pin) {
 
 
 async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, unmarshalApiKey, recoverMechanism, logs) {
+  
   const keyring = keyringInstance.getKeyringsByType(vaultState.keyrings[0].type);
 
   let zeroCounter = 0;
   let accountsArray = [];
   accountsArray.push({ address: indexAddress, isDeleted: false, isImported: false, label: 'Wallet 1' });
   let labelCounter = 2;  // as an initial wallet is already created above with label 'Wallet 1'
+  const chains = Object.keys(Chains.evmChains);
 
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
-      if (logs[i].action === 'add-account'){
-        const vaultState = await keyringInstance.addNewAccount(keyring[0]);
+      if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
+        let vaultState = await keyringInstance.addNewAccount(keyring[0]);
         const newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
-        if (Web3.utils.toChecksumAddress(logs[i].address) === newAccountAddr) {
+        if (logs[i].address.toLowerCase() === newAccountAddr.toLowerCase()) {
           const label = this.createWalletLabels('all', labelCounter);
-          accountsArray.push({ address: newAccountAddr, isDeleted: false, isImported: false, label, isExported: false });
+          accountsArray.push({ address: newAccountAddr.toLowerCase(), isDeleted: false, isImported: false, label, isExported: false });
           labelCounter++;
         }
         
       }
-      if(logs[i].action === 'delete-account') {
+      if(logs[i].action === 'delete-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)) {
         let ind = accountsArray.findIndex((acc) => acc.address === Web3.utils.toChecksumAddress(logs[i].address))
         ind >= 0 ? accountsArray[ind].isDeleted = true : false;
       }
@@ -77,6 +79,39 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
   
     while (zeroCounter < 5 )
   }
+  return accountsArray;
+}
+
+async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs) {
+
+  //if mech = transaction - generate one acc for bitcoin
+  
+  let accountsArray = [];
+  let {address} = await keyringInstance.addAccount();
+  const label = this.createWalletLabels('bitcoin', 1);
+  accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
+  let labelCounter = 2;
+  const chains = Object.keys(Chains.nonEvmChains);
+
+  if( recoverMechanism === 'logs'){
+    let {address} = await keyringInstance.addAccount();
+    for(let i=0; i < logs.length; i++){
+      if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain))){
+        if (logs[i].address.toLowerCase() === address.toLowerCase()) {
+          const label = this.createWalletLabels('bitcoin', labelCounter);
+          accountsArray.push({ address: address.toLowerCase(), isDeleted: false, isImported: false, label, isExported: false });
+          labelCounter ++;
+          address = (await keyringInstance.addAccount()).address;
+        }
+        
+      }
+      if(logs[i].action === 'delete-account' && (chains.includes(logs[i].chain))) {
+        let ind = accountsArray.findIndex((acc) => acc.address.toLowerCase() === logs[i].address.toLowerCase())
+        ind >= 0 ? accountsArray[ind].isDeleted = true : false;
+      }
+    }
+
+  } 
   return accountsArray;
 }
 
@@ -220,7 +255,11 @@ function createWalletLabels(labelObj = 'all', walletIndex = 1) {
   
   if (labelObj === 'all') {
     chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
-  } else {
+  } 
+  else if (labelObj === 'bitcoin') {
+    labels = `${labelObj.charAt(0).toUpperCase() + labelObj.substr(1).toLowerCase()} Wallet ${walletIndex}`;
+  }
+  else {
     chains.forEach(chain => {
       if (labels[chain] !== undefined) {
         labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
@@ -235,6 +274,7 @@ module.exports = {
   stringToArrayBuffer,
   generatePrivData,
   removeEmptyAccounts,
+  getAccountsFromLogs,
   getCoinInstance,
   getAssetDetails,
   cryptography,

@@ -57,3 +57,4 @@ coverage
 .coverage
 safle-vault.code-workspace
 vault_test.json
+vault_test_bitcoin.js

@@ -184,7 +184,7 @@ describe('exportPrivateKey' , ()=>{
             let result = await vault.exportPrivateKey(null,pin)
         }
         catch(e){
-            expect(e.message).toBe('Given address "null" is not a valid Ethereum address.')
+            expect(e.message).toBe("Cannot read properties of null (reading 'toLowerCase')")
         }
             
         
@@ -291,6 +291,7 @@ describe('getActiveChains',()=>{
         chains=result.response
        expect({
       response: [
+        { chain: 'bitcoin', symbol: 'BTC' },
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },

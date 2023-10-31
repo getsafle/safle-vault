@@ -1,5 +1,6 @@
 const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
+const BitcoinKeyringController= require('@getsafle/vault-bitcoin-controller').KeyringController ;
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -49,6 +50,11 @@ class Vault extends Keyring {
         this.keyringInstance = keyringController;
     }
 
+    initializeSupportedChainKeyringController(mnemonic) {
+        const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
+        this["bitcoin"] = keyringController;
+    }
+
     async generateMnemonic(entropy) {
         var mnemonic;
 
@@ -84,7 +90,15 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 } }
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 }}
+
+        this.initializeSupportedChainKeyringController(mnemonic);
+
+        for (const chain of Object.keys(Chains.nonEvmChains)) {
+            const {address: addedAcc } = await this[chain].addAccount();
+            let label = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet 1`
+            rawVault[chain] = { public: [ { address: addedAcc, isDeleted: false, isImported: false, label: label } ], numberOfAccounts: 1 }
+        }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
 
@@ -121,7 +135,23 @@ class Vault extends Keyring {
 
         const numberOfAccounts = accountsArray.length;
 
-        const rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+        let rawVault = { eth: { public: accountsArray, private: privData, numberOfAccounts } }
+
+        const nonEvmChainList = Object.keys(Chains.nonEvmChains);
+
+        //generate other chain's keyring instance and get accounts from logs
+        let obj = {}
+        for ( let chainData of nonEvmChainList) {
+            const { response: mnemonic } = await this.exportMnemonic(pin);
+
+            const keyringInstance = await helper.getCoinInstance(chainData.toLowerCase(), mnemonic);
+
+            const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
+            const numberOfAcc = accArray.length;
+
+            rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAcc } 
+
+        }
 
         this.decryptedVault = rawVault
 
