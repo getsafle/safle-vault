@@ -568,3 +568,8 @@
 * Add fallback for recover vault - the default address to be recovered for every chain
 * Updated recover vault to create default wallet address for bitcoin for preexisting vaults
 * Updated test result for bitcoin
+
+### 2.0.0 (2023-11-02)
+
+* Removed workflow for nightly release branch
+* Merging nightly release 1.31.0 into main branch
