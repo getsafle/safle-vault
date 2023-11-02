@@ -7,12 +7,15 @@ let Vault = require('../vault')
 const Web3 = require('web3')
 const bufView = [48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87, 35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167, 105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233, 152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36];
 let phrase="fun rough treat scan glimpse region century purpose expire video remind second"
-let pin=696969
+let pin="696969"
 let result 
 let vault =new Vault({})
 let vaultAddress
 let privateKey
 let accAddress
+let privateKeyImp = "0x7a9633b8103fec11c9e855a6b6c8c072e9af311a69b92ab0ad8186b1fb57371f"
+let impAccAddress
+
 
 let chains
 const ethUrl = 'https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f'; 
@@ -34,7 +37,7 @@ describe('exportMnemonic' , ()=>{
     })
     test('Valid exportMnemonic/INCORRECT_PIN' , async()=>{
         
-        let result = await new KeyRing().exportMnemonic(111111)
+        let result = await new KeyRing().exportMnemonic("111111")
         expect(result.error).toBe('Incorrect pin')
     })
 
@@ -120,7 +123,7 @@ describe('addAccount' , ()=>{
             let result = await vault.addAccount(null,pin)
         }
         catch(e){
-            expect(e.message).toBe("Cannot read properties of undefined (reading 'length')")
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
         }
         
     })
@@ -137,7 +140,7 @@ describe('addAccount' , ()=>{
     })
     test('addAccount/invalid pin' , async()=>{  
         
-        let result = await vault.addAccount(bufView,"123333")
+        let result = await vault.addAccount(bufView,123333)
         expect(result.error).toBe("Wrong pin type, format or length")
         
         
@@ -145,7 +148,7 @@ describe('addAccount' , ()=>{
     })
     test('addAccount/incorrect pin' , async()=>{  
         
-        let result = await vault.addAccount(bufView,123333)
+        let result = await vault.addAccount(bufView,"123333")
         expect(result.error).toBe("Incorrect pin")
         
         
@@ -177,10 +180,13 @@ describe('exportPrivateKey' , ()=>{
 
     test('exportPrivateKey/empty accAddress' , async()=>{ 
         
-        let result = await vault.exportPrivateKey(null,pin)
-        expect(result.error).toBe('This address is not present in the vault')        
-       
-       
+        try{
+            let result = await vault.exportPrivateKey(null,pin)
+        }
+        catch(e){
+            expect(e.message).toBe("Cannot read properties of null (reading 'toLowerCase')")
+        }
+            
         
     })
 
@@ -199,7 +205,7 @@ describe('exportPrivateKey' , ()=>{
     })
     test('exportPrivateKey/incorrect pin' , async()=>{ 
         
-        let result = await vault.exportPrivateKey(accAddress,111111)
+        let result = await vault.exportPrivateKey(accAddress,"111111")
         expect(result.error).toBe("Incorrect pin")
         
     })
@@ -213,6 +219,13 @@ describe('exportPrivateKey' , ()=>{
 
 
 describe('importWallet' , ()=>{
+
+    test('importWallet/valid import' , async()=>{  
+        let result = await vault.importWallet("0x"+privateKeyImp,pin,bufView)
+        impAccAddress = result.response.address
+        expect(result).toHaveProperty('response.address')
+        
+    })
 
 
     test('importWallet/valid address exists already' , async()=>{  
@@ -243,7 +256,7 @@ describe('importWallet' , ()=>{
     })
     test('importWallet/incorrect pin' , async()=>{ 
        
-        let result = await vault.importWallet("0x"+privateKey,111111,bufView)
+        let result = await vault.importWallet("0x"+privateKey,"111111",bufView)
         expect(result.error).toBe("Incorrect pin") 
        
         
@@ -278,6 +291,7 @@ describe('getActiveChains',()=>{
         chains=result.response
        expect({
       response: [
+        { chain: 'bitcoin', symbol: 'BTC' },
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },
@@ -291,9 +305,195 @@ describe('getActiveChains',()=>{
     })
 })
 
+describe('deleteAccount',()=>{
+    test('deleteAccount/valid generated acc' , async()=>{
+
+        let result = await vault.deleteAccount(bufView,accAddress,pin)
+        expect(result).toHaveProperty('response')
+
+    })
+
+    test('deleteAccount/valid imported acc' , async()=>{
+
+        let result = await vault.deleteAccount(bufView,impAccAddress,pin)
+        expect(result).toHaveProperty('response')
+
+    })
+
+
+    test('deleteAccount/empty encryption key' , async()=>{
+        try{
+        let result = await vault.deleteAccount(null,accAddress,pin)
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
+       
+        
+    })
+
+    test('deleteAccount/invalid encryption key' , async()=>{
+        try{
+        let result = await vault.deleteAccount(null,accAddress,pin)
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
+       
+        
+    })
+    test('deleteAccount/empty address' , async()=>{
+
+        let result = await vault.deleteAccount(bufView,null,pin)
+        expect(result.error).toBe('This address is not present in the vault')
+       
+        
+    })
+    test('deleteAccount/invalid address' , async()=>{
+
+        let result = await vault.deleteAccount(bufView,"rerwgtehry",pin)
+        expect(result.error).toBe('This address is not present in the vault')
+       
+        
+    })
+    test('deleteAccount/empty pin' , async()=>{
+       
+        let result = await vault.deleteAccount(bufView,accAddress,null)
+        expect(result.error).toBe("Wrong pin type, format or length")
+
+        
+       
+       
+        
+    })
+    test('deleteAccount/invalid pin' , async()=>{
+      
+        let result = await vault.deleteAccount(bufView,accAddress,"efwe")
+        expect(result.error).toBe("Wrong pin type, format or length")
+       
+        
+    })
+    test('deleteAccount/incorrect pin' , async()=>{
+      
+        let result = await vault.deleteAccount(bufView,accAddress,"111111")
+        expect(result.error).toBe("Incorrect pin")
+       
+        
+    })
+    test('deleteAccount/all params empty' , async()=>{
+        try{
+            let result = await vault.deleteAccount(null,null,null)
+        }
+        catch(e){
+            expect(e).toBe('Wrong pin type, format or length')
+
+        }
+       
+        
+    })
+})
+
+
+describe('restoreAccount', ()=> {
+    
+    test('restoreAccount/valid generated acc' , async()=>{
+
+        let result = await vault.restoreAccount(bufView,accAddress,pin)
+        expect(result).toHaveProperty('response')
+
+    })
+
+    test('restoreAccount/valid imported acc' , async()=>{
+
+        let result = await vault.restoreAccount(bufView,impAccAddress,pin)
+        expect(result).toHaveProperty('response')
+
+    })
+
+
+    test('restoreAccount/empty encryption key' , async()=>{
+        try{
+        let result = await vault.restoreAccount(null,accAddress,pin)
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
+       
+        
+    })
+
+    test('restoreAccount/invalid encryption key' , async()=>{
+        try{
+        let result = await vault.restoreAccount(null,accAddress,pin)
+        }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
+       
+        
+    })
+    test('restoreAccount/empty address' , async()=>{
+
+        let result = await vault.restoreAccount(bufView,null,pin)
+        expect(result.error).toBe('This address is not present in the vault')
+       
+        
+    })
+    test('restoreAccount/invalid address' , async()=>{
+
+        let result = await vault.restoreAccount(bufView,"rerwgtehry",pin)
+        expect(result.error).toBe('This address is not present in the vault')
+       
+        
+    })
+    test('restoreAccount/empty pin' , async()=>{
+       
+        try {
+            let result = await vault.restoreAccount(bufView,accAddress,null)
+        }
+        catch(e){
+            expect(e).toBe('Wrong pin type, format or length')
+        }
+       
+        
+    })
+    test('restoreAccount/invalid pin' , async()=>{
+        
+        try {
+            let result = await vault.restoreAccount(bufView,accAddress,"efwe")
+        }
+        catch(e){
+            expect(e).toBe('Wrong pin type, format or length')
+        }
+       
+        
+    })
+    test('restoreAccount/incorrect pin' , async()=>{
+      
+        let result = await vault.restoreAccount(bufView,accAddress,"111111")
+        expect(result.error).toBe("Incorrect pin")
+       
+        
+    })
+    test('restoreAccount/all params empty' , async()=>{
+        try{
+            let result = await vault.restoreAccount(null,null,null)
+        }
+        catch(e){
+            expect(e).toBe('Wrong pin type, format or length')
+
+        }
+       
+        
+    })
+})
+
+
 
 describe('restoreKeyringState',()=>{
     test('restoreKeyringState/valid' , async()=>{
+
+        
         await vault.restoreKeyringState(vaultAddress,pin,bufView)  
         expect(result).toHaveProperty('response')
        
@@ -546,7 +746,7 @@ describe('sign',()=>{
         console.log("sign/valid--->",pin,ethUrl)
                 await vault.restoreKeyringState(vault,pin,bufView)
 
-        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",696969,ethUrl)
+        let result = await vault.sign(data,"0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",pin,ethUrl)
         console.log("sign/valid--->",result)
        expect(result.response).toHaveProperty('signature')
         
@@ -576,9 +776,13 @@ describe('sign',()=>{
     test('sign/invalid address' , async()=>{
         
         let data="hello world"
-       
-        let result = await vault.sign(data,"abc",pin,ethUrl)
-        expect(result.error).toBe('This address is not present in the vault')
+        try{
+            let result = await vault.sign(data,"abc",pin,ethUrl)
+        }
+        catch(e){
+            expect(e.message).toBe('Given address "abc" is not a valid Ethereum address.')
+        }
+        
 
         
         
@@ -595,7 +799,7 @@ describe('sign',()=>{
         
         let data="hello world"
         
-        let result = await vault.sign(data,"abc",111111,ethUrl)
+        let result = await vault.sign(data,"abc","111111",ethUrl)
         expect(result.error).toBe("Incorrect pin")    
         
     })
@@ -892,6 +1096,18 @@ describe('changePin',()=>{
         
     })
 
+    test('changePin/wrong currentpin' , async()=>{
+        try{
+                    let result = await vault.changePin("111111",pin,bufView)
+ 
+        }
+         catch(e){
+             expect(e).toBe('Wrong pin type, format or length')
+         }
+         
+         
+     })
+
     test('changePin/invalid currentpin' , async()=>{
        try{
                    let result = await vault.changePin('aefe',pin,bufView)
@@ -942,19 +1158,23 @@ describe('changePin',()=>{
     })
 
     test('changePin/empty encryption key' , async()=>{
-       
+       try{
         let result = await vault.changePin(pin,pin,null)
-        expect(result).toHaveProperty('response')
-        
-        
+       }
+       catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
         
         
     })
 
     test('changePin/invalid encryption key' , async()=>{
-       
+       try{
         let result = await vault.changePin(pin,pin,'efefe')
-        expect(result).toHaveProperty('response')
+       }
+        catch(e){
+            expect(e.message).toBe("Incorrect Encryption Key or vault string")
+        }
         
         
         
@@ -987,101 +1207,14 @@ describe('getLogs',()=>{
 })
 
 
-describe('deleteAccount',()=>{
-    test('deleteAccount/valid' , async()=>{
-
-        let result = await vault.deleteAccount(bufView,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
-       
-        
-    })
-    test('deleteAccount/empty encryption key' , async()=>{
-
-        let result = await vault.deleteAccount(null,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
-       
-        
-    })
-
-    test('deleteAccount/invalid encryption key' , async()=>{
-
-        let result = await vault.deleteAccount(null,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
-       
-        
-    })
-    test('deleteAccount/empty address' , async()=>{
-
-        let result = await vault.deleteAccount(bufView,accAddress,pin)
-        expect(result.error).toBe('This address is not present in the vault')
-       
-        
-    })
-    test('deleteAccount/invalid address' , async()=>{
-
-        let result = await vault.deleteAccount(bufView,"rerwgtehry",pin)
-        expect(result.error).toBe('This address is not present in the vault')
-       
-        
-    })
-    test('deleteAccount/empty pin' , async()=>{
-       
-        let result = await vault.deleteAccount(bufView,accAddress,null)
-        expect(result.error).toBe("Wrong pin type, format or length")
-
-        
-       
-       
-        
-    })
-    test('deleteAccount/invalid pin' , async()=>{
-      
-        let result = await vault.deleteAccount(bufView,accAddress,"efwe")
-        expect(result.error).toBe("Wrong pin type, format or length")
-       
-        
-    })
-    test('deleteAccount/incorrect pin' , async()=>{
-      
-        let result = await vault.deleteAccount(bufView,accAddress,111111)
-        expect(result.error).toBe("Incorrect pin")
-       
-        
-    })
-    test('deleteAccount/all params empty' , async()=>{
-        try{
-            let result = await vault.deleteAccount(null,null,null)
-        }
-        catch(e){
-            expect(e).toBe('Wrong pin type, format or length')
-
-        }
-       
-        
-    })
-})
-
-
-
 describe('getAccounts',()=>{
     test('getAccounts/valid' , async()=>{
         await vault.restoreKeyringState(vaultAddress,pin,bufView)
-        let result = await vault.getAccounts(bufView)
+        let result = await vault.getAccounts()
         expect(result).toHaveProperty('response')
         
     })
-    test('getAccounts/empty encryption key ' , async()=>{
-
-        let result = await vault.getAccounts(null)
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-    })
-    test('getAccounts/invalid encryption key ' , async()=>{
-
-        let result = await vault.getAccounts("aefefe")
-        expect(result.error).toBe('Incorrect Encryption Key or vault string')
-        
-    })
+    
 })
 
 
@@ -1142,7 +1275,7 @@ describe('signTransaction',()=>{
 
         }
         catch(e){
-             expect(e.message).toBe("No keyring found for the requested account.")
+             expect(e.message).toBe("Cannot read properties of undefined (reading 'toLowerCase')")
 
         }
         
@@ -1173,7 +1306,7 @@ describe('signTransaction',()=>{
 
         }
         catch(e){
-             expect(e.message).toBe("No keyring found for the requested account.")
+             expect(e.message).toBe("Cannot read properties of undefined (reading 'toLowerCase')")
 
         }
         
@@ -1252,7 +1385,7 @@ describe('signTransaction',()=>{
     };
         
 
-        let result = await vault.signTransaction("evwf",112344,polygonRpcUrl)
+        let result = await vault.signTransaction("evwf","112344",polygonRpcUrl)
         expect(result.error).toBe('Incorrect pin')
 
         

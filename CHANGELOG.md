@@ -512,3 +512,64 @@
 * Added new controllers for Mantle and Velas chain
 * Updated test cases according to new chain integrated
 * Updated sign message for ethereum chain to filter message hash
+
+### 1.30.01 (2023-07-8) Nightly version : only for experimental use
+
+* Updated vault state with decryptedVault
+* Updated rate limiting for pin validation, upto 10
+
+### 1.30.02 (2023-07-17) Nightly version : only for experimental use
+
+* pakage dependency updates
+* update lable correction
+
+### 1.30.03 (2023-08-17) Nightly version : only for experimental use
+
+* Updated keyring to slice exported private key if it has '0x' prefixed to add backward campatability for imported wallets
+
+### 1.30.04 (2023-08-28) Nightly version : only for experimental use
+
+* Updated the logs for label update & delete account
+* Removed unused encryption key parameter in get accounts
+* Added validation for pin parameter in export private key, restore keyring state & current pin parameter in change pin
+* Added validation for encryption key in add account, sign message, delete account, get vault details & update label
+* Sync the pin validation steps with other methods in import wallet
+* Updated tests wrt changes in vault generation and parameter validations
+* Implemented vault recovery using logs and updated tests
+
+### 1.30.05 (2023-09-08) Nightly version : only for experimental use
+
+* Implemented account recovery in case of deleted accounts, both generated and imported
+* Added test cases for account recovery
+* Added logs for export mnemonic
+* Added logs for export private key(for generated and imported accounts)
+* Re-encrypted the private key of imported wallets and updated vault state after change pin
+
+### 1.30.06 (2023-09-27) Nightly version : only for experimental use
+
+* Added checksum for address comparison in export private key
+* Updated label creation according to logs
+* Updated test cases according to checksum address comparison in export private key
+
+### 1.30.07 (2023-10-05) Nightly version : only for experimental use
+
+* Updated pin format from number to string
+* updated test cases according to pin format changes
+
+### 1.30.08 (2023-10-09) Nightly version : only for experimental use
+
+* Updated pin while resetting imported wallets
+
+### 1.31.0 (2023-10-09) Nightly version : only for experimental use
+
+* Integrated upgraded bitcoin controller into vault
+* Enable backward compatibility in vault recovery for evm chains for undefined chain parameter in logs
+* Generate a default wallet for every chain when generating vault
+* Add fallback for recover vault - the default address to be recovered for every chain
+* Updated recover vault to create default wallet address for bitcoin for preexisting vaults
+* Updated test result for bitcoin
+
+### 2.0.0 (2023-11-02)
+
+* Removed workflow for nightly release branch
+* Merging nightly release 1.31.0 into main branch
