@@ -578,3 +578,4 @@
 
 * Added support for new chain Tezos
 * Update createWalletLabels function to generate labels as per the chain parameters, eg. `tezos` or `bitcoin`.
+* Updated test wrt tezos chain addition
