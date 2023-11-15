@@ -573,3 +573,8 @@
 
 * Removed workflow for nightly release branch
 * Merging nightly release 1.31.0 into main branch
+
+### 2.1.0 (2023-11-15)
+
+* Added support for new chain Tezos
+* Update createWalletLabels function to generate labels as per the chain parameters, eg. `tezos` or `bitcoin`.
