@@ -429,10 +429,12 @@ class Keyring {
 
         const filteredChains = activeChains.response.filter(activeChains => !evmChainList.includes(activeChains.chain));
 
+        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin, 'decryption');
+
         //generate other chain's keyring instance and add accounts to it as per decrypted vault
         if (filteredChains.length > 0) {
             filteredChains.forEach(async (chainData) => {
-                const { response: mnemonic } = await this.exportMnemonic(pin);
+                
 
                 const keyringInstance = await helper.getCoinInstance(chainData.chain.toLowerCase(), mnemonic);
 
@@ -448,8 +450,6 @@ class Keyring {
         }
 
         this.logs.getState().logs.push({ timestamp: Date.now(), action: 'restore-keyring', vault: this.vault });
-
-        const mnemonic = await helper.cryptography(decryptedVault.eth.private.encryptedMnemonic, pin, 'decryption');
 
         // clearing vault state and adding new accounts as per decrypted vault
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
