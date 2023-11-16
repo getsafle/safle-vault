@@ -1,6 +1,7 @@
 const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const BitcoinKeyringController= require('@getsafle/vault-bitcoin-controller').KeyringController ;
+const TezosKeyringController= require('@getsafle/vault-tezos-controller').KeyringController ;
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -51,8 +52,11 @@ class Vault extends Keyring {
     }
 
     initializeSupportedChainKeyringController(mnemonic) {
-        const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
-        this["bitcoin"] = keyringController;
+        const bitcoinKeyringController = new BitcoinKeyringController({mnemonic:mnemonic});
+        this["bitcoin"] = bitcoinKeyringController;
+
+        const tezosKeyringController = new TezosKeyringController({mnemonic:mnemonic});
+        this["tezos"] = tezosKeyringController;
     }
 
     async generateMnemonic(entropy) {
@@ -142,11 +146,10 @@ class Vault extends Keyring {
         //generate other chain's keyring instance and get accounts from logs
         let obj = {}
         for ( let chainData of nonEvmChainList) {
-            const { response: mnemonic } = await this.exportMnemonic(pin);
 
             const keyringInstance = await helper.getCoinInstance(chainData.toLowerCase(), mnemonic);
 
-            const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
+            const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs, chainData);
             const numberOfAcc = accArray.length;
 
             rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAcc } 

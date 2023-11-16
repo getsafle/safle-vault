@@ -82,13 +82,13 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
   return accountsArray;
 }
 
-async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs) {
+async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs, chainData) {
 
   //if mech = transaction - generate one acc for bitcoin
   
   let accountsArray = [];
   let {address} = await keyringInstance.addAccount();
-  const label = this.createWalletLabels('bitcoin', 1);
+  const label = this.createWalletLabels(chainData, 1);
   accountsArray.push({ address: address, isDeleted: false, isImported: false, label, isExported: false });
   let labelCounter = 2;
   const chains = Object.keys(Chains.nonEvmChains);
@@ -98,7 +98,7 @@ async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanis
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain))){
         if (logs[i].address.toLowerCase() === address.toLowerCase()) {
-          const label = this.createWalletLabels('bitcoin', labelCounter);
+          const label = this.createWalletLabels(chainData, labelCounter);
           accountsArray.push({ address: address.toLowerCase(), isDeleted: false, isImported: false, label, isExported: false });
           labelCounter ++;
           address = (await keyringInstance.addAccount()).address;
@@ -255,16 +255,9 @@ function createWalletLabels(labelObj = 'all', walletIndex = 1) {
   
   if (labelObj === 'all') {
     chains.forEach(chain => labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}` );
-  } 
-  else if (labelObj === 'bitcoin') {
-    labels = `${labelObj.charAt(0).toUpperCase() + labelObj.substr(1).toLowerCase()} Wallet ${walletIndex}`;
   }
   else {
-    chains.forEach(chain => {
-      if (labels[chain] !== undefined) {
-        labels[chain] = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet ${walletIndex}`;
-      }
-    })
+    labels = `${labelObj.charAt(0).toUpperCase() + labelObj.substr(1).toLowerCase()} Wallet ${walletIndex}`;
   }
 
   return labels;

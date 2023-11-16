@@ -292,6 +292,7 @@ describe('getActiveChains',()=>{
        expect({
       response: [
         { chain: 'bitcoin', symbol: 'BTC' },
+        { chain: 'tezos', symbol: 'XTZ'},
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },
