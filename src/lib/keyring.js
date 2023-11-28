@@ -454,7 +454,7 @@ class Keyring {
         // clearing vault state and adding new accounts as per decrypted vault
         const restoredVault = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const numberOfAcc = this.decryptedVault.eth.numberOfAccounts;
+        let numberOfAcc = this.decryptedVault.eth.numberOfAccounts;
 
         let decryptedkeyring = await this.keyringInstance.getKeyringsByType(restoredVault.keyrings[0].type);
 
@@ -467,6 +467,17 @@ class Keyring {
         } else {
             decryptedkeyring[0].opts.numberOfAccounts = numberOfAcc;
         }
+
+        // restoring keyring for other chains
+        const nonEvmChainList = Object.keys(Chains.nonEvmChains);
+        for ( let chainData of nonEvmChainList) {
+            numberOfAcc = this.decryptedVault[chainData].numberOfAcc
+            if(numberOfAcc >= 1) {
+                for(let i=0; i < numberOfAcc; i++) {
+                    this[chainData].addAccount();
+                }
+            } 
+        } 
     }
 
     async deleteAccount(encryptionKey, address, pin) {
