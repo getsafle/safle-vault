@@ -573,3 +573,8 @@
 
 * Removed workflow for nightly release branch
 * Merging nightly release 1.31.0 into main branch
+
+### 2.0.1 (2023-11-02)
+
+* Added backward compatibility in recover vault to handle incomplete logs for older users
+* Updated restore keyring state for other chains
