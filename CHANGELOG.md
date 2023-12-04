@@ -583,3 +583,4 @@
 
 * Response updated for no accounts found
 * Added a precheck of current chain in decrypted vault while restoring keyring state
+* Node version upgrade to 18.x
