@@ -137,7 +137,7 @@ class Keyring {
         }
 
         if (decryptedVault[this.chain] === undefined && _.get(decryptedVault, `importedWallets.${this.chain}`) === undefined) {
-            return { error: ERROR_MESSAGE.NO_ACCOUNTS_FOUND };
+            return { response: accounts };
         }
 
         (decryptedVault[this.chain] !== undefined) ? accounts.push(...decryptedVault[this.chain].public) : null;
@@ -471,12 +471,14 @@ class Keyring {
         // restoring keyring for other chains
         const nonEvmChainList = Object.keys(Chains.nonEvmChains);
         for ( let chainData of nonEvmChainList) {
-            numberOfAcc = this.decryptedVault[chainData].numberOfAcc
-            if(numberOfAcc >= 1) {
-                for(let i=0; i < numberOfAcc; i++) {
-                    this[chainData].addAccount();
+            if(this.decryptedVault[chainData]) {
+                numberOfAcc = this.decryptedVault[chainData].numberOfAcc
+                if(numberOfAcc >= 1) {
+                    for(let i=0; i < numberOfAcc; i++) {
+                        this[chainData].addAccount();
+                    }
                 }
-            } 
+            }
         } 
     }
 
