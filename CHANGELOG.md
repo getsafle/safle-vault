@@ -591,3 +591,7 @@
 * Updated readme for getFees() method
 * Added test for getFees() method
 * Updated controller version of eth, polygon, bsc, optimism, arbitrum, mantle, velas, bitcoin
+
+### 2.2.0 (2023-12-04)
+
+* Integrated avalanche C chain in safle vault.
