@@ -584,3 +584,10 @@
 * Response updated for no accounts found
 * Added a precheck of current chain in decrypted vault while restoring keyring state
 * Node version upgrade to 18.x
+
+### 2.1.0 (2023-12-04)
+
+* Added getFees() method to get transaction fees
+* Updated readme for getFees() method
+* Added test for getFees() method
+* Updated controller version of eth, polygon, bsc, optimism, arbitrum, mantle, velas, bitcoin

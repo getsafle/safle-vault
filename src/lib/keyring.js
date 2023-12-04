@@ -274,6 +274,41 @@ class Keyring {
         return { response: { vault: encryptedVault, address: newAddress }};
     }
 
+    async getFees(rawTx, rpcUrl) {
+        let address = rawTx.from
+        const chain = (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') ? 'eth' : this.chain;
+        const importedChain = (chain === 'eth') ? 'evmChains' : chain;
+
+        let isImportedAddress;
+
+        if (_.get(this.decryptedVault, `importedWallets.${importedChain}`) !== undefined && this.decryptedVault.importedWallets[importedChain].data.some(element => element.address === address) == true) {
+            isImportedAddress = true;
+        } else if (this.decryptedVault[chain] !== undefined && this.decryptedVault[chain].public.some(element => element.address.toLowerCase() === address.toLowerCase()) == true) {
+            isImportedAddress = false;
+        } else {
+            return { error: ERROR_MESSAGE.ADDRESS_NOT_PRESENT };
+        }
+         
+
+        if (this.chain === 'ethereum') {
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+            const fees = await this.keyringInstance.getFees(rawTx, web3);
+            return { response: fees };
+        }
+        
+        if (Chains.evmChains.hasOwnProperty(this.chain)) {
+            const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+            const keyringInstance = await helper.getCoinInstance(this.chain);
+
+            const fees = await keyringInstance.getFees(rawTx, web3);
+
+            return { response: fees };
+        }
+
+        const fees = await this[this.chain].getFees(rawTx);
+        return { response: fees };
+    }
+
     async signMessage(address, data, pin, encryptionKey, rpcUrl = '') {
         if (typeof(pin) != 'string'|| pin.match(/^[0-9]+$/) === null || pin < 0 || pin.length !=6 ) {
             return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
