@@ -578,3 +578,9 @@
 
 * Added backward compatibility in recover vault to handle incomplete logs for older users
 * Updated restore keyring state for other chains
+
+### 2.0.2 (2023-12-04)
+
+* Response updated for no accounts found
+* Added a precheck of current chain in decrypted vault while restoring keyring state
+* Node version upgrade to 18.x
