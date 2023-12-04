@@ -242,4 +242,12 @@ Get Logs:
 This method retrieves all the logs of all the vault changes.
 
  `const logs = await vault.getLogs();`
+
+Get Fees:
+This method returns an object containing gas limit, gas price wrt the speed of transaction confirmation 
+
+ `async getFees(rawTx, rpcUrl); `
+
+* `rawTx` - The rawTx object containing the transaction details, e.g from, to , value, data, chainID
+* `rpcUrl` - RPC URL of the chain.
  

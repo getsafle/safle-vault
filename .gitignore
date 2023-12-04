@@ -59,3 +59,4 @@ safle-vault.code-workspace
 vault_test.json
 vault_test_bitcoin.js
 vault_test_recovery.js
+test_getFees.js

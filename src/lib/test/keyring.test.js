@@ -1489,6 +1489,50 @@ describe('signTransaction',()=>{
 })
 
 
+describe('get Fees', () => {
+
+    test('get Fees, validate', async () => {
+        vault.changeNetwork('polygon')
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+
+        const rawTx = {
+            to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+            from: from.toLowerCase(),      //sender address
+            value: web3.utils.numberToHex(web3.utils.toWei("0", 'ether')),
+            chainID: 137,
+        };
+
+        let result = await vault.getFees(rawTx,polygonRpcUrl)
+        expect(result.response).toHaveProperty('gasLimit')
+        expect(result.response).toHaveProperty('fees')
+        
+    })
+
+    test('get fees, invalid', async () => {
+        vault.changeNetwork('polygon')
+        let from="0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD"
+        const web3 =  new Web3(polygonRpcUrl)
+
+        const rawTx = {
+            to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",        //recepient address
+            from: from.toLowerCase(),      //sender address
+            value: web3.utils.numberToHex(web3.utils.toWei("0", 'ether')),
+            chainID: 137,
+        };
+
+        try {
+            let result = await vault.getFees(rawTx,'abc')
+            console.log("result = ", result);
+        }
+        catch (e) {
+            console.log(e.message);
+            expect(e.message).toBe("CONNECTION ERROR: Couldn't connect to node abc.")
+        }
+        
+    })
+})
+
 
 
 
