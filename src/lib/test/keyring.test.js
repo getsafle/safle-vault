@@ -298,7 +298,8 @@ describe('getActiveChains',()=>{
         { chain: 'optimism', symbol: 'OP' },
         { chain: 'arbitrum', symbol: 'ARB' },
         { chain: 'mantle', symbol: 'MNT' },
-        { chain: 'velas', symbol: 'VLX' }
+        { chain: 'velas', symbol: 'VLX' },
+        { chain: 'avalanche', symbol: 'AVAX' }
       ]
     }).toMatchObject(result)
         
