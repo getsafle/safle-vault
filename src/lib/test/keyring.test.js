@@ -295,7 +295,8 @@ describe('getActiveChains',()=>{
         { chain: 'mantle', symbol: 'MNT' },
         { chain: 'velas', symbol: 'VLX' },
         { chain: 'avalanche', symbol: 'AVAX' },
-        { chain: 'base', symbol: 'BASE' }
+        { chain: 'base', symbol: 'BASE' },
+        { chain: 'zkEVM', symbol: 'ZKEVM' }
       ]
     }).toMatchObject(result)
         

@@ -599,3 +599,7 @@
 ### 2.3.0 (2023-12-19)
 
 * Integrated base chain in safle vault.
+
+### 2.4.0 (2023-12-19)
+
+* Integrated polygon zkEVM chain in safle vault.

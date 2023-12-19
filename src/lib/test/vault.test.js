@@ -78,7 +78,7 @@ describe('getSupportedChains' , ()=>{
         
         let result = await new Vault({}).getSupportedChains()
         expect({
-        evmChains: { ethereum: 'ETH', bsc: 'BSC', polygon: 'MATIC', optimism: 'OP', arbitrum: 'ARB', mantle: 'MNT', velas: 'VLX', avalanche: 'AVAX', base:'BASE' },
+        evmChains: { ethereum: 'ETH', bsc: 'BSC', polygon: 'MATIC', optimism: 'OP', arbitrum: 'ARB', mantle: 'MNT', velas: 'VLX', avalanche: 'AVAX', base:'BASE', zkEVM: 'ZKEVM'},
         nonEvmChains: { bitcoin: 'BTC' }
       }).toMatchObject(result.response)
     })
