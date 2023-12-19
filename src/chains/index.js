@@ -7,8 +7,9 @@ const arbitrum = require('@getsafle/vault-arbitrum-controller');
 const mantle = require('@getsafle/vault-mantle-controller');
 const velas = require('@getsafle/vault-velas-controller');
 const avalanche=require('@getsafle/vault-avalanche-controller')
+const base = require('@getsafle/vault-base-controller')
 
-const evmChains = { 'ethereum': 'ETH', 'bsc': 'BSC', 'polygon': 'MATIC', 'optimism': 'OP' ,'arbitrum': 'ARB', 'mantle': 'MNT', 'velas': 'VLX' , 'avalanche': 'AVAX'};
+const evmChains = { 'ethereum': 'ETH', 'bsc': 'BSC', 'polygon': 'MATIC', 'optimism': 'OP' ,'arbitrum': 'ARB', 'mantle': 'MNT', 'velas': 'VLX' , 'avalanche': 'AVAX', 'base':'BASE'};
 const nonEvmChains = { 'bitcoin': 'BTC' };
 
 module.exports = {
@@ -21,6 +22,7 @@ module.exports = {
     mantle,
     velas,
     avalanche,
+    base,
     evmChains,
     nonEvmChains,
 }

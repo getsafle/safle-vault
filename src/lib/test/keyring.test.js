@@ -209,11 +209,6 @@ describe('exportPrivateKey' , ()=>{
         expect(result.error).toBe("Incorrect pin")
         
     })
-
-
-
-    
-   
    
 })
 
@@ -299,7 +294,8 @@ describe('getActiveChains',()=>{
         { chain: 'arbitrum', symbol: 'ARB' },
         { chain: 'mantle', symbol: 'MNT' },
         { chain: 'velas', symbol: 'VLX' },
-        { chain: 'avalanche', symbol: 'AVAX' }
+        { chain: 'avalanche', symbol: 'AVAX' },
+        { chain: 'base', symbol: 'BASE' }
       ]
     }).toMatchObject(result)
         

@@ -595,3 +595,7 @@
 ### 2.2.0 (2023-12-04)
 
 * Integrated avalanche C chain in safle vault.
+
+### 2.3.0 (2023-12-19)
+
+* Integrated base chain in safle vault.
