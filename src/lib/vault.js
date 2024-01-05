@@ -142,7 +142,6 @@ class Vault extends Keyring {
         //generate other chain's keyring instance and get accounts from logs
         let obj = {}
         for ( let chainData of nonEvmChainList) {
-            const { response: mnemonic } = await this.exportMnemonic(pin);
 
             const keyringInstance = await helper.getCoinInstance(chainData.toLowerCase(), mnemonic);
 

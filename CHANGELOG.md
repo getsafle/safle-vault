@@ -603,3 +603,7 @@
 ### 2.4.0 (2023-12-19)
 
 * Integrated polygon zkEVM chain in safle vault.
+
+### 2.4.1 (2024-01-05)
+
+* Updated recover vault to handle disordered logs and duplicate addresses.
