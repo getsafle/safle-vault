@@ -607,3 +607,7 @@
 ### 2.4.1 (2024-01-05)
 
 * Updated recover vault to handle disordered logs and duplicate addresses.
+
+### 2.4.2 (2024-01-09)
+
+* Updated bitcoin controller version
