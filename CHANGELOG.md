@@ -611,3 +611,7 @@
 ### 2.4.2 (2024-01-09)
 
 * Updated bitcoin controller version
+
+### 2.4.3 (2024-01-23)
+
+* Increased rate limit for validating pin
