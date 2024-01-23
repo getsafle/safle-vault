@@ -615,3 +615,4 @@
 ### 2.4.3 (2024-01-23)
 
 * Increased rate limit for validating pin
+* Updated bitcoin controller version

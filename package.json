@@ -50,7 +50,7 @@
     "@getsafle/vault-arbitrum-controller": "^1.0.8",
     "@getsafle/vault-avalanche-controller": "^1.2.1",
     "@getsafle/vault-base-controller": "^1.0.1",
-    "@getsafle/vault-bitcoin-controller": "^2.0.4",
+    "@getsafle/vault-bitcoin-controller": "^2.0.5",
     "@getsafle/vault-bsc-controller": "^1.2.4",
     "@getsafle/vault-eth-controller": "^1.4.6",
     "@getsafle/vault-mantle-controller": "^1.0.1",
