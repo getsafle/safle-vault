@@ -616,3 +616,7 @@
 
 * Increased rate limit for validating pin
 * Updated bitcoin controller version
+
+### 2.4.4 (2024-01-24)
+
+* Updated bitcoin controller version with proxy service integrated
