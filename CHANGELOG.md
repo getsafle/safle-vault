@@ -624,3 +624,4 @@
 ### 2.4.5 (2024-01-30)
 
 * Updated bitcoin controller version with network param for signing
+* Updated restore keyring state and vault structure in recover vault function for bitcoin

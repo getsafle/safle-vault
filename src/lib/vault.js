@@ -148,7 +148,7 @@ class Vault extends Keyring {
             const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
             const numberOfAcc = accArray.length;
 
-            rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAcc } 
+            rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAccounts: numberOfAcc } 
 
         }
 
