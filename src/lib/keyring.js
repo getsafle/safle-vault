@@ -475,7 +475,6 @@ class Keyring {
 
                 const numberOfAcc = this.decryptedVault[chainData.chain.toLowerCase()].numberOfAccounts;
 
-
                 for (let i = 0; i < numberOfAcc; i++) {
                     await this[chainData.chain].addAccount();
                 }
@@ -503,18 +502,6 @@ class Keyring {
             decryptedkeyring[0].opts.numberOfAccounts = numberOfAcc;
         }
 
-        // restoring keyring for other chains
-        const nonEvmChainList = Object.keys(Chains.nonEvmChains);
-        for ( let chainData of nonEvmChainList) {
-            if(this.decryptedVault[chainData]) {
-                numberOfAcc = this.decryptedVault[chainData].numberOfAcc
-                if(numberOfAcc >= 1) {
-                    for(let i=0; i < numberOfAcc; i++) {
-                        this[chainData].addAccount();
-                    }
-                }
-            }
-        } 
     }
 
     async deleteAccount(encryptionKey, address, pin) {
