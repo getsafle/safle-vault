@@ -40,11 +40,16 @@ async function removeEmptyAccounts(indexAddress, keyringInstance, vaultState, un
   let labelCounter = 2;  // as an initial wallet is already created above with label 'Wallet 1'
   const chains = Object.keys(Chains.evmChains);
 
+  let newAccountAddr = indexAddress
+
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain) || logs[i].chain === undefined)){
-        let vaultState = await keyringInstance.addNewAccount(keyring[0]);
-        let newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
+        if (accountCheckList.includes(newAccountAddr)) {
+          vaultState = await keyringInstance.addNewAccount(keyring[0]);
+          newAccountAddr = Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])
+        }
+        
         if (logs[i].address.toLowerCase() !== newAccountAddr.toLowerCase() && !accountCheckList.includes(logs[i].address.toLowerCase())) {
           do {
             const label = this.createWalletLabels('all', labelCounter);
@@ -113,7 +118,11 @@ async function  getAccountsFromLogs(keyringInstance, vaultState, recoverMechanis
   if( recoverMechanism === 'logs'){
     for(let i=0; i < logs.length; i++){
       if (logs[i].action === 'add-account' && (chains.includes(logs[i].chain))){
-        let address = (await keyringInstance.addAccount()).address;
+
+        if (accountCheckList.includes(address)) {
+          address = (await keyringInstance.addAccount()).address;
+        }
+        
         if (logs[i].address.toLowerCase() !== address.toLowerCase() && !accountCheckList.includes(logs[i].address.toLowerCase())) {
           do {
             const label = this.createWalletLabels('bitcoin', labelCounter);
