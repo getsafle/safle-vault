@@ -625,3 +625,7 @@
 
 * Updated bitcoin controller version with network param for signing
 * Updated restore keyring state and vault structure in recover vault function for bitcoin
+
+### 2.4.6 (2024-02-2)
+
+* Updated recover vault to handle recurring addresses in logs
