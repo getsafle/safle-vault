@@ -90,13 +90,13 @@ class Vault extends Keyring {
 
         const privData = await helper.generatePrivData(mnemonic, pin);
 
-        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'Wallet 1' } ], private: privData, numberOfAccounts: 1 }}
+        const rawVault = { eth: { public: [ { address: accounts[0], isDeleted: false, isImported: false, label: 'EVM Wallet 1' } ], private: privData, numberOfAccounts: 1 }}
 
         this.initializeSupportedChainKeyringController(mnemonic);
 
         for (const chain of Object.keys(Chains.nonEvmChains)) {
             const {address: addedAcc } = await this[chain].addAccount();
-            let label = `${chain.charAt(0).toUpperCase() + chain.substr(1).toLowerCase()} Wallet 1`
+            let label = `${Chains.nonEvmChains[chain]} Wallet 1`
             rawVault[chain] = { public: [ { address: addedAcc, isDeleted: false, isImported: false, label: label } ], numberOfAccounts: 1 }
         }
 
@@ -129,8 +129,14 @@ class Vault extends Keyring {
 
         const vaultState = await this.keyringInstance.createNewVaultAndRestore(JSON.stringify(encryptionKey), mnemonic);
 
-        const accountsArray = await helper.removeEmptyAccounts(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, unmarshalApiKey, recoverMechanism, logs);
-
+        let accountsArray = [];
+        if(recoverMechanism === 'transactions') {
+            accountsArray = await helper.getAccountsFromTransactions(vaultState.keyrings[0].accounts[0], this.keyringInstance, vaultState, unmarshalApiKey)
+        } 
+        else if (recoverMechanism === 'logs') {
+            accountsArray = await helper.getAccountsFromLogs('ethereum', this.keyringInstance, vaultState, logs, vaultState.keyrings[0].accounts[0])
+        }
+       
         const privData = await helper.generatePrivData(mnemonic, pin);
 
         const numberOfAccounts = accountsArray.length;
@@ -141,14 +147,14 @@ class Vault extends Keyring {
 
         //generate other chain's keyring instance and get accounts from logs
         let obj = {}
-        for ( let chainData of nonEvmChainList) {
+        for ( let chain of nonEvmChainList) {
+            const keyringInstance = await helper.getCoinInstance(chain.toLowerCase(), mnemonic);
 
-            const keyringInstance = await helper.getCoinInstance(chainData.toLowerCase(), mnemonic);
-
-            const accArray = await helper.getAccountsFromLogs(keyringInstance, vaultState, recoverMechanism, logs);
+            let {address} = await keyringInstance.addAccount();
+            const accArray = await helper.getAccountsFromLogs(chain, keyringInstance, vaultState, logs, address);
             const numberOfAcc = accArray.length;
 
-            rawVault[chainData.toLowerCase()] = { public: accArray, numberOfAccounts: numberOfAcc } 
+            rawVault[chain.toLowerCase()] = { public: accArray, numberOfAccounts: numberOfAcc } 
 
         }
 

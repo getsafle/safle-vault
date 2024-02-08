@@ -629,3 +629,8 @@
 ### 2.4.6 (2024-02-2)
 
 * Updated recover vault to handle recurring addresses in logs
+
+### 2.4.7 (2024-02-08)
+
+* Refactored recover vault logic and generalized it for evm and non evm chains
+* updated labeling for evm and non evm wallet accounts
