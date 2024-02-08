@@ -60,7 +60,7 @@ async function getAccountsFromTransactions(indexAddress, keyringInstance, vaultS
   return accountsArray;
 }
 
-async function  getAccountsFromLogs(chain, chainInstance, vaultState, logs, indexAddress) {
+async function  getAccountsFromLogs(chain, chainInstance, vaultState, logs = [], indexAddress) {
   
   let accountsArray = [];
   const accountCheckSet = new Set();
@@ -99,7 +99,7 @@ async function  getAccountsFromLogs(chain, chainInstance, vaultState, logs, inde
   if (!indexAddress){
     return accountsArray
   }
-  else if(!logs) {
+  else if(!logs.length) {
     const account = await createAccountObject(indexAddress);
     accountsArray.push(account);
     accountCheckSet.add(account.address.toLowerCase());
