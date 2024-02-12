@@ -634,3 +634,4 @@
 
 * Refactored recover vault logic and generalized it for evm and non evm chains
 * updated labeling for evm and non evm wallet accounts
+* Integrated restore account logs for vault recovery

@@ -60,94 +60,91 @@ async function getAccountsFromTransactions(indexAddress, keyringInstance, vaultS
   return accountsArray;
 }
 
-async function  getAccountsFromLogs(chain, chainInstance, vaultState, logs = [], indexAddress) {
-  
-  let accountsArray = [];
-  const accountCheckSet = new Set();
-  const evmChains = Object.keys(Chains.evmChains);
-  let generatedAddress = indexAddress
-  let labelCounter = 1;
-  let keyring, labelPrifix
 
-  if (chain === 'ethereum' || chain === undefined || evmChains.includes(chain)) {
-    keyring = chainInstance.getKeyringsByType(vaultState.keyrings[0].type);
-    labelPrifix = 'EVM';
-  } else {
-    labelPrifix = Chains.nonEvmChains[chain];
+async function getAccountsFromLogs(chain, chainInstance, vaultState, logs = [], indexAddress) {
+
+  const accountsMap = new Map();
+  let generatedAddress = indexAddress;
+  let labelCounter = 1;
+
+  if (!indexAddress) {
+    return [];
   }
 
-  // create account sequentially using chain specific keyring instance
+  // Create a new address based on the blockchain type
   const createNewAddress = async (chain, chainInstance) => {
-    let address
+    let address;
     if (chain === 'ethereum' || chain === undefined) {
-      vaultState = await chainInstance.addNewAccount(keyring[0])
-      address = (Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])).toLowerCase()
-    }
-    else {
+      keyring = chainInstance.getKeyringsByType(vaultState.keyrings[0].type);
+      vaultState = await chainInstance.addNewAccount(keyring[0]);
+      address = (Web3.utils.toChecksumAddress(vaultState.keyrings[0].accounts[vaultState.keyrings[0].accounts.length - 1])).toLowerCase();
+    } else {
       address = (await chainInstance.addAccount()).address.toLowerCase();
     }
     return address;
-  }
+  };
 
-  // create account data wrt vault structure
+  // Create an account object with a label based on the blockchain type
   const createAccountObject = async (generatedAddress) => {
-    const label = this.createWalletLabels(labelPrifix, labelCounter++);
+    const labelPrefix = chain === 'ethereum' || chain === undefined || Chains.evmChains[chain] ? 'EVM' : Chains.nonEvmChains[chain];
+    const label = this.createWalletLabels(labelPrefix, labelCounter++);
     return { address: generatedAddress, isDeleted: false, isImported: false, label, isExported: false };
   };
 
-  // add the initial address in the account array
+  // If indexAddress is empty, return the values of the accounts map
   if (!indexAddress){
-    return accountsArray
-  }
-  else if(!logs.length) {
-    const account = await createAccountObject(indexAddress);
-    accountsArray.push(account);
-    accountCheckSet.add(account.address.toLowerCase());
-    return accountsArray
-  }
-  else {
-    const account = await createAccountObject(indexAddress);
-    accountsArray.push(account);
-    accountCheckSet.add(account.address.toLowerCase());
+    return Array.from(accountsMap.values());
+  } else {
+    // Set the indexAddress account in the accounts map
+    accountsMap.set(indexAddress, await createAccountObject(indexAddress));
   }
 
-
+  // Add account if verified based on the log address
   const addAccountIfVerified = async (logAddress) => {
+    if (accountsMap.has(logAddress)) {
+      let account = accountsMap.get(logAddress);
+      if (account.isDeleted === true) {
+        account.isDeleted = false;
+      }
+    }
 
-    if (accountCheckSet.has(generatedAddress)) {
-      // If the previous generated address was added in the check set, generate a new address
+    if (accountsMap.has(generatedAddress)) {
       generatedAddress = await createNewAddress(chain, chainInstance);
     }
-  
-    while (logAddress !== generatedAddress && !accountCheckSet.has(logAddress)) {
-      // Generate new addresses till the one matching the logAddress, which has not been addded to checkset yet
-      const account = await createAccountObject(generatedAddress);
-      accountsArray.push(account);
-      accountCheckSet.add(account.address.toLowerCase());
+
+    while (logAddress !== generatedAddress && !accountsMap.has(logAddress)) {
+      accountsMap.set(generatedAddress, await createAccountObject(generatedAddress));
       generatedAddress = await createNewAddress(chain, chainInstance);
     }
-  
+
     if (logAddress === generatedAddress) {
-      // If the address matches, add it to the accounts array
-      const account = await createAccountObject(generatedAddress);
-      accountsArray.push(account);
-      accountCheckSet.add(account.address.toLowerCase());
+      accountsMap.set(generatedAddress, await createAccountObject(generatedAddress));
     }
   };
 
+  // Iterate through the logs and update the accounts map accordingly
   for (let log of logs) {
     const logAddress = log?.address?.toLowerCase();
-    if (log.action === 'add-account' && log?.chain === chain) {
-      await addAccountIfVerified(logAddress);
-    } else if (log.action === 'delete-account' && Chains.nonEvmChains.hasOwnProperty(log.chain)) {
-        const index = accountsArray.findIndex((acc) => acc.address === logAddress);
-        if (index !== -1) {
-          accountsArray[index].isDeleted = true;
+    if (log?.chain === chain || (chain === 'ethereum' && log?.chain === undefined)) {
+      if (log.action === 'add-account') {
+        await addAccountIfVerified(logAddress);
+      }
+      else if(log.action === 'restore-account') {
+        const account = accountsMap.get(logAddress);
+        if (account) {
+          account.isDeleted = false;
         }
+      } else if (log.action === 'delete-account') {
+        const account = accountsMap.get(logAddress);
+        if (account) {
+          account.isDeleted = true;
+        }
+      }
     }
   }
 
-  return accountsArray;
+  // Return the values of the accounts map as an array
+  return Array.from(accountsMap.values());
 }
 
 async function getETHTransactions(address, network, unmarshalApiKey) {
