@@ -67,10 +67,6 @@ async function getAccountsFromLogs(chain, chainInstance, vaultState, logs = [], 
   let generatedAddress = indexAddress;
   let labelCounter = 1;
 
-  if (!indexAddress) {
-    return [];
-  }
-
   // Create a new address based on the blockchain type
   const createNewAddress = async (chain, chainInstance) => {
     let address;
@@ -93,10 +89,13 @@ async function getAccountsFromLogs(chain, chainInstance, vaultState, logs = [], 
 
   // If indexAddress is empty, return the values of the accounts map
   if (!indexAddress){
-    return Array.from(accountsMap.values());
+    return [];
   } else {
     // Set the indexAddress account in the accounts map
     accountsMap.set(indexAddress, await createAccountObject(indexAddress));
+  }
+  if(!logs.length) {
+    return Array.from(accountsMap.values());
   }
 
   // Add account if verified based on the log address
