@@ -287,7 +287,6 @@ function createWalletLabels(labelPrefix, walletIndex = 1) {
 module.exports = {
   stringToArrayBuffer,
   generatePrivData,
-  // removeEmptyAccounts,
   getAccountsFromTransactions,
   getAccountsFromLogs,
   getCoinInstance,
