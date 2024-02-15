@@ -191,17 +191,6 @@ This method is used to get the list of all the accounts (`imported` and `generat
 
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 
-Get Assets:
-This method returns the list of assets for all the addresses on all the chains passed in the array.
-
- `const assets = await vault.getAssets({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl });`
-
-* `addresses` - The list of addresses in an array.
-* `chains` - The list of chains in an array.
-* `EthRpcUrl` - Ethereum RPC URL.
-* `PolygonRpcUrl` - Polygon RPC URL.
-* `bscRpcUrl` - BSC RPC URL.
-
 Get Native Asset Balance:
 This method is used to get the native asset balance of an address present in the vault.
 

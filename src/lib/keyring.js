@@ -806,16 +806,6 @@ class Keyring {
         return { response: accounts };
     }
 
-    async getAssets({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl }) {
-        if (!Array.isArray(addresses) && !Array.isArray(chains)) {
-            throw ERROR_MESSAGE.SHOULD_BE_AN_ARRAY;
-        }
-
-        const assetsDetails = await helper.getAssetDetails({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl });
-
-        return { response: assetsDetails };
-    }
-
     async getBalance(address, rpcUrl) {
         if (Chains.evmChains.hasOwnProperty(this.chain)) {
             const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
