@@ -629,3 +629,10 @@
 ### 2.4.6 (2024-02-2)
 
 * Updated recover vault to handle recurring addresses in logs
+
+### 2.5.0 (2024-02-15)
+
+##### [BREAKING Changes] Removed getAssets() method
+
+* Removed function `getAssets()` to get the list of assets of all the accounts associated as it is moved to an api service.
+* Updated avalanche, base and zkEVM controllers.
