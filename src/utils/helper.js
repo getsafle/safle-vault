@@ -1,7 +1,6 @@
 const cryptojs = require('crypto-js');
 const safleTransactionController = require('@getsafle/transaction-controller');
 const Web3 = require('web3');
-const { AssetController } = require('@getsafle/asset-controller');
 
 const Chains = require('../chains');
 const ERROR_MESSAGE = require('../constants/responses');
@@ -194,61 +193,6 @@ async function getCoinInstance(chain, mnemonic) {
   return keyringInstance;
 }
 
-async function getAssetDetails({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl }) {
-
-  let output = { };
-  let chainAssets  = [];
-
-  for (let j = 0; j < addresses.length; j++) {
-    for (let i = 0; i < chains.length; i++) {
-
-        if (chains[i] === 'ethereum') {
-          const assets = await getEthAssets(addresses[j], EthRpcUrl);
-
-          chainAssets.push({ 'ethereum': { ...assets } });
-        } else if (chains[i] === 'bsc') {
-          const assets = await getBSCAssets(addresses[j], bscRpcUrl);
-
-          chainAssets.push({ 'bsc': { ...assets } });
-        } else {
-          const assets = await getPolygonAssets(addresses[j], polygonRpcUrl);
-
-          chainAssets.push({ 'polygon': { ...assets } });
-        }
-      }
-
-      output[addresses[j]] = { ...chainAssets };
-
-      chainAssets = [];
-    }
-
-  return output;
-}
-
-async function getEthAssets(address, ethRpcUrl) {
-  const assetController = new AssetController({ rpcURL: ethRpcUrl, chain: 'ethereum' });
-
-  const tokens = await assetController.detectTokens({ userAddress: address });
-
-  return tokens;
-}
-
-async function getPolygonAssets(address, polygonRpcUrl) {
-  const assetController = new AssetController({ rpcURL: polygonRpcUrl, chain: 'polygon' });
-
-  const tokens = await assetController.detectTokens({ userAddress: address });
-
-  return tokens;
-}
-
-async function getBSCAssets(address, bscRpcUrl) {
-  const assetController = new AssetController({ rpcURL: bscRpcUrl, chain: 'bsc' });
-
-  const tokens = await assetController.detectTokens({ userAddress: address });
-
-  return tokens;
-}
-
 async function cryptography(data, key, action) {
   let output;
 
@@ -290,7 +234,6 @@ module.exports = {
   getAccountsFromTransactions,
   getAccountsFromLogs,
   getCoinInstance,
-  getAssetDetails,
   cryptography,
   validateEncryptionKey,
   createWalletLabels 
