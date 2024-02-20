@@ -221,6 +221,8 @@ class Keyring {
         const acc = await this.getAccounts();
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
+
+            let labelPrefix = 'EVM'
             const accounts = await this.keyringInstance.getAccounts();
 
             const keyring = await this.keyringInstance.getKeyringForAccount(accounts[0]);
@@ -229,7 +231,7 @@ class Keyring {
 
             const newAccount = await this.keyringInstance.getAccounts();
 
-            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `Wallet ${acc.response.length + 1}` })
+            this.decryptedVault.eth.public.push({ address: newAccount[newAccount.length - 1], isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response.length + 1}` })
             this.decryptedVault.eth.numberOfAccounts++;
 
             const encryptedVault = await helper.cryptography(JSON.stringify(this.decryptedVault), JSON.stringify(encryptionKey), 'encryption');
@@ -245,6 +247,8 @@ class Keyring {
 
         let newAddress;
 
+        let labelPrefix = Chains.nonEvmChains[this.chain]
+
         if (this[this.chain] === undefined) {
             const keyringInstance = await helper.getCoinInstance(this.chain, mnemonic);
 
@@ -254,14 +258,14 @@ class Keyring {
 
             newAddress = address;
 
-            const publicData = [ { address, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response ? acc.response.length + 1 : 1}` } ];
+            const publicData = [ { address, isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response ? acc.response.length + 1 : 1}` } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
             const { address } = await this[this.chain].addAccount();
 
             newAddress = address;
 
-            (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}` } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${acc.response.length + 1}` });
+            (this.decryptedVault[this.chain] === undefined) ? this.decryptedVault[this.chain] = { public: [ { address: newAddress, isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response.length + 1}` } ], numberOfAccounts: 1 } : this.decryptedVault[this.chain].public.push({ address: newAddress, isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response.length + 1}` });
             this.decryptedVault[this.chain].numberOfAccounts++;
         }
 
@@ -643,6 +647,8 @@ class Keyring {
         }
 
         if (Chains.evmChains.hasOwnProperty(this.chain) || this.chain === 'ethereum') {
+
+            let labelPrefix = 'EVM'
             
             const keyringInstance = await helper.getCoinInstance(this.chain);
 
@@ -663,13 +669,14 @@ class Keyring {
             }
 
             if (this.decryptedVault.importedWallets === undefined) {
-                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] } };
+                this.decryptedVault.importedWallets = { evmChains: { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `${labelPrefix} Wallet ${numOfAcc + 1}` }] } };
             } else if (this.decryptedVault.importedWallets.evmChains === undefined) {
-                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` }] };
+                this.decryptedVault.importedWallets.evmChains = { data: [{ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `${labelPrefix} Wallet ${numOfAcc + 1}` }] };
             } else {
-                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `Wallet ${numOfAcc + 1}` });
+                this.decryptedVault.importedWallets.evmChains.data.push({ address, privateKey: encryptedPrivKey, isDeleted: false, isImported: true, label: `${labelPrefix} Wallet ${numOfAcc + 1}` });
             }
         } else {
+            let labelPrefix = Chains.nonEvmChains[this.chain]
             const { response: mnemonic } = await this.exportMnemonic(pin);
 
             if (this[this.chain] === undefined) {
@@ -699,16 +706,16 @@ class Keyring {
             if (this.decryptedVault.importedWallets === undefined) {
                 let object = {};
 
-                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` } ];
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${labelPrefix} Wallet ${numOfAcc + 1}` } ];
 
                 object[this.chain] = { data };
                 this.decryptedVault.importedWallets = object;
             } else if (this.decryptedVault.importedWallets[this.chain] === undefined) {        
-                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` } ];
+                const data = [ { address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${labelPrefix} Wallet ${numOfAcc + 1}` } ];
 
                 this.decryptedVault.importedWallets[this.chain] = { data };
             } else {
-                this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${this.chain[0].toUpperCase() + this.chain.slice(1)} Wallet ${numOfAcc + 1}` });
+                this.decryptedVault.importedWallets[this.chain].data.push({ address, isDeleted: false, isImported: true, privateKey: encryptedPrivKey, label: `${labelPrefix} Wallet ${numOfAcc + 1}` });
             }
         }
 
