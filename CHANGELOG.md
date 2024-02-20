@@ -637,7 +637,7 @@
 * Removed function `getAssets()` to get the list of assets of all the accounts associated as it is moved to an api service.
 * Updated avalanche, base and zkEVM controllers.
 
-### 2.4.7 (2024-02-08)
+### 2.5.1 (2024-02-20)
 
 * Refactored recover vault logic and generalized it for evm and non evm chains
 * updated labeling for evm and non evm wallet accounts
