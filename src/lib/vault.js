@@ -159,9 +159,20 @@ class Vault extends Keyring {
         let obj = {}
         for ( let chain of nonEvmChainList) {
             const keyringInstance = await helper.getCoinInstance(chain.toLowerCase(), mnemonic);
-
-            let {address} = await keyringInstance.addAccount();
+            let address
+            if(chain === 'stacks') {
+                address = (await keyringInstance.generateWallet()).address;
+            } else {
+                address = (await keyringInstance.addAccount()).address;
+            }
+            
             const accArray = await helper.getAccountsFromLogs(chain, keyringInstance, vaultState, logs, address);
+            
+            if(chain === 'stacks') {
+                for( let ele of accArray) {
+                    ele.address = ele.address.toUpperCase();
+                }
+            }
             const numberOfAcc = accArray.length;
 
             rawVault[chain.toLowerCase()] = { public: accArray, numberOfAccounts: numberOfAcc } 

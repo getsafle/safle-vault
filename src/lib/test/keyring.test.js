@@ -19,7 +19,7 @@ let impAccAddress
 
 let chains
 const ethUrl = 'https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f'; 
-const polygonRpcUrl = 'https://rpc-mumbai.maticvigil.com';
+const polygonRpcUrl = 'https://polygon-testnet.public.blastapi.io';
 const bscRpcUrl = 'https://rpc.ankr.com/bsc';
 beforeAll(async() => {
 
