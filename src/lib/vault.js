@@ -1,6 +1,7 @@
 const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const BitcoinKeyringController= require('@getsafle/vault-bitcoin-controller').KeyringController ;
+const StacksKeyringController = require('@getsafle/vault-stacks-controller').KeyringController;
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -53,6 +54,9 @@ class Vault extends Keyring {
     initializeSupportedChainKeyringController(mnemonic) {
         const keyringController = new BitcoinKeyringController({mnemonic:mnemonic});
         this["bitcoin"] = keyringController;
+
+        const stacksKeyringController = new StacksKeyringController({mnemonic:mnemonic});
+        this["stacks"] = stacksKeyringController;
     }
 
     async generateMnemonic(entropy) {
@@ -95,9 +99,15 @@ class Vault extends Keyring {
         this.initializeSupportedChainKeyringController(mnemonic);
 
         for (const chain of Object.keys(Chains.nonEvmChains)) {
-            const {address: addedAcc } = await this[chain].addAccount();
+            let addedAcc
+            if (chain === 'stacks') {
+                addedAcc = (await this[chain].generateWallet()).address;
+            } else {
+                addedAcc = (await this[chain].addAccount()).address;
+            }
             let label = `${Chains.nonEvmChains[chain]} Wallet 1`
             rawVault[chain] = { public: [ { address: addedAcc, isDeleted: false, isImported: false, label: label } ], numberOfAccounts: 1 }
+            
         }
 
         const vault = await helper.cryptography(JSON.stringify(rawVault), JSON.stringify(encryptionKey), 'encryption');
@@ -149,9 +159,20 @@ class Vault extends Keyring {
         let obj = {}
         for ( let chain of nonEvmChainList) {
             const keyringInstance = await helper.getCoinInstance(chain.toLowerCase(), mnemonic);
-
-            let {address} = await keyringInstance.addAccount();
+            let address
+            if(chain === 'stacks') {
+                address = (await keyringInstance.generateWallet()).address;
+            } else {
+                address = (await keyringInstance.addAccount()).address;
+            }
+            
             const accArray = await helper.getAccountsFromLogs(chain, keyringInstance, vaultState, logs, address);
+            
+            if(chain === 'stacks') {
+                for( let ele of accArray) {
+                    ele.address = ele.address.toUpperCase();
+                }
+            }
             const numberOfAcc = accArray.length;
 
             rawVault[chain.toLowerCase()] = { public: accArray, numberOfAccounts: numberOfAcc } 

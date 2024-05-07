@@ -480,7 +480,11 @@ class Keyring {
                 const numberOfAcc = this.decryptedVault[chainData.chain.toLowerCase()].numberOfAccounts;
 
                 for (let i = 0; i < numberOfAcc; i++) {
-                    await this[chainData.chain].addAccount();
+                    if(chainData.chain.toLowerCase() === 'stacks' && i === 0) {
+                        await this[chainData.chain].generateWallet()
+                    } else {
+                        await this[chainData.chain].addAccount();
+                    }
                 }
             })
         }

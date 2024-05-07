@@ -19,7 +19,7 @@ let impAccAddress
 
 let chains
 const ethUrl = 'https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f'; 
-const polygonRpcUrl = 'https://rpc-mumbai.maticvigil.com';
+const polygonRpcUrl = 'https://polygon-testnet.public.blastapi.io';
 const bscRpcUrl = 'https://rpc.ankr.com/bsc';
 beforeAll(async() => {
 
@@ -287,6 +287,7 @@ describe('getActiveChains',()=>{
        expect({
       response: [
         { chain: 'bitcoin', symbol: 'BTC' },
+        { chain: 'stacks', symbol: 'STX' },
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },
