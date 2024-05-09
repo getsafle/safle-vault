@@ -646,3 +646,7 @@
 ### 2.6.0 (2024-05-07)
 
 * Integrated stacks chain in safle vault
+
+### 2.6.1 (2024-05-09)
+
+* Upgraded stacks controller version
