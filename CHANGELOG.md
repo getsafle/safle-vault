@@ -650,3 +650,8 @@
 ### 2.6.1 (2024-05-09)
 
 * Upgraded stacks controller version
+
+### 2.6.2 (2024-05-31)
+
+* Updated add account for stacks addresses
+* Upgraded stacks controller version
