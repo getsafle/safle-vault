@@ -254,11 +254,15 @@ class Keyring {
 
             this[this.chain] = keyringInstance;
 
-            const { address } = await this[this.chain].addAccount();
+            if(this.chain === "stacks") {
+                newAddress = (await this[this.chain].generateWallet()).address;
+            } else {
+                const { address } = await this[this.chain].addAccount();
 
-            newAddress = address;
+                newAddress = address;
+            }
 
-            const publicData = [ { address, isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response ? acc.response.length + 1 : 1}` } ];
+            const publicData = [ { address: newAddress, isDeleted: false, isImported: false, label: `${labelPrefix} Wallet ${acc.response ? acc.response.length + 1 : 1}` } ];
             this.decryptedVault[this.chain] = { public: publicData, numberOfAccounts: 1 };
         } else {
             const { address } = await this[this.chain].addAccount();
