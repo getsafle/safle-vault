@@ -288,6 +288,7 @@ describe('getActiveChains',()=>{
       response: [
         { chain: 'bitcoin', symbol: 'BTC' },
         { chain: 'stacks', symbol: 'STX' },
+        { chain: 'solana', symbol: 'SOL' },
         { chain: 'ethereum', symbol: 'ETH' },
         { chain: 'bsc', symbol: 'BSC' },
         { chain: 'polygon', symbol: 'MATIC' },

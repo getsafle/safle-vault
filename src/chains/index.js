@@ -10,9 +10,11 @@ const avalanche=require('@getsafle/vault-avalanche-controller')
 const base = require('@getsafle/vault-base-controller')
 const zkEVM = require('@getsafle/vault-polygon-zkevm-controller')
 const stacks = require('@getsafle/vault-stacks-controller');
+const solana = require('@getsafle/vault-sol-controller');
+
 
 const evmChains = { 'ethereum': 'ETH', 'bsc': 'BSC', 'polygon': 'MATIC', 'optimism': 'OP' ,'arbitrum': 'ARB', 'mantle': 'MNT', 'velas': 'VLX' , 'avalanche': 'AVAX', 'base':'BASE', 'zkEVM': 'ZKEVM'};
-const nonEvmChains = { 'bitcoin': 'BTC', 'stacks': 'STX' };
+const nonEvmChains = { 'bitcoin': 'BTC', 'stacks': 'STX', 'solana': 'SOL' };
 
 module.exports = {
     ethereum,
@@ -27,6 +29,7 @@ module.exports = {
     base,
     zkEVM,
     stacks,
+    solana,
     evmChains,
     nonEvmChains,
 }

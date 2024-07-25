@@ -655,3 +655,8 @@
 
 * Updated add account for stacks addresses
 * Upgraded stacks controller version
+
+### 2.7.0 (2024-07-25)
+
+* Integrated solana chain in safle vault
+* Updated test cases
