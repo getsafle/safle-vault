@@ -2,6 +2,7 @@ const CryptoJS = require('crypto-js');
 const { KeyringController } = require('@getsafle/vault-eth-controller');
 const BitcoinKeyringController= require('@getsafle/vault-bitcoin-controller').KeyringController ;
 const StacksKeyringController = require('@getsafle/vault-stacks-controller').KeyringController;
+const SolanaKeyringController = require('@getsafle/vault-sol-controller').KeyringController;
 const bip39 = require('bip39');
 
 const helper = require('../utils/helper');
@@ -57,6 +58,9 @@ class Vault extends Keyring {
 
         const stacksKeyringController = new StacksKeyringController({mnemonic:mnemonic});
         this["stacks"] = stacksKeyringController;
+
+        const solanaKeyringController = new SolanaKeyringController({mnemonic:mnemonic});
+        this["solana"] = solanaKeyringController;
     }
 
     async generateMnemonic(entropy) {
