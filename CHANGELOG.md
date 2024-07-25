@@ -659,3 +659,4 @@
 ### 2.7.0 (2024-07-25)
 
 * Integrated solana chain in safle vault
+* Updated test cases
