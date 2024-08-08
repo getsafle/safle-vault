@@ -660,3 +660,7 @@
 
 * Integrated solana chain in safle vault
 * Updated test cases
+
+### 2.8.0 (2024-08-08)
+
+* Integrated BEVM chain in safle vault
