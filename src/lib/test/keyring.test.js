@@ -298,7 +298,8 @@ describe('getActiveChains',()=>{
         { chain: 'velas', symbol: 'VLX' },
         { chain: 'avalanche', symbol: 'AVAX' },
         { chain: 'base', symbol: 'BASE' },
-        { chain: 'zkEVM', symbol: 'ZKEVM' }
+        { chain: 'zkEVM', symbol: 'ZKEVM' },
+        { chain: 'bevm', symbol: 'BTC' }
       ]
     }).toMatchObject(result)
         
