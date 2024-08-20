@@ -80,10 +80,7 @@ class Keyring {
       remainingRequests = await limiter.removeTokens(1);
     }
 
-    if (
-      remainingRequests <= 0 &&
-      !trace.includes("node_modules", "jest-runner", "build")
-    ) {
+    if (remainingRequests <= 0 && !isTestEnv) {
       this.timeout = Date.now() + Config.REQUEST_BLOCKED_TIMEOUT;
       return { error: ERROR_MESSAGE.REQUEST_LIMIT_EXCEEDED };
     } else {
@@ -117,7 +114,6 @@ class Keyring {
       return { response: true };
     }
   }
-
   async validateMnemonic(mnemonic, safleID, network, polygonRpcUrl) {
     if (network !== "mainnet" && network !== "testnet") {
       throw ERROR_MESSAGE.INVALID_NETWORK;
