@@ -66,6 +66,7 @@ class Keyring {
   async validatePin(pin) {
     let trace = new Error().stack.split("\n");
     trace = trace[trace.length - 1].toString().split("/");
+    console.log(trace);
     trace = trace[0];
 
     if (
