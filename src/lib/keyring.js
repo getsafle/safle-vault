@@ -64,19 +64,9 @@ class Keyring {
   }
 
   async validatePin(pin) {
-    let trace = new Error().stack.split("\n");
-    trace = trace[trace.length - 1].toString().split("/");
-    console.log(trace);
-    trace = trace[0];
+    const isTestEnv = helper.isTestEnvironment();
 
-    if (
-      this.timeout > Date.now() &&
-      !trace.includes(
-        Constants.CONSTANT_ONE,
-        Constants.CONSTANT_TWO,
-        Constants.CONSTANT_THREE
-      )
-    ) {
+    if (this.timeout > Date.now() && !isTestEnv) {
       return {
         error: `${ERROR_MESSAGE.REQUEST_BLOCKED} for ${(
           (this.timeout - Date.now()) /
@@ -84,8 +74,9 @@ class Keyring {
         ).toFixed(0)} minutes`,
       };
     }
+
     let remainingRequests;
-    if (!trace.includes("node_modules", "jest-runner", "build")) {
+    if (!isTestEnv) {
       remainingRequests = await limiter.removeTokens(1);
     }
 
