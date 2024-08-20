@@ -346,14 +346,14 @@ describe('deleteAccount',()=>{
     })
     test('deleteAccount/empty address' , async()=>{
 
-        let result = await vault.deleteAccount(bufView,null,pin)
+        let result = await vault.deleteAccount(bufView,null,'696969')
         expect(result.error).toBe('This address is not present in the vault')
        
         
     })
     test('deleteAccount/invalid address' , async()=>{
 
-        let result = await vault.deleteAccount(bufView,"rerwgtehry",pin)
+        let result = await vault.deleteAccount(bufView,"rerwgtehry",'696969')
         expect(result.error).toBe('This address is not present in the vault')
        
         
