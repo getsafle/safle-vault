@@ -4,6 +4,84 @@ const { before } = require("lodash");
 let KeyRing = require("../keyring");
 let Vault = require("../vault");
 const Web3 = require("web3");
+const NETWORKS = {
+  ethereum: {
+    URL: "https://eth-goerli.public.blastapi.io",
+    CHAIN_ID: 5,
+  },
+  bsc: {
+    URL: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    CHAIN_ID: 97,
+  },
+  polygon: {
+    URL: "https://polygon-amoy.blockpi.network/v1/rpc/public",
+    CHAIN_ID: 80001,
+  },
+  optimism: {
+    URL: "https://optimism-goerli.public.blastapi.io",
+    CHAIN_ID: 420,
+  },
+  arbitrum: {
+    URL: "https://sepolia-rollup.arbitrum.io/rpc",
+    CHAIN_ID: 421614,
+  },
+  mantle: {
+    URL: "https://rpc.ankr.com/mantle_sepolia",
+    CHAIN_ID: 5001,
+  },
+  velas: {
+    URL: "https://explorer.testnet.velas.com/rpc",
+    CHAIN_ID: 111,
+  },
+  avalanche: {
+    URL: "https://api.avax-test.network/ext/bc/C/rpc",
+    CHAIN_ID: 43113,
+  },
+  base: {
+    URL: "https://base-sepolia.blockpi.network/v1/rpc/public",
+    CHAIN_ID: 84532,
+  },
+  zkEVM: {
+    URL: "https://endpoints.omniatech.io/v1/polygon-zkevm/testnet/public",
+    CHAIN_ID: 1442,
+  },
+  bevm: {
+    URL: "https://testnet.bevm.io/",
+    CHAIN_ID: 1978,
+  },
+  rootstock: {
+    URL: "https://public-node.testnet.rsk.co",
+    CHAIN_ID: 31,
+  },
+};
+
+const chainConfigs = {
+  ethereum: { symbol: "ETH", txType: 2 },
+  bsc: { symbol: "BSC", txType: 0 },
+  polygon: { symbol: "MATIC", txType: 2 },
+  optimism: { symbol: "OP", txType: 2 },
+  arbitrum: { symbol: "ARB", txType: 2 },
+  mantle: { symbol: "MNT", txType: 2 },
+  velas: { symbol: "VLX", txType: 0 },
+  avalanche: { symbol: "AVAX", txType: 2 },
+  base: { symbol: "BASE", txType: 2 },
+  zkEVM: { symbol: "ZKEVM", txType: 2 },
+  bevm: { symbol: "BTC", txType: 0 },
+  rootstock: { symbol: "RBTC", txType: 0 },
+};
+
+// Add the helper function
+const getNetworkConfig = (chainName) => {
+  const network = NETWORKS[chainName];
+  const chainConfig = chainConfigs[chainName];
+  return {
+    url: network.URL,
+    chainId: network.CHAIN_ID,
+    symbol: chainConfig.symbol,
+    txType: chainConfig.txType,
+  };
+};
+
 const bufView = [
   48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87,
   35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167,
@@ -782,290 +860,332 @@ describe("getAccounts", () => {
   });
 });
 
+describe("Add new network", () => {
+  test("Add network", async () => {
+    await vault.addNetwork("TestChain", { symbol: "TST", txType: 0 });
+    let chainInfo = await vault.getChainInfo("TestChain");
+    console.log(chainInfo);
+    expect(chainInfo.symbol).toBe("TST");
+  });
+});
+
 describe("signTransaction", () => {
-  test("signTransaction/valid", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+  Object.keys(NETWORKS).forEach((chainName) => {
+    const networkConfig = getNetworkConfig(chainName);
+    vault.changeNetwork(chainName);
+    test(`signTransaction/valid for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-    await vault.getActiveChains();
-    try {
-      let result = await vault.signTransaction(rawTx, pin, polygonRpcUrl);
-    } catch (e) {
-      expect(e.message).toBe("Cannot read property 'salt' of undefined");
-    }
-  });
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+      await vault.getActiveChains();
+      try {
+        let result = await vault.signTransaction(rawTx, pin, networkConfig.url);
+      } catch (e) {
+        expect(e.message).toBe("Cannot read property 'salt' of undefined");
+      }
+    });
 
-  test("signTransaction/empty raw tx", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    test(`signTransaction/empty raw tx for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-    try {
-      let result = await vault.signTransaction({}, pin, polygonRpcUrl);
-    } catch (e) {
-      expect(e.message).toBe(
-        "Cannot read properties of undefined (reading 'toLowerCase')"
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+      try {
+        let result = await vault.signTransaction({}, pin, networkConfig.url);
+      } catch (e) {
+        expect(e.message).toBe(
+          "Cannot read properties of undefined (reading 'toLowerCase')"
+        );
+      }
+    });
+
+    test(`signTransaction/invalid raw for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+      try {
+        let result = await vault.signTransaction(
+          "evwf",
+          pin,
+          networkConfig.url
+        );
+      } catch (e) {
+        expect(e.message).toBe(
+          "Cannot read properties of undefined (reading 'toLowerCase')"
+        );
+      }
+    });
+
+    test(`signTransaction/empty pin for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+
+      let result = await vault.signTransaction("evwf", null, networkConfig.url);
+      expect(result.error).toBe("Wrong pin type, format or length");
+    });
+
+    test(`signTransaction/invalid pin for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+
+      let result = await vault.signTransaction(
+        "evwf",
+        "afewf",
+        networkConfig.url
       );
-    }
-  });
+      expect(result.error).toBe("Wrong pin type, format or length");
+    });
+    test(`signTransaction/incorrect pin for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-  test("signTransaction/invalid raw tx", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-    try {
-      let result = await vault.signTransaction("evwf", pin, polygonRpcUrl);
-    } catch (e) {
-      expect(e.message).toBe(
-        "Cannot read properties of undefined (reading 'toLowerCase')"
+      let result = await vault.signTransaction(
+        "evwf",
+        "112344",
+        networkConfig.url
       );
-    }
-  });
+      expect(result.error).toBe("Incorrect pin");
+    });
 
-  test("signTransaction/empty pin", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    test(`signTransaction/empty polygon rpc for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
 
-    let result = await vault.signTransaction("evwf", null, polygonRpcUrl);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
+      try {
+        let result = await vault.signTransaction("evwf", pin, null);
+      } catch (e) {
+        expect(e.message).toBe(
+          "CONNECTION ERROR: Couldn't connect to node http://localhost:8545."
+        );
+      }
+    });
 
-  test("signTransaction/invalid pin", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    test(`signTransaction/invalid polygon rpc for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+      let invalidRpc = "efrwgrwdvfr";
+      try {
+        let result = await vault.signTransaction("evwf", pin, invalidRpc);
+      } catch (e) {
+        expect(e.message).toBe(
+          `CONNECTION ERROR: Couldn't connect to node ${invalidRpc}.`
+        );
+      }
+    });
 
-    let result = await vault.signTransaction("evwf", "afewf", polygonRpcUrl);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
-  test("signTransaction/incorrect pin", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    test(`signTransaction/all empty params for ${chainName}`, async () => {
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+        from: from.toLowerCase(), //sender address
+        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+        maxPriorityFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("42.25770", "gwei"))
+        ),
+        maxFeePerGas: web3.utils.numberToHex(
+          parseFloat(web3.utils.toWei("150.99", "gwei"))
+        ),
+        data: "0x0", // method to generate data is provided below
+        nonce: nonce,
+        type: "0x2",
+      };
+      let invalidRpc = "efrwgrwdvfr";
 
-    let result = await vault.signTransaction("evwf", "112344", polygonRpcUrl);
-    expect(result.error).toBe("Incorrect pin");
-  });
-
-  test("signTransaction/empty polygon rpc", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-
-    try {
-      let result = await vault.signTransaction("evwf", pin, null);
-    } catch (e) {
-      expect(e.message).toBe(
-        "CONNECTION ERROR: Couldn't connect to node http://localhost:8545."
-      );
-    }
-  });
-
-  test("signTransaction/invalid polygon rpc", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-    let invalidRpc = "efrwgrwdvfr";
-    try {
-      let result = await vault.signTransaction("evwf", pin, invalidRpc);
-    } catch (e) {
-      expect(e.message).toBe(
-        `CONNECTION ERROR: Couldn't connect to node ${invalidRpc}.`
-      );
-    }
-  });
-
-  test("signTransaction/all empty params", async () => {
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
-    const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-      gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-      maxPriorityFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("42.25770", "gwei"))
-      ),
-      maxFeePerGas: web3.utils.numberToHex(
-        parseFloat(web3.utils.toWei("150.99", "gwei"))
-      ),
-      data: "0x0", // method to generate data is provided below
-      nonce: nonce,
-      type: "0x2",
-    };
-    let invalidRpc = "efrwgrwdvfr";
-
-    let result = await vault.signTransaction(null, null, null);
-    expect(result.error).toBe("Wrong pin type, format or length");
+      let result = await vault.signTransaction(null, null, null);
+      expect(result.error).toBe("Wrong pin type, format or length");
+    });
   });
 });
 
 describe("get Fees", () => {
-  test("get Fees, validate", async () => {
-    vault.changeNetwork("polygon");
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
+  Object.keys(NETWORKS).forEach((chainName) => {
+    test(`get Fees, validate for ${chainName}`, async () => {
+      const networkConfig = getNetworkConfig(chainName);
+      vault.changeNetwork(chainName);
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
-      chainID: 137,
-    };
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
 
-    let result = await vault.getFees(rawTx, polygonRpcUrl);
-    expect(result.response).toHaveProperty("gasLimit");
-    expect(result.response).toHaveProperty("fees");
-  });
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",
+        from: from.toLowerCase(),
+        value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
+        chainID: networkConfig.chainId,
+      };
 
-  test("get fees, invalid", async () => {
-    vault.changeNetwork("polygon");
-    let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-    const web3 = new Web3(polygonRpcUrl);
+      let result = await vault.getFees(rawTx, networkConfig.url);
+      expect(result.response).toHaveProperty("gasLimit");
+      expect(result.response).toHaveProperty("fees");
 
-    const rawTx = {
-      to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-      from: from.toLowerCase(), //sender address
-      value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
-      chainID: 137,
-    };
+      // Additional checks specific to the chain
+      if (networkConfig.txType === 2) {
+        expect(result.response.fees.fast).toHaveProperty("maxFeePerGas");
+        expect(result.response.fees.fast).toHaveProperty(
+          "maxPriorityFeePerGas"
+        );
+      } else {
+        expect(result.response.fees.fast).toHaveProperty("gasPrice");
+      }
+    });
 
-    try {
-      let result = await vault.getFees(rawTx, "abc");
-      console.log("result = ", result);
-    } catch (e) {
-      console.log(e.message);
-      expect(e.message).toBe("CONNECTION ERROR: Couldn't connect to node abc.");
-    }
+    test(`get fees, invalid for ${chainName}`, async () => {
+      const networkConfig = getNetworkConfig(chainName);
+      vault.changeNetwork(chainName);
+
+      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
+      const web3 = new Web3(networkConfig.url);
+
+      const rawTx = {
+        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",
+        from: from.toLowerCase(),
+        value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
+        chainID: networkConfig.chainId,
+      };
+
+      try {
+        let result = await vault.getFees(rawTx, "invalid_url");
+        fail("Should have thrown an error");
+      } catch (e) {
+        expect(e.message).toBe(
+          "CONNECTION ERROR: Couldn't connect to node invalid_url."
+        );
+      }
+    });
   });
 });

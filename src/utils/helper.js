@@ -273,7 +273,11 @@ async function getBSCTransactions(address, network, unmarshalApiKey) {
 
 async function getCoinInstance(chain, mnemonic) {
   if (Chains.evmChains.hasOwnProperty(chain)) {
-    const keyringInstance = new Chains[chain].KeyringController({});
+    const evmChainInfo = Chains.getEvmChainInfo(chain);
+
+    const keyringInstance = new Chains[chain].KeyringController({
+      txType: evmChainInfo.txType,
+    });
 
     return keyringInstance;
   }
