@@ -102,14 +102,14 @@ class Vault extends Keyring {
     }
   }
 
-  // async addNetwork(chainName, chainInfo) {
-  //   try {
-  //     Chains.addEvmChain(chainName, chainInfo);
-  //     return { response: `Network ${chainName} added successfully` };
-  //   } catch (error) {
-  //     return { error: error.message };
-  //   }
-  // }
+  async addNetwork(chainName, chainInfo) {
+    try {
+      Chains.addEvmChain(chainName, chainInfo);
+      return { response: `Network ${chainName} added successfully` };
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
 
   async generateVault(encryptionKey, pin, mnemonic) {
     if (
