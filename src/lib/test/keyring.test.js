@@ -102,7 +102,7 @@ let impAccAddress;
 
 let chains;
 const ethUrl = "https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f";
-const polygonRpcUrl = "https://polygon-amoy-bor-rpc.publicnode.com";
+const polygonRpcUrl = "https://polygon.llamarpc.com";
 const bscRpcUrl = "https://rpc.ankr.com/bsc";
 beforeAll(async () => {
   result = await vault.generateVault(bufView, pin, phrase);
@@ -668,12 +668,12 @@ describe("sign", () => {
 
 describe("validateMnemonic", () => {
   let signUpPhrase =
-    "ladder equip piano open silent pizza solid cannon name volcano fee valley";
+    "join danger verb slide lava blossom garment school panel shaft damp ghost";
   test("validateMnemonic/valid", async () => {
     let result = await vault.validateMnemonic(
       signUpPhrase,
-      "abhi141",
-      "testnet",
+      "polygonamoytest",
+      "mainnet",
       polygonRpcUrl
     );
     expect(result.response).toBe(true);
