@@ -101,6 +101,9 @@ class Vault extends Keyring {
       this.initializeKeyringController();
     }
   }
+  async getChainInfo(chain) {
+    return Chains.getEvmChainInfo(chain);
+  }
 
   async addNetwork(chainName, chainInfo) {
     try {
