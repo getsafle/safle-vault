@@ -57,6 +57,7 @@
     "@getsafle/vault-bitcoin-controller": "^2.0.7",
     "@getsafle/vault-bsc-controller": "^1.2.4",
     "@getsafle/vault-eth-controller": "^1.4.6",
+    "@getsafle/vault-evm-controller": "^1.0.0",
     "@getsafle/vault-mantle-controller": "^1.0.1",
     "@getsafle/vault-optimism-controller": "^1.0.8",
     "@getsafle/vault-polygon-controller": "^1.2.8",
