@@ -14,7 +14,7 @@ const NETWORKS = {
     CHAIN_ID: 97,
   },
   polygon: {
-    URL: "https://polygon-amoy.blockpi.network/v1/rpc/public",
+    URL: "https://polygon-amoy-bor-rpc.publicnode.com",
     CHAIN_ID: 80001,
   },
   optimism: {
@@ -26,7 +26,7 @@ const NETWORKS = {
     CHAIN_ID: 421614,
   },
   mantle: {
-    URL: "https://rpc.ankr.com/mantle_sepolia",
+    URL: "https://rpc.mantle.xyz",
     CHAIN_ID: 5001,
   },
   velas: {
@@ -42,7 +42,7 @@ const NETWORKS = {
     CHAIN_ID: 84532,
   },
   zkEVM: {
-    URL: "https://endpoints.omniatech.io/v1/polygon-zkevm/testnet/public",
+    URL: "https://polygon-zkevm.drpc.org",
     CHAIN_ID: 1442,
   },
   bevm: {
@@ -102,7 +102,7 @@ let impAccAddress;
 
 let chains;
 const ethUrl = "https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f";
-const polygonRpcUrl = "https://polygon-testnet.public.blastapi.io";
+const polygonRpcUrl = "https://polygon.llamarpc.com";
 const bscRpcUrl = "https://rpc.ankr.com/bsc";
 beforeAll(async () => {
   result = await vault.generateVault(bufView, pin, phrase);
@@ -230,7 +230,7 @@ describe("importWallet", () => {
 
   test("importWallet/valid address exists already", async () => {
     let result = await vault.importWallet("0x" + privateKey, pin, bufView);
-    expect(result.error).toBe("This address is already present in the vault");
+    expect(result.response).toHaveProperty("vault");
   });
 
   test("importWallet/empty private key", async () => {
@@ -291,6 +291,7 @@ describe("getActiveChains", () => {
 describe("deleteAccount", () => {
   test("deleteAccount/valid generated acc", async () => {
     let result = await vault.deleteAccount(bufView, accAddress, pin);
+
     expect(result).toHaveProperty("response");
   });
 
@@ -667,12 +668,12 @@ describe("sign", () => {
 
 describe("validateMnemonic", () => {
   let signUpPhrase =
-    "ladder equip piano open silent pizza solid cannon name volcano fee valley";
+    "join danger verb slide lava blossom garment school panel shaft damp ghost";
   test("validateMnemonic/valid", async () => {
     let result = await vault.validateMnemonic(
       signUpPhrase,
-      "abhi141",
-      "testnet",
+      "polygonamoytest",
+      "mainnet",
       polygonRpcUrl
     );
     expect(result.response).toBe(true);

@@ -982,7 +982,42 @@ class Keyring {
         });
 
         if (isDuplicateAddress) {
-          return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
+          try {
+            Object.keys(this.decryptedVault)
+              .slice(0, -1)
+              .forEach((chain) => {
+                this.decryptedVault[chain]?.public?.forEach(
+                  (account, index) => {
+                    if (account.address === address && account.isDeleted) {
+                      this.decryptedVault[chain].public[
+                        index
+                      ].isDeleted = false;
+                    }
+                  }
+                );
+              });
+
+            const vault = await helper.cryptography(
+              JSON.stringify(this.decryptedVault),
+              JSON.stringify(encryptionKey),
+              "encryption"
+            );
+
+            this.vault = vault;
+
+            this.logs.getState().logs.push({
+              timestamp: Date.now(),
+              action: "import-wallet",
+              vault: this.vault,
+              chain: this.chain,
+              address,
+            });
+
+            return { response: { vault, address } };
+          } catch (error) {
+            console.error("Error processing duplicate address:", error);
+            throw error; // or handle it as appropriate for your application
+          }
         }
       }
 
