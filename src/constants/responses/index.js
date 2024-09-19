@@ -15,5 +15,6 @@ module.exports = {
     INCORRECT_CURRENT_PIN: 'The current pin passed is incorrect',
     INCORRECT_LABEL_TYPE: 'Label should be a valid string',
     REQUEST_LIMIT_EXCEEDED: 'Request limit exceeded. Please retry later',
-    REQUEST_BLOCKED: 'Requests to method blocked'
+    REQUEST_BLOCKED: 'Requests to method blocked',
+    INVALID_API_KEY: 'Invalid API key passed'
 };
