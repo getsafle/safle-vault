@@ -49,14 +49,14 @@ module.exports = {
   solana,
   evmChains: evmChainSymbols,
   nonEvmChains,
-  // getEvmChainInfo: (chain) => evmChains[chain],
-  // addEvmChain: (chainName, chainInfo) => {
-  //   if (evmChains[chainName]) {
-  //     throw new Error("Chain already exists");
-  //   }
-  //   evmChains[chainName] = chainInfo;
-  //   evmControllers[chainName] = EvmController
+  getEvmChainInfo: (chain) => evmChains[chain],
+  addEvmChain: (chainName, chainInfo) => {
+    if (evmChains[chainName]) {
+      throw new Error("Chain already exists");
+    }
+    evmChains[chainName] = chainInfo;
+    evmControllers[chainName] = EvmController;
 
-  //   evmChainSymbols[chainName] = chainInfo.symbol;
-  // },
+    evmChainSymbols[chainName] = chainInfo.symbol;
+  },
 };
