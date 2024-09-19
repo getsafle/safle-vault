@@ -191,17 +191,6 @@ This method is used to get the list of all the accounts (`imported` and `generat
 
 * `encryptionKey` - The encryption key used to encrypt/decrypt the vault.
 
-Get Assets:
-This method returns the list of assets for all the addresses on all the chains passed in the array.
-
- `const assets = await vault.getAssets({ addresses, chains, EthRpcUrl, polygonRpcUrl, bscRpcUrl });`
-
-* `addresses` - The list of addresses in an array.
-* `chains` - The list of chains in an array.
-* `EthRpcUrl` - Ethereum RPC URL.
-* `PolygonRpcUrl` - Polygon RPC URL.
-* `bscRpcUrl` - BSC RPC URL.
-
 Get Native Asset Balance:
 This method is used to get the native asset balance of an address present in the vault.
 
@@ -242,4 +231,12 @@ Get Logs:
 This method retrieves all the logs of all the vault changes.
 
  `const logs = await vault.getLogs();`
+
+Get Fees:
+This method returns an object containing gas limit, gas price wrt the speed of transaction confirmation 
+
+ `async getFees(rawTx, rpcUrl); `
+
+* `rawTx` - The rawTx object containing the transaction details, e.g from, to , value, data, chainID
+* `rpcUrl` - RPC URL of the chain.
  

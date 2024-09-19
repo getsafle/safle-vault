@@ -14,11 +14,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
+      GITHUB_ACTIONS: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16.16.0
+          node-version: 18.x
       - run: npm ci
       - run: npm run test
 
@@ -29,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16.16.0
+          node-version: 18.x
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm publish --access public
