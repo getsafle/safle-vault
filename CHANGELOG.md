@@ -673,3 +673,4 @@
 ### 2.9.1 (2024-09-23)
 
 -Integrated vault-evm-controller
+-Resolved issue for unarchival of a wallet
