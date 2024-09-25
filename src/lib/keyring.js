@@ -591,7 +591,102 @@ class Keyring {
       return { response: signedMessage };
     }
   }
+  async signTypedMessage(address, data, pin, encryptionKey, rpcUrl = "") {
+    if (
+      typeof pin != "string" ||
+      pin.match(/^[0-9]+$/) === null ||
+      pin < 0 ||
+      pin.length != 6
+    ) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+    }
 
+    const res = await this.validatePin(pin);
+
+    if (res.response == false || res.error) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+    }
+
+    const err = helper.validateEncryptionKey(
+      this.vault,
+      JSON.stringify(encryptionKey)
+    );
+
+    if (err.error) {
+      return { error: err.error };
+    }
+
+    const { error, response } = await this.exportPrivateKey(address, pin);
+
+    if (error) {
+      return { error };
+    }
+
+    const { privateKey, isImported } = response;
+
+    if (isImported) {
+      const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+
+      if (this.chain === "ethereum") {
+        const signedMessage = await this.keyringInstance.sign(
+          data,
+          privateKey,
+          web3
+        );
+
+        return { response: signedMessage.message };
+      }
+
+      if (Chains.evmChains.hasOwnProperty(this.chain)) {
+        const keyringInstance = await helper.getCoinInstance(this.chain);
+
+        const signedMessage = await keyringInstance.sign(
+          data,
+          privateKey,
+          web3
+        );
+
+        return { response: signedMessage.message };
+      }
+
+      if (Chains?.[this.chain]) {
+        const { signedMessage } = await this[this.chain].signTypedMessage(
+          data,
+          address,
+          privateKey
+        );
+        return { response: signedMessage };
+      }
+
+      return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
+    } else {
+      const accounts = await this.getAccounts();
+
+      if (accounts.response.filter((e) => e.address === address).length < 1) {
+        return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+      }
+
+      if (
+        Chains.evmChains.hasOwnProperty(this.chain) ||
+        this.chain === "ethereum"
+      ) {
+        const msgParams = { from: address, data: data };
+
+        const signedMsg = await this.keyringInstance.signTypedMessage(
+          msgParams
+        );
+
+        return { response: signedMsg };
+      }
+
+      const { signedMessage } = await this[this.chain].signTypedMessage(
+        data,
+        address
+      );
+
+      return { response: signedMessage };
+    }
+  }
   async signTransaction(rawTx, pin, rpcUrl) {
     if (
       typeof pin != "string" ||

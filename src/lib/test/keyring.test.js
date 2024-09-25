@@ -1,13 +1,15 @@
 jest.setTimeout(30000);
-
+const crypto = require("crypto");
+const assert = require("assert");
 const { before } = require("lodash");
 let KeyRing = require("../keyring");
 let Vault = require("../vault");
+const sigUtil = require("eth-sig-util");
 const Web3 = require("web3");
 const NETWORKS = {
   ethereum: {
-    URL: "https://eth-goerli.public.blastapi.io",
-    CHAIN_ID: 5,
+    URL: "https://eth.llamarpc.com",
+    CHAIN_ID: 1,
   },
   bsc: {
     URL: "https://data-seed-prebsc-1-s1.binance.org:8545/",
@@ -18,8 +20,8 @@ const NETWORKS = {
     CHAIN_ID: 80001,
   },
   optimism: {
-    URL: "https://optimism-goerli.public.blastapi.io",
-    CHAIN_ID: 420,
+    URL: "https://optimism.llamarpc.com",
+    CHAIN_ID: 10,
   },
   arbitrum: {
     URL: "https://sepolia-rollup.arbitrum.io/rpc",
@@ -663,6 +665,114 @@ describe("sign", () => {
 
     let result = await vault.sign(null, null, null, null);
     expect(result.error).toBe("Wrong pin type, format or length");
+  });
+});
+
+describe("sign message", () => {
+  Object.keys(NETWORKS).forEach((chainName) => {
+    const networkConfig = getNetworkConfig(chainName);
+    vault.changeNetwork(chainName);
+    test(`signMessage for ${chainName}`, async () => {
+      const message = `Hello, eth!`;
+      let web3 = new Web3(networkConfig.url);
+      const hash = crypto.createHash("sha256").update(message).digest();
+      const hexData = web3.utils.toHex(hash);
+
+      const msgParams = {
+        from: "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
+        data: hexData,
+      };
+
+      const raw_sign = await vault.signMessage(
+        "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
+        msgParams.data,
+        pin,
+        bufView,
+        ethUrl
+      );
+      console.log(raw_sign);
+    });
+    test(`signTypeMessage for ${chainName}`, async () => {
+      const accounts = ["0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd"];
+
+      // Ensure accounts is not empty
+      if (accounts.length === 0) {
+        throw new Error("No accounts found");
+      }
+
+      // console.log(accounts[0]);
+
+      let msgParams = {
+        from: "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
+        data: {
+          types: {
+            EIP712Domain: [
+              { name: "name", type: "string" },
+              { name: "version", type: "string" },
+              { name: "chainId", type: "uint256" },
+              { name: "verifyingContract", type: "address" },
+            ],
+            Person: [
+              { name: "name", type: "string" },
+              { name: "wallet", type: "address" },
+            ],
+            Mail: [
+              { name: "from", type: "Person" },
+              { name: "to", type: "Person" },
+              { name: "contents", type: "string" },
+            ],
+          },
+          primaryType: "Mail",
+          domain: {
+            name: "Ether Mail",
+            version: "1",
+            chainId: NETWORKS[chainName].CHAIN_ID,
+            verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+          },
+          message: {
+            from: {
+              name: "Cow",
+              wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+            },
+            to: {
+              name: "Bob",
+              wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+            },
+            contents: "Hello, Bob!",
+          },
+        },
+      };
+
+      const rawSignature = await vault.signTypedMessage(
+        "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
+        msgParams.data,
+        pin,
+        bufView,
+        networkConfig.url
+      );
+      console.log("Raw signature:", rawSignature);
+
+      // Verify the signature
+      msgParams = { ...msgParams.data, from: msgParams.from };
+      console.log();
+      const recoveredAddress = sigUtil.recoverTypedSignature({
+        data: msgParams,
+        sig: rawSignature.response,
+      });
+
+      // console.log("Recovered address:", recoveredAddress);
+      // console.log("Original address:", msgParams.from);
+
+      // Compare the recovered address with the original signer's address
+      const isSignatureValid =
+        recoveredAddress.toLowerCase() === msgParams.from.toLowerCase();
+
+      assert(
+        isSignatureValid,
+        `Signature verification failed for ${chainName}`
+      );
+      assert(rawSignature, `Failed to Sign Message for ${chainName}`);
+    });
   });
 });
 
