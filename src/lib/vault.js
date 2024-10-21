@@ -40,7 +40,10 @@ class Vault extends Keyring {
     const evmChainInfo = Chains.getEvmChainInfo(this.chain);
     const keyringController = new KeyringController({
       txType: evmChainInfo.txType,
-
+      persistKeyrings: this.keyringInstance?.keyrings,
+      persistStore: this.keyringInstance?.store,
+      persistmemStore: this.keyringInstance?.memStore,
+      persistImported: this.keyringInstance?.importedWallets,
       encryptor: {
         encrypt(pass, object) {
           const ciphertext = CryptoJS.AES.encrypt(

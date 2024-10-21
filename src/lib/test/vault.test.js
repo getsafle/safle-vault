@@ -1,6 +1,6 @@
 jest.setTimeout(30000);
 const crypto = require("crypto");
-
+require("dotenv").config();
 let Vault = require("../vault");
 const bufView = [
   48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87,
@@ -8,9 +8,8 @@ const bufView = [
   105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233,
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
-let phrase =
-  "fun rough treat scan glimpse region century purpose expire video remind second";
-let pin = "696969";
+let phrase = process.env.MNEMONIC;
+let pin = process.env.PIN;
 let vault = new Vault({});
 
 const logs = [

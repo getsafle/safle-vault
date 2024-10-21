@@ -4,43 +4,48 @@ const assert = require("assert");
 const { before } = require("lodash");
 let KeyRing = require("../keyring");
 let Vault = require("../vault");
+require("dotenv").config();
 const sigUtil = require("eth-sig-util");
 const Web3 = require("web3");
 const NETWORKS = {
+  bitcoin: {
+    URL: "https://bitcoin-mainnet.gateway.tatum.io",
+    CHAIN_ID: 999999,
+  },
   ethereum: {
-    URL: "https://eth.llamarpc.com",
-    CHAIN_ID: 1,
+    URL: "https://sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 11155111,
   },
   bsc: {
-    URL: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    URL: "https://bsc-testnet.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 97,
   },
   polygon: {
-    URL: "https://polygon-amoy-bor-rpc.publicnode.com",
-    CHAIN_ID: 80001,
+    URL: "https://polygon-amoy.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 80002,
   },
   optimism: {
-    URL: "https://optimism.llamarpc.com",
-    CHAIN_ID: 10,
+    URL: "https://optimism-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 11155420,
   },
   arbitrum: {
-    URL: "https://sepolia-rollup.arbitrum.io/rpc",
+    URL: "https://arbitrum-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 421614,
   },
   mantle: {
-    URL: "https://rpc.mantle.xyz",
-    CHAIN_ID: 5001,
+    URL: "https://mantle-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 5003,
   },
-  velas: {
-    URL: "https://explorer.testnet.velas.com/rpc",
-    CHAIN_ID: 111,
-  },
+  // velas: {
+  //   URL: "https://explorer.testnet.velas.com/rpc",
+  //   CHAIN_ID: 111,
+  // },
   avalanche: {
-    URL: "https://api.avax-test.network/ext/bc/C/rpc",
+    URL: "https://avalanche-fuji.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 43113,
   },
   base: {
-    URL: "https://base-sepolia.blockpi.network/v1/rpc/public",
+    URL: "https://base-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 84532,
   },
   zkEVM: {
@@ -64,12 +69,13 @@ const chainConfigs = {
   optimism: { symbol: "OP", txType: 2 },
   arbitrum: { symbol: "ARB", txType: 2 },
   mantle: { symbol: "MNT", txType: 2 },
-  velas: { symbol: "VLX", txType: 0 },
+  // velas: { symbol: "VLX", txType: 0 },
   avalanche: { symbol: "AVAX", txType: 2 },
   base: { symbol: "BASE", txType: 2 },
   zkEVM: { symbol: "ZKEVM", txType: 2 },
   bevm: { symbol: "BTC", txType: 0 },
   rootstock: { symbol: "RBTC", txType: 0 },
+  bitcoin: { symbol: "BTC", txType: 0 },
 };
 
 // Add the helper function
@@ -90,16 +96,15 @@ const bufView = [
   105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233,
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
-let phrase =
-  "fun rough treat scan glimpse region century purpose expire video remind second";
-let pin = "696969";
+let phrase = process.env.MNEMONIC;
+let pin = process.env.PIN;
 let result;
 let vault = new Vault({});
 let vaultAddress;
 let privateKey;
 let accAddress;
-let privateKeyImp =
-  "0x7a9633b8103fec11c9e855a6b6c8c072e9af311a69b92ab0ad8186b1fb57371f";
+let privateKeyImp = process.env.PRIVATE_KEY_EVM;
+let privateKeybtcImp = process.env.PRIVATE_KEY_BTC;
 let impAccAddress;
 
 let chains;
@@ -108,6 +113,7 @@ const polygonRpcUrl = "https://polygon.llamarpc.com";
 const bscRpcUrl = "https://rpc.ankr.com/bsc";
 beforeAll(async () => {
   result = await vault.generateVault(bufView, pin, phrase);
+
   vaultAddress = result.response;
   await vault.getAccounts(bufView);
 });
@@ -224,43 +230,66 @@ describe("exportPrivateKey", () => {
 });
 
 describe("importWallet", () => {
-  test("importWallet/valid import", async () => {
-    let result = await vault.importWallet("0x" + privateKeyImp, pin, bufView);
-    impAccAddress = result.response.address;
-    expect(result).toHaveProperty("response.address");
-  });
+  const evmaddresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  const bitcoinadresses = [
+    process.env.BITCOIN_ADDRESS_1,
+    process.env.BITCOIN_ADDRESS_2,
+  ];
+  Object.keys(NETWORKS).map((chainName) => {
+    const networkConfig = getNetworkConfig(chainName);
 
-  test("importWallet/valid address exists already", async () => {
-    let result = await vault.importWallet("0x" + privateKey, pin, bufView);
-    expect(result.response).toHaveProperty("vault");
-  });
-
-  test("importWallet/empty private key", async () => {
-    try {
-      let result = await vault.importWallet(null, pin, bufView);
-    } catch (e) {
-      expect(e.message).toBe(
-        "Cannot read properties of null (reading 'startsWith')"
-      );
+    let addresses;
+    let impprivatekey;
+    if (chainName == "bitcoin") {
+      addresses = bitcoinadresses;
+      impprivatekey = privateKeybtcImp;
+    } else {
+      addresses = evmaddresses;
+      impprivatekey = "0x" + privateKeyImp;
     }
-  });
 
-  test("importWallet/empty pin", async () => {
-    let result = await vault.importWallet("0x" + privateKey, null, bufView);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
-  test("importWallet/incorrect pin", async () => {
-    let result = await vault.importWallet("0x" + privateKey, "111111", bufView);
-    expect(result.error).toBe("Incorrect pin");
-  });
-  test("importWallet/empty encryption key", async () => {
-    let result = await vault.importWallet("0x" + privateKey, pin, null);
-    expect(result.error).toBe("Incorrect Encryption Key or vault string");
-  });
+    test(`importWallet/valid import ${chainName}`, async () => {
+      let var1 = chainName;
+      let var2 = impprivatekey;
+      vault.changeNetwork(chainName);
+      let result = await vault.importWallet(impprivatekey, pin, bufView);
+      impAccAddress = result.response.address;
 
-  test("importWallet/empty all params", async () => {
-    let result = await vault.importWallet(null, null, null);
-    expect(result.error).toBe("Wrong pin type, format or length");
+      expect(result).toHaveProperty("response.address");
+    });
+
+    test("importWallet/valid address exists already", async () => {
+      let result = await vault.importWallet(impprivatekey, pin, bufView);
+      expect(result.response).toHaveProperty("vault");
+    });
+
+    test("importWallet/empty private key", async () => {
+      try {
+        let result = await vault.importWallet(null, pin, bufView);
+      } catch (e) {
+        expect(e.message).toBe(
+          "Cannot read properties of null (reading 'startsWith')"
+        );
+      }
+    });
+
+    test("importWallet/empty pin", async () => {
+      let result = await vault.importWallet(impprivatekey, null, bufView);
+      expect(result.error).toBe("Wrong pin type, format or length");
+    });
+    test("importWallet/incorrect pin", async () => {
+      let result = await vault.importWallet(impprivatekey, "111111", bufView);
+      expect(result.error).toBe("Incorrect pin");
+    });
+    test("importWallet/empty encryption key", async () => {
+      let result = await vault.importWallet(impprivatekey, pin, null);
+      expect(result.error).toBe("Incorrect Encryption Key or vault string");
+    });
+
+    test("importWallet/empty all params", async () => {
+      let result = await vault.importWallet(null, null, null);
+      expect(result.error).toBe("Wrong pin type, format or length");
+    });
   });
 });
 
@@ -522,256 +551,651 @@ describe("getBalance", () => {
 });
 
 describe("updateLabel", () => {
-  test("updateLabel/valid", async () => {
-    let result = await vault.updateLabel(
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      bufView,
-      "Wallet 1"
-    );
-    expect(result).toHaveProperty("response");
-  });
-
-  test("updateLabel/invalid address", async () => {
-    let result = await vault.updateLabel("adeded", bufView, "Wallet 1");
-    expect(result.error).toBe("This address is not present in the vault");
-  });
-
-  test("updateLabel/empty address", async () => {
-    let result = await vault.updateLabel(null, bufView, "Wallet 1");
-    expect(result.error).toBe("This address is not present in the vault");
-  });
-  test("updateLabel/invalid encryption key", async () => {
-    let result = await vault.updateLabel(
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      "afers",
-      "Wallet 1"
-    );
-    expect(result.error).toBe("Incorrect Encryption Key or vault string");
-  });
-  test("updateLabel/empty encryption key", async () => {
-    let result = await vault.updateLabel(
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      null,
-      "Wallet 1"
-    );
-    expect(result.error).toBe("Incorrect Encryption Key or vault string");
-  });
-  test("updateLabel/empty label", async () => {
-    try {
+  const addresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  addresses.forEach((address, index) => {
+    test(`updateLabel/valid  using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      await vault.importWallet("0x" + privateKeyImp, pin, bufView);
       let result = await vault.updateLabel(
-        "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
+        address.toLowerCase(),
         bufView,
-        null
+        "Wallet 1"
       );
-    } catch (e) {
-      expect(e.message).toBe("chainName is not defined");
-    }
-  });
-  test("updateLabel/all empty params", async () => {
-    let result = await vault.updateLabel(null, null, null);
-    expect(result.error).toBe("Incorrect Encryption Key or vault string");
+      expect(result).toHaveProperty("response");
+    });
+
+    test(`updateLabel/invalid address using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      let result = await vault.updateLabel("adeded", bufView, "Wallet 1");
+      expect(result.error).toBe("This address is not present in the vault");
+    });
+
+    test(`updateLabel/empty address using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      let result = await vault.updateLabel(null, bufView, "Wallet 1");
+      expect(result.error).toBe("This address is not present in the vault");
+    });
+    test(`updateLabel/invalid encryption key using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      let result = await vault.updateLabel(
+        address.toLowerCase(),
+        "afers",
+        "Wallet 1"
+      );
+      expect(result.error).toBe("Incorrect Encryption Key or vault string");
+    });
+    test(`updateLabel/empty encryption key using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      let result = await vault.updateLabel(
+        address.toLowerCase(),
+        null,
+        "Wallet 1"
+      );
+      expect(result.error).toBe("Incorrect Encryption Key or vault string");
+    });
+    test(`updateLabel/empty label using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      try {
+        let result = await vault.updateLabel(
+          address.toLowerCase(),
+          bufView,
+          null
+        );
+      } catch (e) {
+        expect(e.message).toBe("chainName is not defined");
+      }
+    });
+    test(`updateLabel/all empty params using ${
+      index == 1 ? "imported" : ""
+    } address ${address}`, async () => {
+      let result = await vault.updateLabel(null, null, null);
+      expect(result.error).toBe("Incorrect Encryption Key or vault string");
+    });
   });
 });
 
 describe("sign", () => {
-  test("sign/valid", async () => {
-    let data = "hello world";
-    console.log("sign/valid--->", pin, ethUrl);
-    await vault.restoreKeyringState(vault, pin, bufView);
+  const evmaddresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  const bitcoinadresses = [
+    process.env.BITCOIN_ADDRESS_1,
+    process.env.BITCOIN_ADDRESS_2,
+  ];
+  Object.keys(NETWORKS)
+    .filter((key) => key !== "bitcoin")
+    .forEach((chainName) => {
+      const networkConfig = getNetworkConfig(chainName);
 
-    let result = await vault.sign(
-      data,
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      pin,
-      ethUrl
-    );
-    console.log("sign/valid--->", result);
-    expect(result.response).toHaveProperty("signature");
-  });
+      let addresses;
+      let impprivatekey;
+      if (chainName == "bitcoin") {
+        addresses = bitcoinadresses;
+        impprivatekey = privateKeybtcImp;
+      } else {
+        addresses = evmaddresses;
+        impprivatekey = "0x" + privateKeyImp;
+      }
+      addresses.forEach((address, index) => {
+        test(`sign/valid  for ${chainName} using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          vault.changeNetwork(chainName);
+          await vault.importWallet(impprivatekey, pin, bufView);
 
-  test("sign/empty data", async () => {
-    let data = "hello world";
-    let result = await vault.sign(
-      "",
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      pin,
-      ethUrl
-    );
-    expect(result.response).toHaveProperty("signature");
-  });
+          console.log("sign/valid--->", pin, networkConfig.url);
+          await vault.restoreKeyringState(vault, pin, bufView);
 
-  test("sign/empty address", async () => {
-    let data = "hello world";
-    try {
-      let result = await vault.sign(data, null, pin, ethUrl);
-    } catch (e) {
-      expect(e.message).toBe(
-        "Cannot read properties of null (reading 'toLowerCase')"
-      );
-    }
-  });
-  test("sign/invalid address", async () => {
-    let data = "hello world";
-    try {
-      let result = await vault.sign(data, "abc", pin, ethUrl);
-    } catch (e) {
-      expect(e.message).toBe(
-        'Given address "abc" is not a valid Ethereum address.'
-      );
-    }
-  });
-  test("sign/empty pin", async () => {
-    let data = "hello world";
+          let result = await vault.sign(
+            data,
+            address.toLowerCase(),
+            pin,
+            networkConfig.url
+          );
+          console.log("sign/valid--->", result);
+          expect(result.response).toHaveProperty("signature");
+        });
 
-    let result = await vault.sign(data, "abc", null, ethUrl);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
-  test("sign/incorrect pin", async () => {
-    let data = "hello world";
+        test(`sign/empty data  for ${chainName}  using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          let result = await vault.sign(
+            "",
+            address.toLowerCase(),
+            pin,
+            networkConfig.url
+          );
+          expect(result.response).toHaveProperty("signature");
+        });
 
-    let result = await vault.sign(data, "abc", "111111", ethUrl);
-    expect(result.error).toBe("Incorrect pin");
-  });
-  test("sign/invalid pin", async () => {
-    let data = "hello world";
-    let result = await vault.sign(data, accAddress, "abc", ethUrl);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
+        test(`sign/empty address  for ${chainName}  using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          try {
+            let result = await vault.sign(data, null, pin, networkConfig.url);
+          } catch (e) {
+            expect(e.message).toBe(
+              "Cannot read properties of null (reading 'toLowerCase')"
+            );
+          }
+        });
+        test(`sign/invalid address using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          try {
+            let result = await vault.sign(data, "abc", pin, networkConfig.url);
+          } catch (e) {
+            expect(e.message).toBe(
+              'Given address "abc" is not a valid Ethereum address.'
+            );
+          }
+        });
+        test(`sign/empty pin  for ${chainName}  using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
 
-  test("sign/empty url", async () => {
-    let data = "hello world";
-    let result = await vault.sign(
-      data,
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      pin,
-      null
-    );
-    expect(result.response).toHaveProperty("signature");
-  });
+          let result = await vault.sign(data, "abc", null, networkConfig.url);
+          expect(result.error).toBe("Wrong pin type, format or length");
+        });
+        test(`sign/incorrect  for ${chainName}  pin using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
 
-  test("sign/invalid url", async () => {
-    let data = "hello world";
-    let result = await vault.sign(
-      data,
-      "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-      pin,
-      "abc"
-    );
-    expect(result.response).toHaveProperty("signature");
-  });
+          let result = await vault.sign(
+            data,
+            "abc",
+            "111111",
+            networkConfig.url
+          );
+          expect(result.error).toBe("Incorrect pin");
+        });
+        test(`sign/invalid  for ${chainName}  pin using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          let result = await vault.sign(
+            data,
+            accAddress,
+            "abc",
+            networkConfig.url
+          );
+          expect(result.error).toBe("Wrong pin type, format or length");
+        });
 
-  test("sign/all params empty", async () => {
-    let data = "hello world";
+        test(`sign/empty for ${chainName}  url using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          let result = await vault.sign(data, address.toLowerCase(), pin, null);
+          expect(result.response).toHaveProperty("signature");
+        });
 
-    let result = await vault.sign(null, null, null, null);
-    expect(result.error).toBe("Wrong pin type, format or length");
-  });
+        test(`sign/invalid url for ${chainName}  using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+          let result = await vault.sign(
+            data,
+            address.toLowerCase(),
+            pin,
+            "abc"
+          );
+          expect(result.response).toHaveProperty("signature");
+        });
+
+        test(`sign/all params empty for ${chainName}  using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let data = "hello world";
+
+          let result = await vault.sign(null, null, null, null);
+          expect(result.error).toBe("Wrong pin type, format or length");
+        });
+      });
+    });
 });
 
 describe("sign message", () => {
-  Object.keys(NETWORKS).forEach((chainName) => {
+  const evmaddresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  const bitcoinadresses = [
+    process.env.BITCOIN_ADDRESS_1,
+    process.env.BITCOIN_ADDRESS_2,
+  ];
+  Object.keys(NETWORKS).forEach(async (chainName) => {
     const networkConfig = getNetworkConfig(chainName);
-    vault.changeNetwork(chainName);
-    test(`signMessage for ${chainName}`, async () => {
-      const message = `Hello, eth!`;
-      let web3 = new Web3(networkConfig.url);
-      const hash = crypto.createHash("sha256").update(message).digest();
-      const hexData = web3.utils.toHex(hash);
 
-      const msgParams = {
-        from: "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-        data: hexData,
-      };
+    let addresses;
+    let impprivatekey;
+    if (chainName == "bitcoin") {
+      addresses = bitcoinadresses;
+      impprivatekey = privateKeybtcImp;
+    } else {
+      addresses = evmaddresses;
+      impprivatekey = "0x" + privateKeyImp;
+    }
+    addresses.forEach((address, index) => {
+      test(`signMessage for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        vault.changeNetwork(chainName);
+        await vault.importWallet(impprivatekey, pin, bufView);
 
-      const raw_sign = await vault.signMessage(
-        "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-        msgParams.data,
-        pin,
-        bufView,
-        ethUrl
-      );
-      console.log(raw_sign);
-    });
-    test(`signTypeMessage for ${chainName}`, async () => {
-      const accounts = ["0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd"];
+        const message = `Hello, eth!`;
+        let web3 = new Web3(networkConfig.url);
+        const hash = crypto.createHash("sha256").update(message).digest();
+        const hexData = web3.utils.toHex(hash);
 
-      // Ensure accounts is not empty
-      if (accounts.length === 0) {
-        throw new Error("No accounts found");
-      }
+        const msgParams = {
+          from: address,
+          data: hexData,
+        };
 
-      // console.log(accounts[0]);
-
-      let msgParams = {
-        from: "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-        data: {
-          types: {
-            EIP712Domain: [
-              { name: "name", type: "string" },
-              { name: "version", type: "string" },
-              { name: "chainId", type: "uint256" },
-              { name: "verifyingContract", type: "address" },
-            ],
-            Person: [
-              { name: "name", type: "string" },
-              { name: "wallet", type: "address" },
-            ],
-            Mail: [
-              { name: "from", type: "Person" },
-              { name: "to", type: "Person" },
-              { name: "contents", type: "string" },
-            ],
-          },
-          primaryType: "Mail",
-          domain: {
-            name: "Ether Mail",
-            version: "1",
-            chainId: NETWORKS[chainName].CHAIN_ID,
-            verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-          },
-          message: {
-            from: {
-              name: "Cow",
-              wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
-            },
-            to: {
-              name: "Bob",
-              wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-            },
-            contents: "Hello, Bob!",
-          },
-        },
-      };
-
-      const rawSignature = await vault.signTypedMessage(
-        "0x80f850d6bfa120bcc462df27cf94d7d23bd8b7fd",
-        msgParams.data,
-        pin,
-        bufView,
-        networkConfig.url
-      );
-      console.log("Raw signature:", rawSignature);
-
-      // Verify the signature
-      msgParams = { ...msgParams.data, from: msgParams.from };
-      console.log();
-      const recoveredAddress = sigUtil.recoverTypedSignature({
-        data: msgParams,
-        sig: rawSignature.response,
+        const raw_sign = await vault.signMessage(
+          address,
+          msgParams.data,
+          pin,
+          bufView,
+          ethUrl
+        );
+        console.log(raw_sign);
       });
 
-      // console.log("Recovered address:", recoveredAddress);
-      // console.log("Original address:", msgParams.from);
+      // Skip signTypedMessage and personalSign tests for Bitcoin
+      if (chainName !== "bitcoin") {
+        test(`signTypeMessage for ${chainName} using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          let msgParams = {
+            from: address,
+            data: {
+              types: {
+                EIP712Domain: [
+                  { name: "name", type: "string" },
+                  { name: "version", type: "string" },
+                  { name: "chainId", type: "uint256" },
+                  { name: "verifyingContract", type: "address" },
+                ],
+                Person: [
+                  { name: "name", type: "string" },
+                  { name: "wallet", type: "address" },
+                ],
+                Mail: [
+                  { name: "from", type: "Person" },
+                  { name: "to", type: "Person" },
+                  { name: "contents", type: "string" },
+                ],
+              },
+              primaryType: "Mail",
+              domain: {
+                name: "Ether Mail",
+                version: "1",
+                chainId: NETWORKS[chainName].CHAIN_ID,
+                verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+              },
+              message: {
+                from: {
+                  name: "Cow",
+                  wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+                },
+                to: {
+                  name: "Bob",
+                  wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+                },
+                contents: "Hello, Bob!",
+              },
+            },
+          };
 
-      // Compare the recovered address with the original signer's address
-      const isSignatureValid =
-        recoveredAddress.toLowerCase() === msgParams.from.toLowerCase();
+          const rawSignature = await vault.signTypedMessage(
+            address,
+            msgParams.data,
+            pin,
+            bufView,
+            networkConfig.url
+          );
+          console.log("Raw signature:", rawSignature);
 
-      assert(
-        isSignatureValid,
-        `Signature verification failed for ${chainName}`
-      );
-      assert(rawSignature, `Failed to Sign Message for ${chainName}`);
+          // Verify the signature
+          msgParams = { ...msgParams.data, from: msgParams.from };
+          const recoveredAddress = sigUtil.recoverTypedSignature({
+            data: msgParams,
+            sig: rawSignature.response,
+          });
+
+          const isSignatureValid =
+            recoveredAddress.toLowerCase() === msgParams.from.toLowerCase();
+
+          assert(
+            isSignatureValid,
+            `Signature verification failed for ${chainName} using address ${address}`
+          );
+          assert(
+            rawSignature,
+            `Failed to Sign Message for ${chainName} using address ${address}`
+          );
+        });
+
+        test(`personalSign for ${chainName} using ${
+          index == 1 ? "imported" : ""
+        } address ${address}`, async () => {
+          const message = "Hello, personal sign!";
+          const msgParams = {
+            from: address,
+            data: message,
+          };
+
+          const rawSignature = await vault.personalSign(
+            address,
+            msgParams.data,
+            pin,
+            bufView,
+            networkConfig.url
+          );
+
+          console.log("Raw signature:", rawSignature);
+
+          // Verify the signature
+          let web3 = new Web3(networkConfig.url);
+          const recoveredAddress = web3.eth.accounts.recover(
+            message,
+            rawSignature.response
+          );
+
+          const isSignatureValid =
+            recoveredAddress.toLowerCase() === address.toLowerCase();
+
+          assert(
+            isSignatureValid,
+            `Signature verification failed for ${chainName} using address ${address}`
+          );
+
+          assert(
+            rawSignature,
+            `Failed to Personal Sign Message for ${chainName} using address ${address}`
+          );
+        });
+      }
+    });
+  });
+});
+
+describe("signTransaction", () => {
+  const evmaddresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  const bitcoinadresses = [
+    process.env.BITCOIN_ADDRESS_1,
+    process.env.BITCOIN_ADDRESS_2,
+  ];
+  Object.keys(NETWORKS).forEach((chainName) => {
+    const networkConfig = getNetworkConfig(chainName);
+
+    let addresses;
+    let impprivatekey;
+    if (chainName == "bitcoin") {
+      addresses = bitcoinadresses;
+      impprivatekey = privateKeybtcImp;
+    } else {
+      addresses = evmaddresses;
+      impprivatekey = "0x" + privateKeyImp;
+    }
+    addresses.forEach((address, index) => {
+      test(`signTransaction/valid for ${chainName} using ${
+        index === 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        vault.changeNetwork(chainName);
+        const web3 = new Web3(networkConfig.url);
+        await vault.importWallet(impprivatekey, pin, bufView);
+
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+        await vault.getActiveChains();
+        try {
+          let result = await vault.signTransaction(
+            rawTx,
+            pin,
+            networkConfig.url
+          );
+
+          // Add more specific assertions based on the expected result structure
+        } catch (e) {
+          expect(e.message).toBe("Cannot read property 'salt' of undefined");
+        }
+      });
+
+      test(`signTransaction/empty raw tx for ${chainName} using ${
+        index === 1 ? "imported" : ""
+      }
+       address ${address}`, async () => {
+        let from = process.env.EVM_ADDRESS_1;
+        const web3 = new Web3(networkConfig.url);
+        try {
+          let result = await vault.signTransaction({}, pin, networkConfig.url);
+        } catch (e) {
+          expect(e.message).toBe(
+            "Cannot read properties of undefined (reading 'toLowerCase')"
+          );
+        }
+      });
+
+      test(`signTransaction/invalid raw for ${chainName} using ${
+        index === 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        try {
+          let result = await vault.signTransaction(
+            "invalid",
+            pin,
+            networkConfig.url
+          );
+        } catch (e) {
+          expect(e.message).toBe(
+            "Cannot read properties of undefined (reading 'toLowerCase')"
+          );
+        }
+      });
+
+      test(`signTransaction/empty pin for ${chainName} using ${
+        index === 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        const web3 = new Web3(networkConfig.url);
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+
+        let result = await vault.signTransaction(
+          rawTx,
+          null,
+          networkConfig.url
+        );
+        expect(result.error).toBe("Wrong pin type, format or length");
+      });
+
+      test(`signTransaction/invalid pin for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        let from = address.toLowerCase();
+        const web3 = new Web3(networkConfig.url);
+
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+
+        let result = await vault.signTransaction(
+          "evwf",
+          "afewf",
+          networkConfig.url
+        );
+        expect(result.error).toBe("Wrong pin type, format or length");
+      });
+      test(`signTransaction/incorrect pin for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        let from = address.toLowerCase();
+        const web3 = new Web3(networkConfig.url);
+
+        const rawTx = {
+          to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
+          from: from.toLowerCase(), //sender address
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          data: "0x0", // method to generate data is provided below
+
+          type: "0x2",
+        };
+
+        let result = await vault.signTransaction(
+          "evwf",
+          "112344",
+          networkConfig.url
+        );
+        expect(result.error).toBe("Incorrect pin");
+      });
+
+      test(`signTransaction/empty polygon rpc for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        let from = address.toLowerCase();
+        const web3 = new Web3(networkConfig.url);
+
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+
+        try {
+          let result = await vault.signTransaction(rawTx, pin, null);
+        } catch (e) {
+          expect(e.message).toBe(
+            "CONNECTION ERROR: Couldn't connect to node http://localhost:8545."
+          );
+        }
+      });
+
+      test(`signTransaction/invalid polygon rpc for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        let from = address.toLowerCase();
+        const web3 = new Web3(networkConfig.url);
+
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+        let invalidRpc = "efrwgrwdvfr";
+        try {
+          let result = await vault.signTransaction(rawTx, pin, invalidRpc);
+        } catch (e) {
+          expect(e.message).toBe(
+            `CONNECTION ERROR: Couldn't connect to node ${invalidRpc}.`
+          );
+        }
+      });
+
+      test(`signTransaction/all empty params for ${chainName} using ${
+        index == 1 ? "imported" : ""
+      } address ${address}`, async () => {
+        let from = address.toLowerCase();
+        const web3 = new Web3(networkConfig.url);
+
+        const rawTx = {
+          to: addresses[index === 0 ? 1 : 0],
+          from: address.toLowerCase(),
+          value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
+          gasLimit: web3.utils.numberToHex(21000),
+          maxPriorityFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("42.25770", "gwei"))
+          ),
+          maxFeePerGas: web3.utils.numberToHex(
+            parseFloat(web3.utils.toWei("150.99", "gwei"))
+          ),
+          amount: 0,
+          satPerByte: 1,
+          data: "0x0",
+          type: "0x2",
+        };
+        let invalidRpc = "efrwgrwdvfr";
+
+        let result = await vault.signTransaction(null, null, null);
+        expect(result.error).toBe("Wrong pin type, format or length");
+      });
     });
   });
 });
@@ -980,323 +1404,90 @@ describe("Add new network", () => {
   });
 });
 
-describe("signTransaction", () => {
+describe("getFees", () => {
+  const evmAddresses = [process.env.EVM_ADDRESS_1, process.env.EVM_ADDRESS_2];
+  const bitcoinAddresses = [
+    process.env.BITCOIN_ADDRESS_1,
+    process.env.BITCOIN_ADDRESS_2,
+  ];
+
   Object.keys(NETWORKS).forEach((chainName) => {
     const networkConfig = getNetworkConfig(chainName);
-    vault.changeNetwork(chainName);
-    test(`signTransaction/valid for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
 
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-      await vault.getActiveChains();
-      try {
-        let result = await vault.signTransaction(rawTx, pin, networkConfig.url);
-      } catch (e) {
-        expect(e.message).toBe("Cannot read property 'salt' of undefined");
-      }
-    });
+    let addresses;
+    if (chainName === "bitcoin") {
+      addresses = bitcoinAddresses;
+    } else {
+      addresses = evmAddresses;
+    }
 
-    test(`signTransaction/empty raw tx for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+    addresses.forEach((address, index) => {
+      test(`getFees/valid for ${chainName} using address ${address}`, async () => {
+        vault.changeNetwork(chainName);
+        const web3 =
+          chainName !== "bitcoin" ? new Web3(networkConfig.url) : null;
 
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-      try {
-        let result = await vault.signTransaction({}, pin, networkConfig.url);
-      } catch (e) {
-        expect(e.message).toBe(
-          "Cannot read properties of undefined (reading 'toLowerCase')"
-        );
-      }
-    });
+        const rawTx =
+          chainName === "bitcoin"
+            ? {
+                to: addresses[index === 0 ? 1 : 0],
+                from: address,
+                value: "0.0001", // BTC value
+              }
+            : {
+                to: addresses[index === 0 ? 1 : 0],
+                from: address.toLowerCase(),
+                value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
+                chainID: networkConfig.chainId,
+              };
 
-    test(`signTransaction/invalid raw for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+        let result = await vault.getFees(rawTx, networkConfig.url);
 
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-      try {
-        let result = await vault.signTransaction(
-          "evwf",
-          pin,
-          networkConfig.url
-        );
-      } catch (e) {
-        expect(e.message).toBe(
-          "Cannot read properties of undefined (reading 'toLowerCase')"
-        );
-      }
-    });
+        if (chainName === "bitcoin") {
+          expect(result.response).toHaveProperty("transactionSize");
+          expect(result.response).toHaveProperty("fees");
+          expect(result.response.fees).toHaveProperty("slow");
+          expect(result.response.fees).toHaveProperty("standard");
+          expect(result.response.fees).toHaveProperty("fast");
+          expect(result.response.fees.slow).toHaveProperty("satPerByte");
+          expect(result.response.fees.standard).toHaveProperty("satPerByte");
+          expect(result.response.fees.fast).toHaveProperty("satPerByte");
+          expect(typeof result.response.transactionSize).toBe("number");
+          expect(typeof result.response.fees.slow.satPerByte).toBe("number");
+          expect(typeof result.response.fees.standard.satPerByte).toBe(
+            "number"
+          );
+          expect(typeof result.response.fees.fast.satPerByte).toBe("number");
+        } else {
+          expect(result.response).toHaveProperty("gasLimit");
+          expect(result.response).toHaveProperty("fees");
+          if (networkConfig.txType === 2) {
+            expect(result.response.fees.fast).toHaveProperty("maxFeePerGas");
+            expect(result.response.fees.fast).toHaveProperty(
+              "maxPriorityFeePerGas"
+            );
+          } else {
+            expect(result.response.fees.fast).toHaveProperty("gasPrice");
+          }
+        }
+      });
 
-    test(`signTransaction/empty pin for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
+      test(`getFees/network error for ${chainName} using address ${address}`, async () => {
+        // Mock axios to simulate a network error
 
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
+        const rawTx =
+          chainName === "bitcoin"
+            ? { from: address }
+            : { from: address.toLowerCase() };
 
-      let result = await vault.signTransaction("evwf", null, networkConfig.url);
-      expect(result.error).toBe("Wrong pin type, format or length");
-    });
-
-    test(`signTransaction/invalid pin for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-
-      let result = await vault.signTransaction(
-        "evwf",
-        "afewf",
-        networkConfig.url
-      );
-      expect(result.error).toBe("Wrong pin type, format or length");
-    });
-    test(`signTransaction/incorrect pin for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-
-      let result = await vault.signTransaction(
-        "evwf",
-        "112344",
-        networkConfig.url
-      );
-      expect(result.error).toBe("Incorrect pin");
-    });
-
-    test(`signTransaction/empty polygon rpc for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-
-      try {
-        let result = await vault.signTransaction("evwf", pin, null);
-      } catch (e) {
-        expect(e.message).toBe(
-          "CONNECTION ERROR: Couldn't connect to node http://localhost:8545."
-        );
-      }
-    });
-
-    test(`signTransaction/invalid polygon rpc for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-      let invalidRpc = "efrwgrwdvfr";
-      try {
-        let result = await vault.signTransaction("evwf", pin, invalidRpc);
-      } catch (e) {
-        expect(e.message).toBe(
-          `CONNECTION ERROR: Couldn't connect to node ${invalidRpc}.`
-        );
-      }
-    });
-
-    test(`signTransaction/all empty params for ${chainName}`, async () => {
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-      const nonce = await web3.eth.getTransactionCount(from.toLowerCase());
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88", //recepient address
-        from: from.toLowerCase(), //sender address
-        value: web3.utils.numberToHex(web3.utils.toWei("0.001", "ether")),
-        gasLimit: web3.utils.numberToHex(21000), //method to compute gas provided below
-        maxPriorityFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("42.25770", "gwei"))
-        ),
-        maxFeePerGas: web3.utils.numberToHex(
-          parseFloat(web3.utils.toWei("150.99", "gwei"))
-        ),
-        data: "0x0", // method to generate data is provided below
-        nonce: nonce,
-        type: "0x2",
-      };
-      let invalidRpc = "efrwgrwdvfr";
-
-      let result = await vault.signTransaction(null, null, null);
-      expect(result.error).toBe("Wrong pin type, format or length");
-    });
-  });
-});
-
-describe("get Fees", () => {
-  Object.keys(NETWORKS).forEach((chainName) => {
-    test(`get Fees, validate for ${chainName}`, async () => {
-      const networkConfig = getNetworkConfig(chainName);
-      vault.changeNetwork(chainName);
-
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",
-        from: from.toLowerCase(),
-        value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
-        chainID: networkConfig.chainId,
-      };
-
-      let result = await vault.getFees(rawTx, networkConfig.url);
-      expect(result.response).toHaveProperty("gasLimit");
-      expect(result.response).toHaveProperty("fees");
-
-      // Additional checks specific to the chain
-      if (networkConfig.txType === 2) {
-        expect(result.response.fees.fast).toHaveProperty("maxFeePerGas");
-        expect(result.response.fees.fast).toHaveProperty(
-          "maxPriorityFeePerGas"
-        );
-      } else {
-        expect(result.response.fees.fast).toHaveProperty("gasPrice");
-      }
-    });
-
-    test(`get fees, invalid for ${chainName}`, async () => {
-      const networkConfig = getNetworkConfig(chainName);
-      vault.changeNetwork(chainName);
-
-      let from = "0x80F850d6BFA120Bcc462df27cF94d7D23bd8B7FD";
-      const web3 = new Web3(networkConfig.url);
-
-      const rawTx = {
-        to: "0xacde0f575d8caf7bdba417326797c1a1d1b21f88",
-        from: from.toLowerCase(),
-        value: web3.utils.numberToHex(web3.utils.toWei("0", "ether")),
-        chainID: networkConfig.chainId,
-      };
-
-      try {
-        let result = await vault.getFees(rawTx, "invalid_url");
-        fail("Should have thrown an error");
-      } catch (e) {
-        expect(e.message).toBe(
-          "CONNECTION ERROR: Couldn't connect to node invalid_url."
-        );
-      }
+        try {
+          let result = await vault.getFees(rawTx, "invalid_url");
+        } catch (e) {
+          expect(e.message).toBe(
+            "CONNECTION ERROR: Couldn't connect to node invalid_url."
+          );
+        }
+      });
     });
   });
 });
