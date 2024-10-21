@@ -5,13 +5,10 @@ const { before } = require("lodash");
 let KeyRing = require("../keyring");
 let Vault = require("../vault");
 require("dotenv").config();
+const helper = require("../../utils/helper");
 const sigUtil = require("eth-sig-util");
 const Web3 = require("web3");
-const NETWORKS = {
-  bitcoin: {
-    URL: "https://bitcoin-mainnet.gateway.tatum.io",
-    CHAIN_ID: 999999,
-  },
+let NETWORKS = {
   ethereum: {
     URL: "https://sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 11155111,
@@ -49,7 +46,7 @@ const NETWORKS = {
     CHAIN_ID: 84532,
   },
   zkEVM: {
-    URL: "https://polygon-zkevm.drpc.org",
+    URL: "https://1rpc.io/polygon/zkevm",
     CHAIN_ID: 1442,
   },
   bevm: {
@@ -61,7 +58,16 @@ const NETWORKS = {
     CHAIN_ID: 31,
   },
 };
-
+if (!helper.isTestEnvironment()) {
+  NETWORKS = {
+    bitcoin: {
+      URL: "https://bitcoin-mainnet.gateway.tatum.io",
+      CHAIN_ID: 999999,
+    },
+    ...NETWORKS,
+  };
+}
+console.log(NETWORKS);
 const chainConfigs = {
   ethereum: { symbol: "ETH", txType: 2 },
   bsc: { symbol: "BSC", txType: 0 },

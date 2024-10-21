@@ -674,3 +674,4 @@
 
 -Integrated vault-evm-controller
 -Resolved issue for unarchival of a wallet
+-Adding test for bitcoin

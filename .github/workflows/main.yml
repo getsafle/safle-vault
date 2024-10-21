@@ -17,6 +17,14 @@ jobs:
     env:
       CI: true
       GITHUB_ACTIONS: true
+      MNEMONIC:"vintage reflect pass input polar enlist giggle judge render position also document"
+      PIN:"696969"
+      PRIVATE_KEY_EVM:"0x7a9633b8103fec11c9e855a6b6c8c072e9af311a69b92ab0ad8186b1fb57371f"
+      PRIVATE_KEY_BTC: "KzQfcdjDRUwpVmKKev6k2aAeJFJ359Ht9Umxdg77MTzf2E3bzGsC"
+      EVM_ADDRESS_1:'0x6bbc122fa843f3ed30d23f8cdd9a430d1f898d07'
+      EVM_ADDRESS_2:"0xbae949ddb4d8ac763c12f206db842b9b2d49a464"
+      BITCOIN_ADDRESS_1:"bc1qugw5q5yrzw86wnw3lgldm8en0c736k4hvceuzl"
+      BITCOIN_ADDRESS_2:"bc1qta5f6q32cphxt5rck3kuspukac7keqvxyuk4cl"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
