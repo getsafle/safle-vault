@@ -94,6 +94,7 @@ const bufView = [
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
 let phrase = process.env.MNEMONIC;
+console.log(phrase, "phrase");
 let pin = process.env.PIN;
 let result;
 let vault = new Vault({});
