@@ -58,6 +58,8 @@ let NETWORKS = {
     CHAIN_ID: 31,
   },
 };
+
+//uncomment the below if statement to run test for bitcoin and make sure you override the balance check in bitcoin controller
 if (!helper.isTestEnvironment()) {
   NETWORKS = {
     bitcoin: {
@@ -67,7 +69,7 @@ if (!helper.isTestEnvironment()) {
     ...NETWORKS,
   };
 }
-console.log(NETWORKS);
+
 const chainConfigs = {
   ethereum: { symbol: "ETH", txType: 2 },
   bsc: { symbol: "BSC", txType: 0 },
