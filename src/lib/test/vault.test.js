@@ -1,14 +1,19 @@
 jest.setTimeout(30000);
 const crypto = require("crypto");
-require("dotenv").config();
+
 let Vault = require("../vault");
+
+require("dotenv").config();
+
 const bufView = [
   48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87,
   35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167,
   105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233,
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
+let oldphrase = process.env.OLD_MNEMONIC;
 let phrase = process.env.MNEMONIC;
+
 let pin = process.env.PIN;
 let vault = new Vault({});
 
@@ -162,7 +167,7 @@ describe("recoverVault", () => {
 
   test("recoverVault/logs valid", async () => {
     let result = await vault.recoverVault(
-      phrase,
+      oldphrase,
       bufView,
       pin,
       null,
@@ -173,7 +178,13 @@ describe("recoverVault", () => {
   });
 
   test("recoverVault/logs empty logs valid", async () => {
-    let result = await vault.recoverVault(phrase, bufView, pin, null, "logs");
+    let result = await vault.recoverVault(
+      oldphrase,
+      bufView,
+      pin,
+      null,
+      "logs"
+    );
     expect(result).toHaveProperty("response");
   });
 

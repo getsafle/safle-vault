@@ -17,6 +17,7 @@ jobs:
     env:
       CI: true
       GITHUB_ACTIONS: true
+      OLD_MNEMONIC:"fun rough treat scan glimpse region century purpose expire video remind second"
       MNEMONIC:"vintage reflect pass input polar enlist giggle judge render position also document"
       PIN:"696969"
       PRIVATE_KEY_EVM:"0x7a9633b8103fec11c9e855a6b6c8c072e9af311a69b92ab0ad8186b1fb57371f"
