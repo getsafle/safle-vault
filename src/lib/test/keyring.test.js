@@ -4,45 +4,45 @@ const { before } = require("lodash");
 let KeyRing = require("../keyring");
 let Vault = require("../vault");
 const Web3 = require("web3");
-const NETWORKS = {
+let NETWORKS = {
   ethereum: {
-    URL: "https://eth-goerli.public.blastapi.io",
-    CHAIN_ID: 5,
+    URL: "https://sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 11155111,
   },
   bsc: {
-    URL: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    URL: "https://bsc-testnet.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 97,
   },
   polygon: {
-    URL: "https://polygon-amoy-bor-rpc.publicnode.com",
-    CHAIN_ID: 80001,
+    URL: "https://polygon-amoy.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 80002,
   },
   optimism: {
-    URL: "https://optimism-goerli.public.blastapi.io",
-    CHAIN_ID: 420,
+    URL: "https://optimism-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 11155420,
   },
   arbitrum: {
-    URL: "https://sepolia-rollup.arbitrum.io/rpc",
+    URL: "https://arbitrum-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 421614,
   },
   mantle: {
-    URL: "https://rpc.mantle.xyz",
-    CHAIN_ID: 5001,
+    URL: "https://mantle-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
+    CHAIN_ID: 5003,
   },
   velas: {
     URL: "https://explorer.testnet.velas.com/rpc",
     CHAIN_ID: 111,
   },
   avalanche: {
-    URL: "https://api.avax-test.network/ext/bc/C/rpc",
+    URL: "https://avalanche-fuji.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 43113,
   },
   base: {
-    URL: "https://base-sepolia.blockpi.network/v1/rpc/public",
+    URL: "https://base-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 84532,
   },
   zkEVM: {
-    URL: "https://polygon-zkevm.drpc.org",
+    URL: "https://1rpc.io/polygon/zkevm",
     CHAIN_ID: 1442,
   },
   bevm: {
