@@ -591,6 +591,130 @@ class Keyring {
       return { response: signedMessage };
     }
   }
+  async signTypedMessage(address, data, pin, encryptionKey, rpcUrl = "") {
+    if (
+      typeof pin != "string" ||
+      pin.match(/^[0-9]+$/) === null ||
+      pin < 0 ||
+      pin.length != 6
+    ) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+    }
+
+    const res = await this.validatePin(pin);
+
+    if (res.response == false || res.error) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+    }
+
+    const err = helper.validateEncryptionKey(
+      this.vault,
+      JSON.stringify(encryptionKey)
+    );
+
+    if (err.error) {
+      return { error: err.error };
+    }
+
+    const { error, response } = await this.exportPrivateKey(address, pin);
+
+    if (error) {
+      return { error };
+    }
+
+    const { privateKey, isImported } = response;
+    if (isImported) {
+      if (
+        Chains.evmChains.hasOwnProperty(this.chain) ||
+        this.chain === "ethereum"
+      ) {
+        const signedMsg = await this.keyringInstance.customSignTypedMessage(
+          "0x" + privateKey,
+          data
+        );
+
+        return { response: signedMsg };
+      }
+      return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
+    }
+
+    const accounts = await this.getAccounts();
+
+    if (accounts.response.filter((e) => e.address === address).length < 1) {
+      return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+    }
+
+    if (
+      Chains.evmChains.hasOwnProperty(this.chain) ||
+      this.chain === "ethereum"
+    ) {
+      const msgParams = { from: address, data: data };
+
+      const signedMsg = await this.keyringInstance.signTypedMessage(msgParams);
+
+      return { response: signedMsg };
+    }
+
+    const { signedMessage } = await this[this.chain].signTypedMessage(
+      data,
+      address
+    );
+
+    return { response: signedMessage };
+  }
+  async personalSign(address, data, pin, encryptionKey, rpcUrl = "") {
+    if (
+      typeof pin != "string" ||
+      pin.match(/^[0-9]+$/) === null ||
+      pin < 0 ||
+      pin.length != 6
+    ) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
+    }
+
+    const res = await this.validatePin(pin);
+
+    if (res.response == false || res.error) {
+      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+    }
+
+    const err = helper.validateEncryptionKey(
+      this.vault,
+      JSON.stringify(encryptionKey)
+    );
+
+    if (err.error) {
+      return { error: err.error };
+    }
+
+    const { error, response } = await this.exportPrivateKey(address, pin);
+
+    if (error) {
+      return { error };
+    }
+
+    const { privateKey, isImported } = response;
+
+    const accounts = await this.getAccounts();
+
+    if (accounts.response.filter((e) => e.address === address).length < 1) {
+      return { error: ERROR_MESSAGE.NONEXISTENT_KEYRING_ACCOUNT };
+    }
+
+    if (
+      Chains.evmChains.hasOwnProperty(this.chain) ||
+      this.chain === "ethereum"
+    ) {
+      const signedMsg = await this.keyringInstance.customPersonalSign(
+        "0x" + privateKey,
+        data
+      );
+
+      return { response: signedMsg };
+    } else {
+      return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
+    }
+  }
 
   async signTransaction(rawTx, pin, rpcUrl) {
     if (
@@ -621,14 +745,13 @@ class Keyring {
       if (isImported) {
         const signedTransaction = await this.keyringInstance.signTransaction(
           rawTx,
-          web3,
           privateKey
         );
         return { response: signedTransaction };
       } else {
         const signedTx = await this.keyringInstance.signTransaction(
           rawTx,
-          web3
+          privateKey
         );
         return { response: signedTx };
       }
@@ -1083,7 +1206,42 @@ class Keyring {
         });
 
         if (isDuplicateAddress) {
-          return { error: ERROR_MESSAGE.ADDRESS_ALREADY_PRESENT };
+          try {
+            Object.keys(this.decryptedVault)
+              .slice(0, -1)
+              .forEach((chain) => {
+                this.decryptedVault[chain]?.public?.forEach(
+                  (account, index) => {
+                    if (account.address === address && account.isDeleted) {
+                      this.decryptedVault[chain].public[
+                        index
+                      ].isDeleted = false;
+                    }
+                  }
+                );
+              });
+
+            const vault = await helper.cryptography(
+              JSON.stringify(this.decryptedVault),
+              JSON.stringify(encryptionKey),
+              "encryption"
+            );
+
+            this.vault = vault;
+
+            this.logs.getState().logs.push({
+              timestamp: Date.now(),
+              action: "import-wallet",
+              vault: this.vault,
+              chain: this.chain,
+              address,
+            });
+
+            return { response: { vault, address } };
+          } catch (error) {
+            console.error("Error processing duplicate address:", error);
+            throw error; // or handle it as appropriate for your application
+          }
         }
       }
 
