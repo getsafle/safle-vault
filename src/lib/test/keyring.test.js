@@ -57,6 +57,26 @@ let NETWORKS = {
     URL: "https://public-node.testnet.rsk.co",
     CHAIN_ID: 31,
   },
+  opbnb: {
+    URL: "https://opbnb-rpc.publicnode.com",
+    CHAIN_ID: 204,
+  },
+  sei: {
+    URL: "https://evm-rpc.sei-apis.com",
+    CHAIN_ID: 1329,
+  },
+  ronin: {
+    URL: "https://ronin.lgns.net/rpc",
+    CHAIN_ID: 2020,
+  },
+  nebula: {
+    URL: "https://mainnet.skalenodes.com/v1/green-giddy-denebola",
+    CHAIN_ID: 1482601649,
+  },
+  immutable: {
+    URL: "https://rpc.immutable.com",
+    CHAIN_ID: 13371,
+  },
 };
 
 const chainConfigs = {
@@ -73,6 +93,11 @@ const chainConfigs = {
   bevm: { symbol: "BTC", txType: 0 },
   rootstock: { symbol: "RBTC", txType: 0 },
   bitcoin: { symbol: "BTC", txType: 0 },
+  opbnb: { symbol: "BNB", txType: 0 },
+  sei: { symbol: "SEI", txType: 0 },
+  ronin: { symbol: "RON", txType: 0 },
+  nebula: { symbol: "sFUEL", txType: 0 },
+  immutable: { symbol: "IMX", txType: 0 },
 };
 
 // Add the helper function
@@ -312,6 +337,11 @@ describe("getActiveChains", () => {
         { chain: "zkEVM", symbol: "ZKEVM" },
         { chain: "bevm", symbol: "BTC" },
         { chain: "rootstock", symbol: "RBTC" },
+        { chain: "opbnb", symbol: "BNB" },
+        { chain: "sei", symbol: "SEI" },
+        { chain: "ronin", symbol: "RON" },
+        { chain: "nebula", symbol: "sFUEL" },
+        { chain: "immutable", symbol: "IMX" },
       ],
     }).toMatchObject(result);
   });
