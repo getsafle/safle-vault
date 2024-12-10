@@ -675,3 +675,7 @@
 -Integrated vault-evm-controller
 -Resolved issue for unarchival of a wallet
 -Adding test for bitcoin
+
+### 2.9.2 (2024-12-10)
+
+-Adding new default EVM chains
