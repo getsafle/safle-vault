@@ -1,23 +1,27 @@
 jest.setTimeout(30000);
 const crypto = require("crypto");
-require("dotenv").config();
+
 let Vault = require("../vault");
+
+require("dotenv").config();
+
 const bufView = [
   48, 0, 236, 187, 187, 172, 177, 90, 255, 184, 9, 116, 142, 96, 197, 158, 87,
   35, 26, 101, 187, 30, 116, 138, 50, 131, 166, 50, 51, 197, 198, 83, 238, 167,
   105, 178, 182, 108, 174, 199, 124, 141, 155, 73, 21, 85, 81, 109, 78, 233,
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
+let oldphrase = process.env.OLD_MNEMONIC;
 let phrase = process.env.MNEMONIC;
+
 let pin = process.env.PIN;
 let vault = new Vault({});
-
 const logs = [
   {
     action: "add-account",
     timestamp: 1000000000001,
     platform: "web",
-    address: "0x6bbc122fa843f3ed30d23f8cdd9a430d1f898d07",
+    address: "0xF8919220F674a553F0F0F6e86481612A2bEd44EB",
     storage: ["mobile"],
     _id: "64e881b05b04774ca85aee51",
   },
@@ -25,7 +29,7 @@ const logs = [
     action: "add-account",
     timestamp: 1000000000002,
     platform: "web",
-    address: "0x9dd2f739d2713dbf5135a94c3f65e565e781ce15",
+    address: "0x627437E29e7363C0F53896e84467EF6F8f9D0247",
     storage: ["mobile"],
     _id: "64e881e3bae0e048dfaefc46",
   },
@@ -33,7 +37,7 @@ const logs = [
     action: "add-account",
     timestamp: 1000000000003,
     platform: "web",
-    address: "0xe390b170db2f84b48ab761f3071a4bbb3741b713",
+    address: "0xa1F77e4D8306000639D1d44a6013ad53b992182E",
     storage: ["mobile"],
     _id: "64ec3339a58abcbf66a9b34a",
   },
@@ -41,7 +45,7 @@ const logs = [
     action: "add-account",
     timestamp: 1000000000004,
     platform: "web",
-    address: "0x7010f6139c52ba3d3767a0a3d87d114f81122ed8",
+    address: "0x9e6627384a3E6453b9EC061e4DaeD4cE0223bbdc",
     storage: ["mobile"],
     _id: "64ec333ca58abcbf66a9b354",
   },
@@ -49,7 +53,7 @@ const logs = [
     action: "add-account",
     timestamp: 1000000000005,
     platform: "mobile",
-    address: "0xcdc7d5c379b3ccc2c874dfb965a2db7fb34e6e5a",
+    address: "0xCccbD31ea19acE5688731148a4f63907F273BEe0",
     storage: ["mobile"],
     _id: "64e87e9e72e00ccf96bce1fc",
   },
@@ -57,12 +61,11 @@ const logs = [
     action: "delete-account",
     timestamp: 1000000000006,
     platform: "web",
-    address: "0x6f6c301eed3835ad5dfc1340ae59f7f1a47846f5",
+    address: "0x9e6627384a3E6453b9EC061e4DaeD4cE0223bbdc",
     storage: ["mobile"],
     _id: "64ec3339a58abcbf66a9b34a",
   },
 ];
-
 describe("getSupportedChains", () => {
   test("getSupportedChains", async () => {
     let result = await new Vault({}).getSupportedChains();
@@ -167,7 +170,7 @@ describe("recoverVault", () => {
 
   test("recoverVault/logs valid", async () => {
     let result = await vault.recoverVault(
-      phrase,
+      oldphrase,
       bufView,
       pin,
       null,
@@ -178,7 +181,13 @@ describe("recoverVault", () => {
   });
 
   test("recoverVault/logs empty logs valid", async () => {
-    let result = await vault.recoverVault(phrase, bufView, pin, null, "logs");
+    let result = await vault.recoverVault(
+      oldphrase,
+      bufView,
+      pin,
+      null,
+      "logs"
+    );
     expect(result).toHaveProperty("response");
   });
 

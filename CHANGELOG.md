@@ -670,12 +670,13 @@
 - Update BEVM controller version
 - Fixed validatePin function for tests
 
-### 2.9.1 (2024-09-23)
+### 2.9.2 (2024-09-23)
 
 -Integrated vault-evm-controller
 -Resolved issue for unarchival of a wallet
 -Adding test for bitcoin
+-Adding sensitive info in env github pipeline
 
-### 2.9.2 (2024-12-10)
+### 2.9.3 (2024-12-10)
 
--Adding new default EVM chains
+-Adding new chains

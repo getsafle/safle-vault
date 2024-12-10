@@ -33,10 +33,10 @@ let NETWORKS = {
     URL: "https://mantle-sepolia.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 5003,
   },
-  // velas: {
-  //   URL: "https://explorer.testnet.velas.com/rpc",
-  //   CHAIN_ID: 111,
-  // },
+  velas: {
+    URL: "https://explorer.testnet.velas.com/rpc",
+    CHAIN_ID: 111,
+  },
   avalanche: {
     URL: "https://avalanche-fuji.infura.io/v3/0611b8c478b14db0b7d29e51466ff925",
     CHAIN_ID: 43113,
@@ -79,17 +79,6 @@ let NETWORKS = {
   },
 };
 
-//uncomment the below if statement to run test for bitcoin and make sure you override the balance check in bitcoin controller
-if (!helper.isTestEnvironment()) {
-  NETWORKS = {
-    bitcoin: {
-      URL: "https://bitcoin-mainnet.gateway.tatum.io",
-      CHAIN_ID: 999999,
-    },
-    ...NETWORKS,
-  };
-}
-
 const chainConfigs = {
   ethereum: { symbol: "ETH", txType: 2 },
   bsc: { symbol: "BSC", txType: 0 },
@@ -97,7 +86,7 @@ const chainConfigs = {
   optimism: { symbol: "OP", txType: 2 },
   arbitrum: { symbol: "ARB", txType: 2 },
   mantle: { symbol: "MNT", txType: 2 },
-  // velas: { symbol: "VLX", txType: 0 },
+  velas: { symbol: "VLX", txType: 0 },
   avalanche: { symbol: "AVAX", txType: 2 },
   base: { symbol: "BASE", txType: 2 },
   zkEVM: { symbol: "ZKEVM", txType: 2 },
@@ -130,6 +119,7 @@ const bufView = [
   152, 108, 242, 238, 192, 31, 147, 86, 174, 195, 55, 229, 4, 36,
 ];
 let phrase = process.env.MNEMONIC;
+console.log(phrase, "phrase");
 let pin = process.env.PIN;
 let result;
 let vault = new Vault({});
