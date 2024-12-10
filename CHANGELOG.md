@@ -679,4 +679,4 @@
 
 ### 2.9.3 (2024-12-10)
 
--Adding new chains
+-Integrated the following chains to safle-vault opBNB, Ronin, Sei Skale - Nebula, Immutable zk-EVM
