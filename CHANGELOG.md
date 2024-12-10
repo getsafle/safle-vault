@@ -676,3 +676,7 @@
 -Resolved issue for unarchival of a wallet
 -Adding test for bitcoin
 -Adding sensitive info in env github pipeline
+
+### 2.9.3 (2024-12-10)
+
+-Integrated the following chains to safle-vault opBNB, Ronin, Sei Skale - Nebula, Immutable zk-EVM

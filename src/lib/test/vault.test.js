@@ -16,7 +16,6 @@ let phrase = process.env.MNEMONIC;
 
 let pin = process.env.PIN;
 let vault = new Vault({});
-
 const logs = [
   {
     action: "add-account",
@@ -67,7 +66,6 @@ const logs = [
     _id: "64ec3339a58abcbf66a9b34a",
   },
 ];
-
 describe("getSupportedChains", () => {
   test("getSupportedChains", async () => {
     let result = await new Vault({}).getSupportedChains();
@@ -85,6 +83,11 @@ describe("getSupportedChains", () => {
         zkEVM: "ZKEVM",
         bevm: "BTC",
         rootstock: "RBTC",
+        opbnb: "BNB",
+        sei: "SEI",
+        ronin: "RON",
+        nebula: "sFUEL",
+        immutable: "IMX",
       },
       nonEvmChains: { bitcoin: "BTC", stacks: "STX", solana: "SOL" },
     }).toMatchObject(result.response);
