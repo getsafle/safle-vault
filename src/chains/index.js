@@ -16,6 +16,11 @@ const evmChains = {
   zkEVM: { symbol: "ZKEVM", txType: 2 },
   bevm: { symbol: "BTC", txType: 0 },
   rootstock: { symbol: "RBTC", txType: 0 },
+  opbnb: { symbol: "BNB", txType: 0 },
+  sei: { symbol: "SEI", txType: 0 },
+  ronin: { symbol: "RON", txType: 0 },
+  nebula: { symbol: "sFUEL", txType: 0 },
+  immutable: { symbol: "IMX", txType: 0 },
 };
 
 const nonEvmChains = {
