@@ -38,7 +38,11 @@ class Keyring {
     const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const mnemonic = await helper.cryptography(
@@ -201,7 +205,11 @@ class Keyring {
     const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const chain =
@@ -307,7 +315,11 @@ class Keyring {
     const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { error } = helper.validateEncryptionKey(
@@ -510,7 +522,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const err = helper.validateEncryptionKey(
@@ -604,7 +620,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (res.error) {
+        return { error: res.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const err = helper.validateEncryptionKey(
@@ -675,7 +695,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (res.error) {
+        return { error: res.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const err = helper.validateEncryptionKey(
@@ -729,7 +753,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (res.error) {
+        return { error: res.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { error, response } = await this.exportPrivateKey(rawTx.from, pin);
@@ -794,7 +822,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (res.error) {
+        return { error: res.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { decryptedVault, error } = helper.validateEncryptionKey(
@@ -891,7 +923,11 @@ class Keyring {
     const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { error } = helper.validateEncryptionKey(
@@ -969,10 +1005,13 @@ class Keyring {
 
     const { response } = await this.validatePin(pin);
 
-    if (response == false) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+    if (response.response == false || response.error) {
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
-
     const { error } = helper.validateEncryptionKey(
       this.vault,
       JSON.stringify(encryptionKey)
@@ -1052,7 +1091,11 @@ class Keyring {
     const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { error } = helper.validateEncryptionKey(
@@ -1451,7 +1494,11 @@ class Keyring {
     const res = await this.validatePin(pin);
 
     if (res.response == false || res.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (res.error) {
+        return { error: res.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const { error, response } = await this.exportPrivateKey(address, pin);
@@ -1608,7 +1655,11 @@ class Keyring {
     const response = await this.validatePin(currentPin);
 
     if (response.response == false || response.error) {
-      return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      if (response.error) {
+        return { error: response.error };
+      } else {
+        return { error: ERROR_MESSAGE.INCORRECT_PIN };
+      }
     }
 
     const err = helper.validateEncryptionKey(

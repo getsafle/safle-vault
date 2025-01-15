@@ -680,3 +680,7 @@
 ### 2.9.3 (2024-12-10)
 
 -Integrated the following chains to safle-vault opBNB, Ronin, Sei Skale - Nebula, Immutable zk-EVM
+
+### 2.9.4 (2025-01-15)
+
+-Updating error message handling for pin throttling
