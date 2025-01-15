@@ -1003,7 +1003,7 @@ class Keyring {
       return { error: ERROR_MESSAGE.INCORRECT_PIN_TYPE };
     }
 
-    const { response } = await this.validatePin(pin);
+    const response = await this.validatePin(pin);
 
     if (response.response == false || response.error) {
       if (response.error) {
