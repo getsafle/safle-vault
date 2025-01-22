@@ -46,7 +46,7 @@ let NETWORKS = {
     CHAIN_ID: 84532,
   },
   zkEVM: {
-    URL: "https://1rpc.io/polygon/zkevm",
+    URL: "https://rpc.polygon-zkevm.gateway.fm",
     CHAIN_ID: 1442,
   },
   bevm: {
@@ -62,7 +62,7 @@ let NETWORKS = {
     CHAIN_ID: 204,
   },
   sei: {
-    URL: "https://evm-rpc.sei-apis.com",
+    URL: "https://sei.drpc.org",
     CHAIN_ID: 1329,
   },
   ronin: {
