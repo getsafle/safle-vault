@@ -684,3 +684,4 @@
 ### 2.9.4 (2025-01-15)
 
 -Updating error message handling for pin throttling
+-Updating public rpc's in test script
