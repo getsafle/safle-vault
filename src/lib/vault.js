@@ -284,14 +284,6 @@ class Vault extends Keyring {
       let address;
       if (chain === "stacks") {
         address = (await keyringInstance.generateWallet()).address;
-      } else if (chain === "concordium") {
-        // await keyringInstance.setIdentityProvider(
-        //   await keyringInstance.getIdentityProviders()[0]
-        // );
-        // await keyringInstance.initializeIdentity(
-        //   await keyringInstance.createIdentityRequest()
-        // );
-        address = (await this["concordium"].addAccount()).address;
       } else {
         address = (await keyringInstance.addAccount()).address;
       }
