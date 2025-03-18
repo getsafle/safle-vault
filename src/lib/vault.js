@@ -170,14 +170,7 @@ class Vault extends Keyring {
       if (chain === "stacks") {
         addedAcc = (await this[chain].generateWallet()).address;
       } else if (chain === "concordium") {
-        // Concordium requires identity setup first; for simplicity, add an account directly
-        await this[chain].setIdentityProvider(
-          await this[chain].getIdentityProviders()[0]
-        ); // Use first provider
-        await this[chain].initializeIdentity(
-          await this[chain].createIdentityRequest()
-        );
-        addedAcc = (await this[chain].addAccount()).address;
+        // addedAcc = (await this[chain].addAccount()).address;
       } else {
         addedAcc = (await this[chain].addAccount()).address;
       }
@@ -284,6 +277,8 @@ class Vault extends Keyring {
       let address;
       if (chain === "stacks") {
         address = (await keyringInstance.generateWallet()).address;
+      } else if (chain === "concordium") {
+        continue;
       } else {
         address = (await keyringInstance.addAccount()).address;
       }
@@ -336,42 +331,135 @@ class Vault extends Keyring {
   }
 
   async createIdentityRequest() {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].createIdentityRequest();
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    try {
+      const identityRequest = await this["concordium"].createIdentityRequest();
+      return identityRequest;
+    } catch (error) {
+      return { error: `Failed to create identity request: ${error.message}` };
+    }
   }
 
   async sendIdentityRequest(identityRequest, redirectUri) {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].sendIdentityRequest(
-      identityRequest,
-      redirectUri
-    );
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    if (!identityRequest || typeof identityRequest !== "object") {
+      return { error: ERROR_MESSAGE.INVALID_IDENTITY_REQUEST };
+    }
+
+    if (
+      !redirectUri ||
+      typeof redirectUri !== "string" ||
+      !redirectUri.match(/^https?:\/\/.+/)
+    ) {
+      return { error: ERROR_MESSAGE.INVALID_REDIRECT_URI };
+    }
+
+    try {
+      const response = await this["concordium"].sendIdentityRequest(
+        identityRequest,
+        redirectUri
+      );
+      return response;
+    } catch (error) {
+      return { error: `Failed to send identity request: ${error.message}` };
+    }
   }
 
   async retrieveIdentity(redirectUrl) {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].retrieveIdentity(redirectUrl);
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    if (
+      !redirectUrl ||
+      typeof redirectUrl !== "string" ||
+      !redirectUrl.match(/^https?:\/\/.+/)
+    ) {
+      return { error: ERROR_MESSAGE.INVALID_REDIRECT_URL };
+    }
+
+    try {
+      const identity = await this["concordium"].retrieveIdentity(redirectUrl);
+      if (!identity) {
+        return { error: ERROR_MESSAGE.IDENTITY_RETRIEVAL_FAILED };
+      }
+      return identity;
+    } catch (error) {
+      return { error: `Failed to retrieve identity: ${error.message}` };
+    }
   }
 
   async initializeIdentity(identity) {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].initializeIdentity(identity);
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    if (!identity || typeof identity !== "object") {
+      return { error: ERROR_MESSAGE.INVALID_IDENTITY };
+    }
+
+    try {
+      const response = await this["concordium"].initializeIdentity(identity);
+      return response;
+    } catch (error) {
+      return { error: `Failed to initialize identity: ${error.message}` };
+    }
   }
 
   async setIdentityProvider(provider) {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].setIdentityProvider(provider);
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    try {
+      const response = await this["concordium"].setIdentityProvider(provider);
+      return { response };
+    } catch (error) {
+      return { error: `Failed to set identity provider: ${error.message}` };
+    }
   }
 
   async getIdentityProviders() {
-    if (!this["concordium"])
+    if (!this["concordium"]) {
       throw new Error("Concordium controller not initialized");
-    return await this["concordium"].getIdentityProviders();
+    }
+
+    if (!this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    try {
+      const providers = await this["concordium"].getIdentityProviders();
+      return providers;
+    } catch (error) {
+      return { error: `Failed to get identity providers: ${error.message}` };
+    }
   }
 }
 

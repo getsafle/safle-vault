@@ -915,7 +915,7 @@ class Keyring {
             await this[chainData.chain].generateWallet();
           } else if (chainData.chain.toLowerCase() === "concordium") {
             // Assume identity is set; add account
-            await this[chainData.chain].addAccount();
+            continue;
           } else {
             await this[chainData.chain].addAccount();
           }

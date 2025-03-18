@@ -1,0 +1,4 @@
+Methods that cannot be called for Concordium the standard way due to identity managment
+- generateVault
+- recoverVault
+- restoreKeyringstatecls
