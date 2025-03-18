@@ -685,3 +685,9 @@
 
 -Updating error message handling for pin throttling
 -Updating public rpc's in test script
+
+### 2.9.5 (2025-03-18)
+
+- Update chain initalization for concordium
+- Update Keyring Class for concordium
+- Update Vault Class for concordium

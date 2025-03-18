@@ -84,7 +84,7 @@ class Vault extends Keyring {
 
     const concordiumKeyringController = new ConcordiumKeyringController({
       mnemonic: mnemonic,
-      network: "Testnet", // Default to Testnet; can be configurable
+      network: helper.isTestEnvironment() ? "Testnet" : "Mainnet", // Default to Testnet; can be configurable
     });
     this["concordium"] = concordiumKeyringController;
   }
