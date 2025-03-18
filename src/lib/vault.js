@@ -267,6 +267,8 @@ class Vault extends Keyring {
       eth: { public: accountsArray, private: privData, numberOfAccounts },
     };
 
+    this.initializeSupportedChainKeyringController(mnemonic);
+
     const nonEvmChainList = Object.keys(Chains.nonEvmChains);
 
     for (let chain of nonEvmChainList) {
@@ -459,6 +461,66 @@ class Vault extends Keyring {
       return providers;
     } catch (error) {
       return { error: `Failed to get identity providers: ${error.message}` };
+    }
+  }
+
+  async restoreConcordiumState() {
+    if (!this["concordium"] || !this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    try {
+      const restoredIdentity = await this[
+        "concordium"
+      ].restoreIdentityDynamic();
+      if (restoredIdentity) {
+        await this["concordium"].initializeIdentity(restoredIdentity);
+      }
+
+      const restoredAccounts = await this["concordium"].restoreAccounts();
+      const formattedAccounts = restoredAccounts.map((account, index) => ({
+        address: account.address,
+        isDeleted: false,
+        isImported: false,
+        label: `Concordium Wallet ${index + 1}`,
+      }));
+
+      this.decryptedVault.concordium = {
+        public: formattedAccounts,
+        numberOfAccounts: formattedAccounts.length,
+      };
+
+      const vault = await helper.cryptography(
+        JSON.stringify(this.decryptedVault),
+        JSON.stringify(this.keyringInstance.password),
+        "encryption"
+      );
+
+      this.vault = vault;
+
+      return { response: "Concordium state restored successfully" };
+    } catch (error) {
+      return { error: `Failed to restore Concordium state: ${error.message}` };
+    }
+  }
+
+  async getConcordiumAccounts() {
+    if (!this["concordium"] || !this.vault || !this.decryptedVault) {
+      return { error: ERROR_MESSAGE.VAULT_NOT_INITIALIZED };
+    }
+
+    try {
+      const accounts = await this["concordium"].getAccounts();
+      return {
+        response: accounts.map((address, index) => ({
+          address,
+          isDeleted: false,
+          isImported: false,
+          label: `Concordium Wallet ${index + 1}`,
+        })),
+      };
+    } catch (error) {
+      return { error: `Failed to get Concordium accounts: ${error.message}` };
     }
   }
 }

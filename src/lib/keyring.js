@@ -827,18 +827,15 @@ class Keyring {
           transaction,
           privateKey
         );
-        const signedTransaction = await this[this.chain].sendTransaction(
-          transaction,
-          signature
-        );
-        return { response: signedTransaction };
+
+        return { transaction, signature };
       } else {
         const signature = await this[this.chain].signTransaction(transaction);
         const signedTransaction = await this[this.chain].sendTransaction(
           transaction,
           signature
         );
-        return { response: signedTransaction };
+        return { transaction, signature };
       }
     }
 
