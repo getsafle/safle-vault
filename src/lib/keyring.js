@@ -827,18 +827,15 @@ class Keyring {
           transaction,
           privateKey
         );
-        const signedTransaction = await this[this.chain].sendTransaction(
-          transaction,
-          signature
-        );
-        return { response: signedTransaction };
+
+        return { transaction, signature };
       } else {
         const signature = await this[this.chain].signTransaction(transaction);
         const signedTransaction = await this[this.chain].sendTransaction(
           transaction,
           signature
         );
-        return { response: signedTransaction };
+        return { transaction, signature };
       }
     }
 
@@ -915,7 +912,7 @@ class Keyring {
             await this[chainData.chain].generateWallet();
           } else if (chainData.chain.toLowerCase() === "concordium") {
             // Assume identity is set; add account
-            await this[chainData.chain].addAccount();
+            continue;
           } else {
             await this[chainData.chain].addAccount();
           }
