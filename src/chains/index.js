@@ -2,7 +2,9 @@ const EvmController = require("@getsafle/vault-evm-controller");
 const bitcoin = require("@getsafle/vault-bitcoin-controller");
 const stacks = require("@getsafle/vault-stacks-controller");
 const solana = require("@getsafle/vault-sol-controller");
-//we don't have to put rpc and chain id since our vault get web3 as a argument in all methods
+const concordium = require("@getsafle/vault-concordium-controller"); // Adjust path as needed
+
+// EVM Chains
 const evmChains = {
   ethereum: { symbol: "ETH", txType: 2 },
   bsc: { symbol: "BSC", txType: 0 },
@@ -23,10 +25,12 @@ const evmChains = {
   immutable: { symbol: "IMX", txType: 0 },
 };
 
+// Non-EVM Chains
 const nonEvmChains = {
   bitcoin: "BTC",
   stacks: "STX",
   solana: "SOL",
+  concordium: "CCD", // Added Concordium
 };
 
 // Create an object with all EVM chains using the same controller but initialized with the appropriate txType
@@ -52,6 +56,7 @@ module.exports = {
   bitcoin,
   stacks,
   solana,
+  concordium, // Export Concordium controller
   evmChains: evmChainSymbols,
   nonEvmChains,
   getEvmChainInfo: (chain) => evmChains[chain],
@@ -61,7 +66,6 @@ module.exports = {
     }
     evmChains[chainName] = chainInfo;
     evmControllers[chainName] = EvmController;
-
     evmChainSymbols[chainName] = chainInfo.symbol;
   },
 };
