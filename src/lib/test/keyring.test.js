@@ -325,6 +325,10 @@ describe("getActiveChains", () => {
         { chain: "bitcoin", symbol: "BTC" },
         { chain: "stacks", symbol: "STX" },
         { chain: "solana", symbol: "SOL" },
+        {
+          chain: "concordium",
+          symbol: "CCD",
+        },
         { chain: "ethereum", symbol: "ETH" },
         { chain: "bsc", symbol: "BSC" },
         { chain: "polygon", symbol: "MATIC" },

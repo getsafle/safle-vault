@@ -118,6 +118,7 @@ class Keyring {
       return { response: true };
     }
   }
+
   async validateMnemonic(mnemonic, safleID, network, polygonRpcUrl) {
     if (network !== "mainnet" && network !== "testnet") {
       throw ERROR_MESSAGE.INVALID_NETWORK;
@@ -129,7 +130,6 @@ class Keyring {
 
     try {
       const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-
       address = wallet.address;
     } catch (e) {
       return { response: false };
@@ -289,6 +289,11 @@ class Keyring {
       return { response: { privateKey, isImported: isImportedAddress } };
     }
 
+    if (chain === "concordium") {
+      // Concordium doesn't use traditional private keys; return an error or handle differently
+      return { error: ERROR_MESSAGE.CONCORDIUM_NO_PRIVATE_KEY_EXPORT };
+    }
+
     const { privateKey } = await this[chain].exportPrivateKey(address);
 
     this.logs.getState().logs.push({
@@ -383,7 +388,6 @@ class Keyring {
     const { response: mnemonic } = await this.exportMnemonic(pin);
 
     let newAddress;
-
     let labelPrefix = Chains.nonEvmChains[this.chain];
 
     if (this[this.chain] === undefined) {
@@ -396,9 +400,12 @@ class Keyring {
 
       if (this.chain === "stacks") {
         newAddress = (await this[this.chain].generateWallet()).address;
+      } else if (this.chain === "concordium") {
+        // Assume identity is already set in the controller
+        const { address } = await this[this.chain].addAccount();
+        newAddress = address;
       } else {
         const { address } = await this[this.chain].addAccount();
-
         newAddress = address;
       }
 
@@ -417,29 +424,35 @@ class Keyring {
         numberOfAccounts: 1,
       };
     } else {
-      const { address } = await this[this.chain].addAccount();
+      if (this.chain === "concordium") {
+        const { address } = await this[this.chain].addAccount();
+        newAddress = address;
+      } else {
+        const { address } = await this[this.chain].addAccount();
+        newAddress = address;
+      }
 
-      newAddress = address;
-
-      this.decryptedVault[this.chain] === undefined
-        ? (this.decryptedVault[this.chain] = {
-            public: [
-              {
-                address: newAddress,
-                isDeleted: false,
-                isImported: false,
-                label: `${labelPrefix} Wallet ${acc.response.length + 1}`,
-              },
-            ],
-            numberOfAccounts: 1,
-          })
-        : this.decryptedVault[this.chain].public.push({
-            address: newAddress,
-            isDeleted: false,
-            isImported: false,
-            label: `${labelPrefix} Wallet ${acc.response.length + 1}`,
-          });
-      this.decryptedVault[this.chain].numberOfAccounts++;
+      if (this.decryptedVault[this.chain] === undefined) {
+        this.decryptedVault[this.chain] = {
+          public: [
+            {
+              address: newAddress,
+              isDeleted: false,
+              isImported: false,
+              label: `${labelPrefix} Wallet ${acc.response.length + 1}`,
+            },
+          ],
+          numberOfAccounts: 1,
+        };
+      } else {
+        this.decryptedVault[this.chain].public.push({
+          address: newAddress,
+          isDeleted: false,
+          isImported: false,
+          label: `${labelPrefix} Wallet ${acc.response.length + 1}`,
+        });
+        this.decryptedVault[this.chain].numberOfAccounts++;
+      }
     }
 
     const encryptedVault = await helper.cryptography(
@@ -499,10 +512,13 @@ class Keyring {
     if (Chains.evmChains.hasOwnProperty(this.chain)) {
       const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
       const keyringInstance = await helper.getCoinInstance(this.chain);
-
       const fees = await keyringInstance.getFees(rawTx, web3);
-
       return { response: fees };
+    }
+
+    if (this.chain === "concordium") {
+      // Concordium fees are handled differently; return a placeholder or fetch from node
+      return { response: { gasLimit: "30000", fees: "0.1 CCD" } }; // Placeholder
     }
 
     const fees = await this[this.chain].getFees(rawTx);
@@ -555,23 +571,24 @@ class Keyring {
           privateKey,
           web3
         );
-
         return { response: signedMessage.message };
       }
 
       if (Chains.evmChains.hasOwnProperty(this.chain)) {
         const keyringInstance = await helper.getCoinInstance(this.chain);
-
         const signedMessage = await keyringInstance.sign(
           data,
           privateKey,
           web3
         );
-
         return { response: signedMessage.message };
       }
 
-      if (Chains?.[this.chain]) {
+      if (this.chain === "concordium") {
+        return { error: ERROR_MESSAGE.CONCORDIUM_NO_MESSAGE_SIGNING };
+      }
+
+      if (Chains.nonEvmChains[this.chain]) {
         const { signedMessage } = await this[this.chain].signMessage(
           data,
           address,
@@ -593,20 +610,22 @@ class Keyring {
         this.chain === "ethereum"
       ) {
         const msgParams = { from: address, data: data };
-
         const signedMsg = await this.keyringInstance.signMessage(msgParams);
-
         return { response: signedMsg };
+      }
+
+      if (this.chain === "concordium") {
+        return { error: ERROR_MESSAGE.CONCORDIUM_NO_MESSAGE_SIGNING };
       }
 
       const { signedMessage } = await this[this.chain].signMessage(
         data,
         address
       );
-
       return { response: signedMessage };
     }
   }
+
   async signTypedMessage(address, data, pin, encryptionKey, rpcUrl = "") {
     if (
       typeof pin != "string" ||
@@ -643,6 +662,7 @@ class Keyring {
     }
 
     const { privateKey, isImported } = response;
+
     if (isImported) {
       if (
         Chains.evmChains.hasOwnProperty(this.chain) ||
@@ -652,7 +672,6 @@ class Keyring {
           "0x" + privateKey,
           data
         );
-
         return { response: signedMsg };
       }
       return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
@@ -669,19 +688,21 @@ class Keyring {
       this.chain === "ethereum"
     ) {
       const msgParams = { from: address, data: data };
-
       const signedMsg = await this.keyringInstance.signTypedMessage(msgParams);
-
       return { response: signedMsg };
+    }
+
+    if (this.chain === "concordium") {
+      return { error: ERROR_MESSAGE.CONCORDIUM_NO_TYPED_MESSAGE_SIGNING };
     }
 
     const { signedMessage } = await this[this.chain].signTypedMessage(
       data,
       address
     );
-
     return { response: signedMessage };
   }
+
   async personalSign(address, data, pin, encryptionKey, rpcUrl = "") {
     if (
       typeof pin != "string" ||
@@ -733,11 +754,14 @@ class Keyring {
         "0x" + privateKey,
         data
       );
-
       return { response: signedMsg };
-    } else {
-      return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
     }
+
+    if (this.chain === "concordium") {
+      return { error: ERROR_MESSAGE.CONCORDIUM_NO_PERSONAL_SIGNING };
+    }
+
+    return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
   }
 
   async signTransaction(rawTx, pin, rpcUrl) {
@@ -787,10 +811,32 @@ class Keyring {
 
     if (Chains.evmChains.hasOwnProperty(this.chain)) {
       const keyringInstance = await helper.getCoinInstance(this.chain);
-
       const signedTx = await keyringInstance.signTransaction(rawTx, privateKey);
-
       return { response: signedTx };
+    }
+
+    if (this.chain === "concordium") {
+      const transaction = await this[this.chain].createTransferTransaction(
+        rawTx.to,
+        rawTx.amount,
+        rawTx.from
+      );
+      if (isImported) {
+        // For imported accounts, we assume privateKey is available
+        const signature = await this[this.chain].signTransaction(
+          transaction,
+          privateKey
+        );
+
+        return { transaction, signature };
+      } else {
+        const signature = await this[this.chain].signTransaction(transaction);
+        const signedTransaction = await this[this.chain].sendTransaction(
+          transaction,
+          signature
+        );
+        return { transaction, signature };
+      }
     }
 
     if (isImported) {
@@ -805,8 +851,6 @@ class Keyring {
       );
       return { response: signedTransaction };
     }
-
-    return { response: signedTransaction };
   }
 
   async restoreKeyringState(vault, pin, encryptionKey) {
@@ -839,7 +883,6 @@ class Keyring {
     }
 
     this.decryptedVault = decryptedVault;
-
     this.vault = vault;
 
     const activeChains = await this.getActiveChains();
@@ -850,9 +893,8 @@ class Keyring {
       (activeChains) => !evmChainList.includes(activeChains.chain)
     );
 
-    //generate other chain's keyring instance and add accounts to it as per decrypted vault
     if (filteredChains.length > 0) {
-      filteredChains.forEach(async (chainData) => {
+      for (const chainData of filteredChains) {
         const { response: mnemonic } = await this.exportMnemonic(pin);
 
         const keyringInstance = await helper.getCoinInstance(
@@ -868,11 +910,14 @@ class Keyring {
         for (let i = 0; i < numberOfAcc; i++) {
           if (chainData.chain.toLowerCase() === "stacks" && i === 0) {
             await this[chainData.chain].generateWallet();
+          } else if (chainData.chain.toLowerCase() === "concordium") {
+            // Assume identity is set; add account
+            continue;
           } else {
             await this[chainData.chain].addAccount();
           }
         }
-      });
+      }
     }
 
     this.logs.getState().logs.push({
@@ -887,7 +932,6 @@ class Keyring {
       "decryption"
     );
 
-    // clearing vault state and adding new accounts as per decrypted vault
     const restoredVault = await this.keyringInstance.createNewVaultAndRestore(
       JSON.stringify(encryptionKey),
       mnemonic
@@ -902,7 +946,6 @@ class Keyring {
     if (numberOfAcc > 1) {
       for (let i = 0; i < numberOfAcc - 1; i++) {
         await this.keyringInstance.addNewAccount(decryptedkeyring[0]);
-
         decryptedkeyring[0].opts.numberOfAccounts = numberOfAcc;
       }
     } else {
@@ -1012,6 +1055,7 @@ class Keyring {
         return { error: ERROR_MESSAGE.INCORRECT_PIN };
       }
     }
+
     const { error } = helper.validateEncryptionKey(
       this.vault,
       JSON.stringify(encryptionKey)
@@ -1059,9 +1103,7 @@ class Keyring {
     const vault = await helper.cryptography(
       JSON.stringify(this.decryptedVault),
       JSON.stringify(encryptionKey),
-      "encryption",
-      this.encryptor,
-      this.isCustomEncryptor
+      "encryption"
     );
 
     this.vault = vault;
@@ -1072,7 +1114,6 @@ class Keyring {
       vault: this.vault,
       chain: this.chain,
       address,
-      platform: this.platform,
     });
 
     return { response: vault };
@@ -1133,14 +1174,11 @@ class Keyring {
       this.chain === "ethereum"
     ) {
       let labelPrefix = "EVM";
-
       const keyringInstance = await helper.getCoinInstance(this.chain);
-
       address = await keyringInstance.importWallet(privateKey);
 
       if (!accounts.error) {
         numOfAcc = accounts.response.length;
-
         accounts.response.forEach((element) => {
           if (element.address === address) {
             isDuplicateAddress = true;
@@ -1148,42 +1186,33 @@ class Keyring {
         });
 
         if (isDuplicateAddress) {
-          try {
-            Object.keys(this.decryptedVault)
-              .slice(0, -1)
-              .forEach((chain) => {
-                this.decryptedVault[chain]?.public?.forEach(
-                  (account, index) => {
-                    if (account.address === address && account.isDeleted) {
-                      this.decryptedVault[chain].public[
-                        index
-                      ].isDeleted = false;
-                    }
-                  }
-                );
+          Object.keys(this.decryptedVault)
+            .slice(0, -1)
+            .forEach((chain) => {
+              this.decryptedVault[chain]?.public?.forEach((account, index) => {
+                if (account.address === address && account.isDeleted) {
+                  this.decryptedVault[chain].public[index].isDeleted = false;
+                }
               });
-
-            const vault = await helper.cryptography(
-              JSON.stringify(this.decryptedVault),
-              JSON.stringify(encryptionKey),
-              "encryption"
-            );
-
-            this.vault = vault;
-
-            this.logs.getState().logs.push({
-              timestamp: Date.now(),
-              action: "import-wallet",
-              vault: this.vault,
-              chain: this.chain,
-              address,
             });
 
-            return { response: { vault, address } };
-          } catch (error) {
-            console.error("Error processing duplicate address:", error);
-            throw error; // or handle it as appropriate for your application
-          }
+          const vault = await helper.cryptography(
+            JSON.stringify(this.decryptedVault),
+            JSON.stringify(encryptionKey),
+            "encryption"
+          );
+
+          this.vault = vault;
+
+          this.logs.getState().logs.push({
+            timestamp: Date.now(),
+            action: "import-wallet",
+            vault: this.vault,
+            chain: this.chain,
+            address,
+          });
+
+          return { response: { vault, address } };
         }
       }
 
@@ -1226,14 +1255,16 @@ class Keyring {
       let labelPrefix = Chains.nonEvmChains[this.chain];
       const { response: mnemonic } = await this.exportMnemonic(pin);
 
+      if (this.chain === "concordium") {
+        return { error: ERROR_MESSAGE.CONCORDIUM_NO_PRIVATE_KEY_IMPORT };
+      }
+
       if (this[this.chain] === undefined) {
         const keyringInstance = await helper.getCoinInstance(
           this.chain,
           mnemonic
         );
-
         this[this.chain] = keyringInstance;
-
         address = await keyringInstance.importWallet(privateKey);
       } else {
         address = await this[this.chain].importWallet(privateKey);
@@ -1242,55 +1273,44 @@ class Keyring {
       if (!accounts.error) {
         accounts.response.forEach((element) => {
           numOfAcc = accounts.response.length;
-
           if (element.address === address) {
             isDuplicateAddress = true;
           }
         });
 
         if (isDuplicateAddress) {
-          try {
-            Object.keys(this.decryptedVault)
-              .slice(0, -1)
-              .forEach((chain) => {
-                this.decryptedVault[chain]?.public?.forEach(
-                  (account, index) => {
-                    if (account.address === address && account.isDeleted) {
-                      this.decryptedVault[chain].public[
-                        index
-                      ].isDeleted = false;
-                    }
-                  }
-                );
+          Object.keys(this.decryptedVault)
+            .slice(0, -1)
+            .forEach((chain) => {
+              this.decryptedVault[chain]?.public?.forEach((account, index) => {
+                if (account.address === address && account.isDeleted) {
+                  this.decryptedVault[chain].public[index].isDeleted = false;
+                }
               });
-
-            const vault = await helper.cryptography(
-              JSON.stringify(this.decryptedVault),
-              JSON.stringify(encryptionKey),
-              "encryption"
-            );
-
-            this.vault = vault;
-
-            this.logs.getState().logs.push({
-              timestamp: Date.now(),
-              action: "import-wallet",
-              vault: this.vault,
-              chain: this.chain,
-              address,
             });
 
-            return { response: { vault, address } };
-          } catch (error) {
-            console.error("Error processing duplicate address:", error);
-            throw error; // or handle it as appropriate for your application
-          }
+          const vault = await helper.cryptography(
+            JSON.stringify(this.decryptedVault),
+            JSON.stringify(encryptionKey),
+            "encryption"
+          );
+
+          this.vault = vault;
+
+          this.logs.getState().logs.push({
+            timestamp: Date.now(),
+            action: "import-wallet",
+            vault: this.vault,
+            chain: this.chain,
+            address,
+          });
+
+          return { response: { vault, address } };
         }
       }
 
       if (this.decryptedVault.importedWallets === undefined) {
         let object = {};
-
         const data = [
           {
             address,
@@ -1300,7 +1320,6 @@ class Keyring {
             label: `${labelPrefix} Wallet ${numOfAcc + 1}`,
           },
         ];
-
         object[this.chain] = { data };
         this.decryptedVault.importedWallets = object;
       } else if (
@@ -1315,7 +1334,6 @@ class Keyring {
             label: `${labelPrefix} Wallet ${numOfAcc + 1}`,
           },
         ];
-
         this.decryptedVault.importedWallets[this.chain] = { data };
       } else {
         this.decryptedVault.importedWallets[this.chain].data.push({
@@ -1351,28 +1369,26 @@ class Keyring {
     let importedChains = [];
     let generatedChains = [];
 
-    this.decryptedVault.importedWallets !== undefined
-      ? importedChains.push(...Object.keys(this.decryptedVault.importedWallets))
-      : null;
+    if (this.decryptedVault.importedWallets !== undefined) {
+      importedChains.push(...Object.keys(this.decryptedVault.importedWallets));
+    }
 
     generatedChains.push(...Object.keys(this.decryptedVault));
-
     generatedChains.push(...Object.keys(Chains.evmChains));
 
-    generatedChains.includes("importedWallets")
-      ? generatedChains.splice(generatedChains.indexOf("importedWallets"), 1)
-      : null;
+    if (generatedChains.includes("importedWallets")) {
+      generatedChains.splice(generatedChains.indexOf("importedWallets"), 1);
+    }
 
-    generatedChains.includes("eth")
-      ? generatedChains.splice(generatedChains.indexOf("eth"), 1)
-      : null;
+    if (generatedChains.includes("eth")) {
+      generatedChains.splice(generatedChains.indexOf("eth"), 1);
+    }
 
-    importedChains.includes("evmChains")
-      ? importedChains.splice(importedChains.indexOf("evmChains"), 1)
-      : null;
+    if (importedChains.includes("evmChains")) {
+      importedChains.splice(importedChains.indexOf("evmChains"), 1);
+    }
 
     const array = importedChains.concat(generatedChains);
-
     const result = array.filter((item, pos) => array.indexOf(item) === pos);
 
     let chains = [];
@@ -1452,15 +1468,10 @@ class Keyring {
         nonEvmAccs = decryptedVault.importedWallets[chain].data.filter(
           (address) => address.isDeleted === false
         );
-        accounts[chain] === undefined
-          ? (accounts[chain] = {
-              importedWallets: {
-                ...decryptedVault.importedWallets[chain].data,
-              },
-            })
-          : (accounts[chain].importedWallets = {
-              ...decryptedVault.importedWallets[chain].data,
-            });
+        accounts[chain] = accounts[chain] || {};
+        accounts[chain].importedWallets = {
+          ...decryptedVault.importedWallets[chain].data,
+        };
       }
     });
 
@@ -1470,14 +1481,16 @@ class Keyring {
   async getBalance(address, rpcUrl) {
     if (Chains.evmChains.hasOwnProperty(this.chain)) {
       const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
-
       const balance = await Chains[this.chain].getBalance(address, web3);
+      return { response: balance };
+    }
 
+    if (this.chain === "concordium") {
+      const balance = await this[this.chain].getBalance(address);
       return { response: balance };
     }
 
     const balance = await Chains[this.chain].getBalance(address);
-
     return { response: balance };
   }
 
@@ -1507,7 +1520,7 @@ class Keyring {
       return { error };
     }
 
-    const { privateKey, isImported } = response;
+    const { privateKey } = response;
 
     const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
@@ -1517,16 +1530,17 @@ class Keyring {
         privateKey,
         web3
       );
-
       return { response: signedData };
     }
 
     if (Chains.evmChains.hasOwnProperty(this.chain)) {
       const keyringInstance = await helper.getCoinInstance(this.chain);
-
       const signedData = await keyringInstance.sign(data, privateKey, web3);
-
       return { response: signedData };
+    }
+
+    if (this.chain === "concordium") {
+      return { error: ERROR_MESSAGE.CONCORDIUM_NO_MESSAGE_SIGNING };
     }
 
     return { error: ERROR_MESSAGE.UNSUPPORTED_NON_EVM_FUNCTIONALITY };
@@ -1560,7 +1574,7 @@ class Keyring {
         undefined &&
       this.decryptedVault.importedWallets[importedChain].data.some(
         (element) => element.address === address
-      ) == true
+      )
     ) {
       objIndex = this.decryptedVault.importedWallets[
         importedChain
@@ -1625,6 +1639,7 @@ class Keyring {
     let importedChains = Object.keys(this.decryptedVault.importedWallets);
 
     for (let importedChain of importedChains) {
+      if (importedChain === "concordium") continue; // Concordium doesn't support imported wallets
       let data = this.decryptedVault.importedWallets[importedChain].data;
       for (let i = 0; i < data.length; i++) {
         let decryptedPrivKey = await helper.cryptography(

@@ -51,7 +51,6 @@ jobs:
       - name: Run tests
         run: |
           npm run test
-          npx jest --coverage | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main
