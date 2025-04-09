@@ -1567,6 +1567,20 @@ class Keyring {
 
     const importedChain = chain === "eth" ? "evmChains" : chain;
 
+    // Check if the label is already taken by an active wallet
+    const isLabelTaken = Object.values(this.decryptedVault).some((vaultChain) => {
+      if (vaultChain.public) {
+        return vaultChain.public.some(
+          (wallet) => wallet.label === newLabel && !wallet.isDeleted
+        );
+      }
+      return false;
+    });
+
+    if (isLabelTaken) {
+      return { error: "This label is already taken by another wallet." };
+    }
+
     let objIndex;
 
     if (
