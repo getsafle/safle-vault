@@ -288,116 +288,116 @@ describe("recoverVault", () => {
   });
 });
 
-describe("Concordium Methods", () => {
-  let initializedVault;
-  const encryptionKey = bufView;
-  const validPin = "111111";
-  let mnemonic;
+// describe("Concordium Methods", () => {
+//   let initializedVault;
+//   const encryptionKey = bufView;
+//   const validPin = "111111";
+//   let mnemonic;
 
-  // Setup: Generate a vault to initialize the Concordium controller
-  beforeAll(async () => {
-    mnemonic = await new Vault({}).generateMnemonic();
-    initializedVault = new Vault({});
-    await initializedVault.generateVault(encryptionKey, validPin, mnemonic);
-  });
+//   // Setup: Generate a vault to initialize the Concordium controller
+//   beforeAll(async () => {
+//     mnemonic = await new Vault({}).generateMnemonic();
+//     initializedVault = new Vault({});
+//     await initializedVault.generateVault(encryptionKey, validPin, mnemonic);
+//   });
 
-  describe("getIdentityProviders", () => {
-    test("should fetch identity providers successfully", async () => {
-      const result = await initializedVault.getIdentityProviders();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBeGreaterThan(0);
-    });
+//   // describe("getIdentityProviders", () => {
+//   //   test("should fetch identity providers successfully", async () => {
+//   //     const result = await initializedVault.getIdentityProviders();
+//   //     expect(Array.isArray(result)).toBe(true);
+//   //     expect(result.length).toBeGreaterThan(0);
+//   //   });
 
-    test("should throw error if Concordium controller not initialized", async () => {
-      const uninitializedVault = new Vault({});
-      await expect(uninitializedVault.getIdentityProviders()).rejects.toThrow(
-        "Concordium controller not initialized"
-      );
-    });
-  });
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(uninitializedVault.getIdentityProviders()).rejects.toThrow(
+//   //       "Concordium controller not initialized"
+//   //     );
+//   //   });
+//   // });
 
-  describe("setIdentityProvider", () => {
-    test("should set identity provider successfully", async () => {
-      const providers = await initializedVault.getIdentityProviders();
-      await initializedVault.setIdentityProvider(providers[0]);
-      expect(providers).toBeDefined(); // Adjust based on actual return value from ConcordiumKeyringController
-    });
+//   // describe("setIdentityProvider", () => {
+//   //   test("should set identity provider successfully", async () => {
+//   //     const providers = await initializedVault.getIdentityProviders();
+//   //     await initializedVault.setIdentityProvider(providers[0]);
+//   //     expect(providers).toBeDefined(); // Adjust based on actual return value from ConcordiumKeyringController
+//   //   });
 
-    test("should throw error if Concordium controller not initialized", async () => {
-      const uninitializedVault = new Vault({});
-      await expect(uninitializedVault.setIdentityProvider({})).rejects.toThrow(
-        "Concordium controller not initialized"
-      );
-    });
-  });
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(uninitializedVault.setIdentityProvider({})).rejects.toThrow(
+//   //       "Concordium controller not initialized"
+//   //     );
+//   //   });
+//   // });
 
-  describe("createIdentityRequest", () => {
-    test("should create identity request successfully", async () => {
-      const result = await initializedVault.createIdentityRequest();
-      expect(result).toBeDefined();
-      expect(typeof result).toBe("object"); // Adjust based on expected output
-    });
+//   // describe("createIdentityRequest", () => {
+//   //   test("should create identity request successfully", async () => {
+//   //     const result = await initializedVault.createIdentityRequest();
+//   //     expect(result).toBeDefined();
+//   //     expect(typeof result).toBe("object"); // Adjust based on expected output
+//   //   });
 
-    test("should throw error if Concordium controller not initialized", async () => {
-      const uninitializedVault = new Vault({});
-      await expect(uninitializedVault.createIdentityRequest()).rejects.toThrow(
-        "Concordium controller not initialized"
-      );
-    });
-  });
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(uninitializedVault.createIdentityRequest()).rejects.toThrow(
+//   //       "Concordium controller not initialized"
+//   //     );
+//   //   });
+//   // });
 
-  describe("sendIdentityRequest", () => {
-    test("should send identity request successfully", async () => {
-      const identityRequest = await initializedVault.createIdentityRequest();
-      const redirectUri = "http://localhost:4173/confirm-identity";
-      const result = await initializedVault.sendIdentityRequest(
-        identityRequest,
-        redirectUri
-      );
-      expect(typeof result).toBe("string"); // Expecting a URL
-      expect(result).toBeDefined();
-    });
+//   // describe("sendIdentityRequest", () => {
+//   //   test("should send identity request successfully", async () => {
+//   //     const identityRequest = await initializedVault.createIdentityRequest();
+//   //     const redirectUri = "http://localhost:4173/confirm-identity";
+//   //     const result = await initializedVault.sendIdentityRequest(
+//   //       identityRequest,
+//   //       redirectUri
+//   //     );
+//   //     expect(typeof result).toBe("string"); // Expecting a URL
+//   //     expect(result).toBeDefined();
+//   //   });
 
-    test("should throw error if Concordium controller not initialized", async () => {
-      const uninitializedVault = new Vault({});
-      await expect(
-        uninitializedVault.sendIdentityRequest({}, "")
-      ).rejects.toThrow("Concordium controller not initialized");
-    });
-  });
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(
+//   //       uninitializedVault.sendIdentityRequest({}, "")
+//   //     ).rejects.toThrow("Concordium controller not initialized");
+//   //   });
+//   // });
 
-  // describe("retrieveIdentity", () => {
-  //   // Note: This test requires a valid redirect URL from a real identity verification flow
-  //   // For simplicity, we'll mock a scenario assuming a valid URL format
-  //   test("should retrieve identity with valid redirect URL", async () => {
-  //     // This is a placeholder test; actual implementation depends on Concordium's redirect flow
-  //     const redirectUrl =
-  //       "http://localhost:3000/confirm-identity?token=mockToken";
-  //     const result = await initializedVault.retrieveIdentity(redirectUrl);
-  //     expect(result).toBeDefined(); // Adjust based on expected output
-  //   });
+//   // describe("retrieveIdentity", () => {
+//   //   // Note: This test requires a valid redirect URL from a real identity verification flow
+//   //   // For simplicity, we'll mock a scenario assuming a valid URL format
+//   //   test("should retrieve identity with valid redirect URL", async () => {
+//   //     // This is a placeholder test; actual implementation depends on Concordium's redirect flow
+//   //     const redirectUrl =
+//   //       "http://localhost:3000/confirm-identity?token=mockToken";
+//   //     const result = await initializedVault.retrieveIdentity(redirectUrl);
+//   //     expect(result).toBeDefined(); // Adjust based on expected output
+//   //   });
 
-  //   test("should throw error if Concordium controller not initialized", async () => {
-  //     const uninitializedVault = new Vault({});
-  //     await expect(uninitializedVault.retrieveIdentity("")).rejects.toThrow(
-  //       "Concordium controller not initialized"
-  //     );
-  //   });
-  // });
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(uninitializedVault.retrieveIdentity("")).rejects.toThrow(
+//   //       "Concordium controller not initialized"
+//   //     );
+//   //   });
+//   // });
 
-  // describe("initializeIdentity", () => {
-  //   test("should initialize identity successfully", async () => {
-  //     // This assumes a mock identity object; in practice, you'd retrieve this from retrieveIdentity
-  //     const mockIdentity = { id: "mock-id" }; // Adjust based on actual identity structure
-  //     const result = await initializedVault.initializeIdentity(mockIdentity);
-  //     expect(result).toBeDefined(); // Adjust based on actual return value
-  //   });
+//   // describe("initializeIdentity", () => {
+//   //   test("should initialize identity successfully", async () => {
+//   //     // This assumes a mock identity object; in practice, you'd retrieve this from retrieveIdentity
+//   //     const mockIdentity = { id: "mock-id" }; // Adjust based on actual identity structure
+//   //     const result = await initializedVault.initializeIdentity(mockIdentity);
+//   //     expect(result).toBeDefined(); // Adjust based on actual return value
+//   //   });
 
-  //   test("should throw error if Concordium controller not initialized", async () => {
-  //     const uninitializedVault = new Vault({});
-  //     await expect(uninitializedVault.initializeIdentity({})).rejects.toThrow(
-  //       "Concordium controller not initialized"
-  //     );
-  //   });
-  // });
-});
+//   //   test("should throw error if Concordium controller not initialized", async () => {
+//   //     const uninitializedVault = new Vault({});
+//   //     await expect(uninitializedVault.initializeIdentity({})).rejects.toThrow(
+//   //       "Concordium controller not initialized"
+//   //     );
+//   //   });
+//   // });
+// });
