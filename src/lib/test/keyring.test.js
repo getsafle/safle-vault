@@ -49,10 +49,10 @@ let NETWORKS = {
     URL: "https://rpc.polygon-zkevm.gateway.fm",
     CHAIN_ID: 1442,
   },
-  bevm: {
-    URL: "https://testnet.bevm.io/",
-    CHAIN_ID: 1978,
-  },
+  // bevm: {
+  //   URL: "https://testnet.bevm.io/",
+  //   CHAIN_ID: 1978,
+  // },
   rootstock: {
     URL: "https://public-node.testnet.rsk.co",
     CHAIN_ID: 31,
@@ -61,10 +61,10 @@ let NETWORKS = {
     URL: "https://opbnb-rpc.publicnode.com",
     CHAIN_ID: 204,
   },
-  sei: {
-    URL: "https://sei.drpc.org",
-    CHAIN_ID: 1329,
-  },
+  // sei: {
+  //   URL: "https://sei.drpc.org",
+  //   CHAIN_ID: 1329,
+  // },
   ronin: {
     URL: "https://ronin.lgns.net/rpc",
     CHAIN_ID: 2020,
@@ -132,7 +132,7 @@ let impAccAddress;
 
 let chains;
 const ethUrl = "https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f";
-const polygonRpcUrl = "https://polygon.llamarpc.com";
+const polygonRpcUrl = "https://1rpc.io/matic";
 const bscRpcUrl = "https://rpc.ankr.com/bsc";
 beforeAll(async () => {
   result = await vault.generateVault(bufView, pin, phrase);
