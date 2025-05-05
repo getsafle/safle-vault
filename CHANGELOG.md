@@ -691,3 +691,7 @@
 - Update chain initalization for concordium
 - Update Keyring Class for concordium
 - Update Vault Class for concordium
+
+### 2.9.6 (2025-05-05)
+
+- Update solana package version
