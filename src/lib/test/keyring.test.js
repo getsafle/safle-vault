@@ -77,6 +77,14 @@ let NETWORKS = {
     URL: "https://rpc.immutable.com",
     CHAIN_ID: 13371,
   },
+  moonbeam: {
+    URL: "https://rpc.api.moonbeam.network",
+    CHAIN_ID: 1284,
+  },
+  bearachain: {
+    URL: "https://rpc.berachain.com",
+    CHAIN_ID: 80094,
+  },
 };
 
 const chainConfigs = {
@@ -98,6 +106,8 @@ const chainConfigs = {
   ronin: { symbol: "RON", txType: 0 },
   nebula: { symbol: "sFUEL", txType: 0 },
   immutable: { symbol: "IMX", txType: 0 },
+  moonbeam: { symbol: "GLMR", txType: 2 },
+  bearachain: { symbol: "BERA", txType: 2 },
 };
 
 // Add the helper function
@@ -135,10 +145,10 @@ const ethUrl = "https://mainnet.infura.io/v3/6145d532688844c4b6db32574d90e19f";
 const polygonRpcUrl = "https://1rpc.io/matic";
 const bscRpcUrl = "https://rpc.ankr.com/bsc";
 beforeAll(async () => {
-  result = await vault.generateVault(bufView, pin, phrase);
+    result = await vault.generateVault(bufView, pin, phrase);
 
-  vaultAddress = result.response;
-  await vault.getAccounts(bufView);
+    vaultAddress = result.response;
+    await vault.getAccounts(bufView);
 });
 describe("exportMnemonic", () => {
   test("Valid exportMnemonic/invalid pin", async () => {
@@ -346,6 +356,8 @@ describe("getActiveChains", () => {
         { chain: "ronin", symbol: "RON" },
         { chain: "nebula", symbol: "sFUEL" },
         { chain: "immutable", symbol: "IMX" },
+        { chain: "moonbeam", symbol: "GLMR" },
+        { chain: "bearachain", symbol: "BERA" },
       ],
     }).toMatchObject(result);
   });

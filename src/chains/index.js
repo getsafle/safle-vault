@@ -23,6 +23,8 @@ const evmChains = {
   ronin: { symbol: "RON", txType: 0 },
   nebula: { symbol: "sFUEL", txType: 0 },
   immutable: { symbol: "IMX", txType: 0 },
+  moonbeam: { symbol: "GLMR", txType: 2 },
+  bearachain: { symbol: "BERA", txType: 2 },
 };
 
 // Non-EVM Chains

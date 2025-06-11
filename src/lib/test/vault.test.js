@@ -88,6 +88,8 @@ describe("getSupportedChains", () => {
         ronin: "RON",
         nebula: "sFUEL",
         immutable: "IMX",
+        moonbeam: "GLMR",
+        bearachain: "BERA",
       },
       nonEvmChains: {
         bitcoin: "BTC",
