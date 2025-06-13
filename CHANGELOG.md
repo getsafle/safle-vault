@@ -695,3 +695,7 @@
 ### 2.9.6 (2025-05-05)
 
 - Update solana package version
+
+### 2.9.7 (2025-06-10)
+
+- Integrated Moonbeam and Berachain chains in safle vault
